@@ -1,0 +1,9 @@
+.travis.yml
+appveyor.yml
+NEWS.md
+docs/
+man-roxygen/
+Makefile
+.git/
+^.*\.Rproj$
+^\.Rproj\.user$
