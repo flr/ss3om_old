@@ -1,7 +1,7 @@
 Package: ss3om
 Title: Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3
-Version: 0.0.1
-Date: 2017-06-027
+Version: 0.0.2
+Date: 2017-09-19
 Authors@R: person("Iago", "Mosqueira", email = "iago.mosqueira@ec.europa.eu",
   role = c("aut", "cre"))
 Description: Tools for conditioning of Operating Models based on SS3 by considering
@@ -15,11 +15,12 @@ Imports:
   methods,
   stats,
   data.table,
-  r4ss (>= 1.27.0),
+  foreach,
+  r4ss (>= 1.27.0)
 Additional_repositories: http://flr-project.org/R
 Suggests:
     doParallel,
     testthat
-License: File EUPL_v1_2_EN_UTF-8.txt
+License: EUPL
 LazyData: false
 RoxygenNote: 6.0.1

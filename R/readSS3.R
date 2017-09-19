@@ -6,10 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-utils::globalVariables(c("BirthSeas", "Age", "Seas", "Sex", "Area", "Fleet",
-  "Morph", "Yr", "Era", "yr", "seas", "gender", "birthseas", "fleet", "Gender",
-  "factor", "year", "morph"))
-
 # readFLBFss3 {{{
 readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas)) {
 
@@ -229,23 +225,17 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas)) {
 #' A function to read SS3 results as an FLStock object
 #'
 #' Results of a run of the Stock Synthesis sofware, SS3 (Methot & Wetzel, 2013),
-#' can be loaded into an object of class \code{\link{{FLStock}}. The code makes
+#' can be loaded into an object of class \code{\link{FLStock}}. The code makes
 #' use of the r4ss::SS_output function to obtain a list from Report.sso. The
 #' following elements of that list are used to generate the necessary information
 #' for the slots in \code{\link{FLStock}}: "catage", "natage", "ageselex",
 #' "endgrowth", "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet",
 #' "fleet_ID", "FleetNames", "spawnseas", "inputs" and "SS_version".
 #'
-#' Aliquam sagittis feugiat felis eget consequat. Praesent eleifend dolor massa, 
-#' vitae faucibus justo lacinia a. Cras sed erat et magna pharetra bibendum quis in 
-#' mi. Sed sodales mollis arcu, sit amet venenatis lorem fringilla vel. Vivamus vitae 
-#' ipsum sem. Donec malesuada purus at libero bibendum accumsan. Donec ipsum sapien, 
-#' feugiat blandit arcu in, dapibus dictum felis.
-#'
-#’ @references
+#' @references
 #' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
 #' framework for fish stock assessment and fishery management.
-#' Fisheries Research 142: 86–99.
+#' Fisheries Research 142: 86-99.
 #'
 #' @param dir Directory holding the SS3 output files
 #' @param birthseas Birth seasons for this stock, defaults to spawnseas
@@ -265,11 +255,13 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas)) {
 #' 
 
 readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
-  desc=paste(out$inputs$repfile, out$SS_version, sep=" - ")) {
+  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
+  repfile="Report.sso", compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE)
+    printstats=FALSE, repfile=repfile, compfile=compfile,
+    covar=FALSE, forecast=FALSE)
   
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth",
@@ -371,10 +363,10 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 
 #' A function to read the CPUE series from an SS3 run into anm FLIndex object
 #'
-#’ @references
+#' @references
 #' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
 #' framework for fish stock assessment and fishery management.
-#' Fisheries Research 142: 86–99.
+#' Fisheries Research 142: 86-99.
 #'
 #' @param dir Directory holding the SS3 output files
 #' @param name Name of the output object to fil the name slot
@@ -395,13 +387,16 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 # dir <- '../../../sa/run/'
 # cps <- readFLIBss3(dir, fleets=c(LLCPUE1=1, LLCPUE2=2, LLCPUE3=3, LLCPUE4=4))
 
-readFLIBss3 <- function(dir, fleets) {
+readFLIBss3 <- function(dir, fleets, repfile="Report.sso",
+  compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE)
+    printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
 
   # TODO LOAD ctl$sizeselex, to match fleets if not given
+
+  fleets <- unlist(fleets)
   
   # SUBSET from out
   cpue <- data.table(out[[c("cpue")]])
@@ -556,14 +551,14 @@ ss3index.q <- function(cpue, fleets) {
 # ss3sel.pattern
 ss3sel.pattern <- function(selex, years, fleets) {
 
-  setkey(selex, "factor", fleet, year, morph)
+  setkey(selex, "Factor", Fleet, Yr, Morph)
 
   # SUBSET Asel2, fleets, cpue years
   selex <- selex[CJ("Asel2", fleets, years, c(4,8))]
-  selex[, c("factor", "morph", "label") := NULL]
+  selex[, c("Factor", "Morph", "Label") := NULL]
 
   # RESHAPE to long
-  selex <- melt(selex, id.vars=c("fleet", "year", "seas","gender"),
+  selex <- melt(selex, id.vars=c("Fleet", "Yr", "Seas", "Sex"),
     variable.name="age", value.name="data")
 
   # CHANGE names & SORT

@@ -4,7 +4,8 @@
 \alias{readFLIBss3}
 \title{A function to read the CPUE series from an SS3 run into anm FLIndex object}
 \usage{
-readFLIBss3(dir, fleets)
+readFLIBss3(dir, fleets, repfile = "Report.sso",
+  compfile = "CompReport.sso")
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
@@ -17,12 +18,15 @@ readFLIBss3(dir, fleets)
 An object of class \code{\link{FLStock}}
 }
 \description{
-Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
-framework for fish stock assessment and fishery management.
-Fisheries Research 142: 86–99.
+A function to read the CPUE series from an SS3 run into anm FLIndex object
 }
 \examples{
  
+}
+\references{
+Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
+framework for fish stock assessment and fishery management.
+Fisheries Research 142: 86-99.
 }
 \seealso{
 \link{FLComp}

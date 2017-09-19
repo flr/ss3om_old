@@ -6,11 +6,16 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+utils::globalVariables(c("BirthSeas", "Age", "Seas", "Sex", "Area", "Fleet",
+  "Morph", "Yr", "Era", "yr", "seas", "gender", "birthseas", "fleet", "Gender",
+  "factor", "year", "morph"))
+
 # loadres(dirs, vars, progress=TRUE) {{{
 loadres <- function(dirs,
   vars=list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2014=3, F_2014=3,
   Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2, Convergence_Level=2,
-  Survey=2, Length_comp=2, Catch_like=2, Recruitment=2), progress=TRUE) {
+  Survey=2, Length_comp=2, Catch_like=2, Recruitment=2), progress=TRUE,
+  repfile="Report.sso", covarfile = "covar.sso") {
 
 	# Loop over dirs
 	out <- foreach(i=seq(length(dirs)), .errorhandling = "remove" ) %dopar% {
@@ -19,11 +24,11 @@ loadres <- function(dirs,
 			cat(paste0('[', i, ']\n'))
     
     # CONVERGED?
-    if(!file.exists(paste0(dirs[i], "/covar.sso"))) {
+    if(!file.exists(file.path(dirs[i], covarfile))) {
       setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
     } else {
     # READ results
-		readRPss3(paste(dirs[i], "Report.sso", sep="/"), vars)
+		readRPss3(file.path(dirs[i], repfile), vars)
     }
 	}
 
@@ -106,6 +111,7 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
     dt <- data.table(as.data.frame(readFLSss3(dirs[i], ...)))
     dt[, iter := NULL]
     dt[, iter := i]
+    setcolorder(dt, "age", "year", "unit", "season", "area", "iter", "data")
 
     fwrite(dt, file=paste0(dirs[i], "/om.csv"))
     paste0(dirs[i], "/om.csv")

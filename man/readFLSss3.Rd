@@ -5,7 +5,8 @@
 \title{A function to read SS3 results as an FLStock object}
 \usage{
 readFLSss3(dir, birthseas = out$spawnseas, name = "",
-  desc = paste(out$inputs$repfile, out$SS_version, sep = " - "))
+  desc = paste(out$inputs$repfile, out$SS_version, sep = " - "),
+  repfile = "Report.sso", compfile = "CompReport.sso")
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
@@ -19,19 +20,22 @@ readFLSss3(dir, birthseas = out$spawnseas, name = "",
 \value{
 An object of class \code{\link{FLStock}}
 }
-\details{
-Aliquam sagittis feugiat felis eget consequat. Praesent eleifend dolor massa, 
-vitae faucibus justo lacinia a. Cras sed erat et magna pharetra bibendum quis in 
-mi. Sed sodales mollis arcu, sit amet venenatis lorem fringilla vel. Vivamus vitae 
-ipsum sem. Donec malesuada purus at libero bibendum accumsan. Donec ipsum sapien, 
-feugiat blandit arcu in, dapibus dictum felis.
-
-Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
-framework for fish stock assessment and fishery management.
-Fisheries Research 142: 86–99.
+\description{
+Results of a run of the Stock Synthesis sofware, SS3 (Methot & Wetzel, 2013),
+can be loaded into an object of class \code{\link{FLStock}}. The code makes
+use of the r4ss::SS_output function to obtain a list from Report.sso. The
+following elements of that list are used to generate the necessary information
+for the slots in \code{\link{FLStock}}: "catage", "natage", "ageselex",
+"endgrowth", "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet",
+"fleet_ID", "FleetNames", "spawnseas", "inputs" and "SS_version".
 }
 \examples{
 
+}
+\references{
+Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
+framework for fish stock assessment and fishery management.
+Fisheries Research 142: 86-99.
 }
 \seealso{
 \link{FLComp}

@@ -1,6 +1,24 @@
 import("methods")
 import("FLCore")
 import("data.table")
+import("foreach")
 importFrom("stats", "optimize")
 import("r4ss")
-exportPattern("^[^\\.]")
+importFrom("stats", "setNames")
+importFrom("utils", "data")
+
+export(
+  "%++%",
+  "getRange",
+  "loadhessian",
+  "loadindex",
+  "loadom",
+  "loadom2csv",
+  "loadrec",
+  "loadres",
+  "readFLBFss3",
+  "readFLSss3",
+  "readFLIBss3",
+  "readRPss3",
+  "readFLQsss3"
+)
