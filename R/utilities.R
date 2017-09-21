@@ -88,7 +88,6 @@ deSS3 <- function(object, spwnSeason=4, stockSeason=1) {
 
 } # }}}
 
-
 # getDimnames {{{
 getDimnames <- function(out, birthseas) {
 

@@ -10,7 +10,7 @@ importFrom("utils", "data")
 
 export(
   "%++%",
-  "getRange",
+  "deSS3",
   "loadhessian",
   "loadindex",
   "loadom",
