@@ -5,8 +5,7 @@
 \title{A function to read SS3 results as an FLStock object}
 \usage{
 readFLSss3(dir, birthseas = out$spawnseas, name = "",
-  desc = paste(out$inputs$repfile, out$SS_version, sep = " - "),
-  repfile = "Report.sso", compfile = "CompReport.sso")
+  desc = paste(out$inputs$repfile, out$SS_version, sep = " - "), ...)
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}

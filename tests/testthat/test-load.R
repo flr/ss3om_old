@@ -14,6 +14,11 @@ library(ss3om)
 ioalb <- readFLSss3(system.file("ext-data/ioalb", package="ss3om"),
   name="ALB", repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 
+# FLBiol + FLFisheries
+ioalbf <- readFLBFss3(system.file("ext-data/ioalb", package="ss3om"),
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2", wtfile="wtatage.ss_new.bz2",
+  covarfile="covar.sso.bz2", birthseas=4)
+
 # FLindexBiomass
 iocp <- readFLIBss3(system.file("ext-data/ioalb", package="ss3om"),
   fleets=c(LLCPUE1=1), repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")

@@ -1,5 +1,6 @@
 import("methods")
 import("FLCore")
+import("FLFishery")
 import("data.table")
 import("foreach")
 importFrom("stats", "optimize")

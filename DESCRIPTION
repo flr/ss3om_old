@@ -1,7 +1,7 @@
 Package: ss3om
 Title: Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3
-Version: 0.0.2
-Date: 2017-09-19
+Version: 0.0.2.9000
+Date: 2017-09-21
 Authors@R: person("Iago", "Mosqueira", email = "iago.mosqueira@ec.europa.eu",
   role = c("aut", "cre"))
 Description: Tools for conditioning of Operating Models based on SS3 by considering
@@ -10,7 +10,8 @@ Description: Tools for conditioning of Operating Models based on SS3 by consider
   loaded on various FLR objects using functions from the r4ss package.
 Depends:
   R (>= 3.3.2),
-  FLCore (>= 2.5.20170101)
+  FLCore (>= 2.6.5),
+  FLFishery
 Imports:
   methods,
   stats,
