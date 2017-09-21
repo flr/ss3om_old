@@ -88,3 +88,47 @@ deSS3 <- function(object, spwnSeason=4, stockSeason=1) {
 
 } # }}}
 
+
+# getDimnames {{{
+getDimnames <- function(out, birthseas) {
+
+  # GET range
+  range <- getRange(out$catage)
+  ages <- ac(seq(range['min'], range['max']))
+ 
+  dmns <- list(age=ages,
+    year=seq(range['minyear'], range['maxyear']),
+    # unit = combinations(Sex, birthseas)
+    unit=c(t(outer(switch(out$nsexes, "unique", c("F", "M")),
+      switch((length(birthseas) > 1) + 1, "", birthseas), paste0))),
+    season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
+    area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
+    iter=1)
+
+  return(dmns)
+} # }}}
+
+# getRange {{{
+getRange <- function(x) {
+	
+  # empty range
+	range <- rep(as.numeric(NA), 7)
+	names(range) <- c("min", "max", "plusgroup", "minyear", "maxyear", "minfbar", "maxfbar")
+	
+  # age range from catage
+	range[c("min", "max")] <- range(as.numeric(names(x)[-(1:10)]))
+	
+  # plusgroup = max
+	range["plusgroup"] <- range["max"]
+	
+  # min/maxfbar = min/max
+	range[c("minfbar", "maxfbar")] <- range[c("min", "max")]
+	
+  # year range from catage
+	range[c("minyear", "maxyear")] <- range(x$Yr[x$Era == "TIME"])
+
+  # set plusgroup to max age
+	range["plusgroup"] <- range["maxyear"]
+	
+  return(range)
+} # }}}

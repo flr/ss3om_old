@@ -28,9 +28,6 @@ for the slots in \code{\link{FLStock}}: "catage", "natage", "ageselex",
 "endgrowth", "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet",
 "fleet_ID", "FleetNames", "spawnseas", "inputs" and "SS_version".
 }
-\examples{
-
-}
 \references{
 Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
 framework for fish stock assessment and fishery management.

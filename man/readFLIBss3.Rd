@@ -4,7 +4,7 @@
 \alias{readFLIBss3}
 \title{A function to read the CPUE series from an SS3 run into anm FLIndex object}
 \usage{
-readFLIBss3(dir, fleets, ...)
+readFLIBss3(dir, fleets, birthseas = out$spawnseas, ...)
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
@@ -28,6 +28,6 @@ Fisheries Research 142: 86-99.
 \link{FLComp}
 }
 \author{
-The FLR Team
+Iago Mosqueira, EC JRC
 }
 \keyword{classes}

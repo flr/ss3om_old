@@ -257,8 +257,6 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @author The FLR Team
 #' @seealso \link{FLComp}
 #' @keywords classes
-#' @examples
-#' 
 
 readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
   desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
@@ -277,16 +275,7 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
   ages <- ac(seq(range['min'], range['max']))
   idx <- out$fleet_ID[out$IsFishFleet]
 
-  # GET dimnames
-  dmns <- list(age=ages,
-    year=seq(range['minyear'], range['maxyear']),
-    # unit = combinations(Sex, birthseas)
-    unit=c(t(outer(switch(out$nsexes, "unique", c("F", "M")),
-      switch((length(birthseas) > 1) + 1, "", birthseas), paste0))),
-    season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
-    area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
-    iter=1)
-
+  dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 
   # EXTRACT from out
@@ -302,8 +291,7 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
   
   # CATCH.N
   catage <- data.table(out$catage)
-    # setnames(catage, c("Gender"), c("Sex"))
-    setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
 
   # STOCK.WT
   wt <- ss3wt(endgrowth, dmns, birthseas)
@@ -382,11 +370,11 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 #' @rdname readFLIBss3
 #' @aliases readFLIBss3
 #'
-#' @author The FLR Team
+#' @author Iago Mosqueira, EC JRC
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLIBss3 <- function(dir, fleets, ...) {
+readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
 
   # LOAD SS_output list
   out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
@@ -397,8 +385,15 @@ readFLIBss3 <- function(dir, fleets, ...) {
   fleets <- unlist(fleets)
   
   # SUBSET from out
-  cpue <- data.table(out[[c("cpue")]])
+  out <- out[c("cpue", "ageselex", "endgrowth", "catage",
+    "nsexes", "nseasons", "nareas", "spawnseas")]
+  cpue <- data.table(out[["cpue"]])
   selex <- data.table(out[["ageselex"]])
+  endgrowth <- data.table(out[["endgrowth"]])
+  wtatage <- endgrowth[BirthSeas %in% birthseas,
+    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
+  catage <- data.table(out[["catage"]])
+  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
 
   # --- index
   index <- ss3index(cpue, fleets)
@@ -414,17 +409,18 @@ readFLIBss3 <- function(dir, fleets, ...) {
 
   # --- index.res (var)
   index.res <- ss3index.res(cpue, fleets)
-  
+
   # --- catch.n
-  wtatage <- endgrowth[BirthSeas %in% birthseas,
-    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", idx)), with=FALSE]
-  catch.n <- ss3catch(data.table(out$catage), data.table(out$wtatage),
-    dmns=dimnames(sel.pattern[[1]]), birthseas=4, idx=fleets)
+  catch<- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=4),
+    birthseas=4, idx=fleets)
+  catch.n <- lapply(catch, "[[", "landings.n")
   
   # --- FLIndices
   cpues <- lapply(names(fleets), function(x) FLIndexBiomass(name=x,
-    index=index[[x]], index.q=index.q[[x]],
+    index=index[[x]],
+    index.q=index.q[[x]],
     index.var=index.res[[x]],
+    catch.n=catch.n[[x]],
     sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
       end=dims(index[[x]])$maxyear)))
   

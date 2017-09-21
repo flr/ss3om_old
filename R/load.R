@@ -210,28 +210,3 @@ loadhessian <- function(dir, grid) {
 	return(res)
 
 } # }}}
-
-# getRange {{{
-getRange <- function(x) {
-	
-  # empty range
-	range <- rep(as.numeric(NA), 7)
-	names(range) <- c("min", "max", "plusgroup", "minyear", "maxyear", "minfbar", "maxfbar")
-	
-  # age range from catage
-	range[c("min", "max")] <- range(as.numeric(names(x)[-(1:10)]))
-	
-  # plusgroup = max
-	range["plusgroup"] <- range["max"]
-	
-  # min/maxfbar = min/max
-	range[c("minfbar", "maxfbar")] <- range[c("min", "max")]
-	
-  # year range from catage
-	range[c("minyear", "maxyear")] <- range(x$Yr[x$Era == "TIME"])
-
-  # set plusgroup to max age
-	range["plusgroup"] <- range["maxyear"]
-	
-  return(range)
-} # }}}
