@@ -1,6 +1,6 @@
 Package: ss3om
 Title: Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3
-Version: 0.0.2.9000
+Version: 0.0.2.9001
 Date: 2017-09-21
 Authors@R: person("Iago", "Mosqueira", email = "iago.mosqueira@ec.europa.eu",
   role = c("aut", "cre"))
@@ -19,9 +19,11 @@ Imports:
   foreach,
   r4ss (>= 1.27.0)
 Additional_repositories: http://flr-project.org/R
+BugReports: https://github.com/iagomosqueira/ss3om/issues
 Suggests:
     doParallel,
     testthat
 License: EUPL
 LazyData: false
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1

@@ -15,6 +15,8 @@ readFLSss3(dir, birthseas = out$spawnseas, name = "",
 \item{name}{Name of the output object to fil the name slot}
 
 \item{desc}{Description of the output object to fill the desc slot}
+
+\item{...}{Any other argument to be passed to \code{r4ss::SS_output}}
 }
 \value{
 An object of class \code{\link{FLStock}}

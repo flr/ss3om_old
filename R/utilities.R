@@ -81,9 +81,6 @@ deSS3 <- function(object, spwnSeason=4, stockSeason=1) {
 	catch(res) <-  computeCatch(res)
 	stock(res) <- computeStock(res)
 
-  # recage
-  res <- res[-1,]
-
 	return(res)
 
 } # }}}

@@ -10,6 +10,7 @@ utils::globalVariables(c("BirthSeas", "Age", "Seas", "Sex", "Area", "Fleet",
   "Morph", "Yr", "Era", "yr", "seas", "gender", "birthseas", "fleet", "Gender",
   "factor", "year", "morph"))
 
+# TODO convert to r4ss
 # loadres(dirs, vars, progress=TRUE) {{{
 loadres <- function(dirs,
   vars=list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2014=3, F_2014=3,

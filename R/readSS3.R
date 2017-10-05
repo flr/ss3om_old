@@ -1,7 +1,7 @@
 # readSS3.R - DESC
 # ioalbmse/R/readSS3.R
 
-# Copyright European Union, 2015-2016
+# Copyright European Union, 2015-2017
 # Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
@@ -247,8 +247,9 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @param birthseas Birth seasons for this stock, defaults to spawnseas
 #' @param name Name of the output object to fil the name slot
 #' @param desc Description of the output object to fill the desc slot
+#' @param ... Any other argument to be passed to `r4ss::SS_output`
 #'
-#' @return An object of class \code{\link{FLStock}}
+#' @return An object of class `\link{FLStock}`
 #'
 #' @name readFLSss3
 #' @rdname readFLSss3
@@ -407,8 +408,8 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
   # --- sel.pattern
   sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets)
 
-  # --- index.res (var)
-  index.res <- ss3index.res(cpue, fleets)
+  # --- index.var (var)
+  index.var <- ss3index.var(cpue, fleets)
 
   # --- catch.n
   catch<- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=4),
@@ -419,7 +420,7 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
   cpues <- lapply(names(fleets), function(x) FLIndexBiomass(name=x,
     index=index[[x]],
     index.q=index.q[[x]],
-    index.var=index.res[[x]],
+    index.var=index.var[[x]],
     catch.n=catch.n[[x]],
     sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
       end=dims(index[[x]])$maxyear)))
@@ -488,7 +489,27 @@ readFLQsss3 <- function(dir, ...) {
 
 # ss3slot functions {{{
 
-# ss3index
+#' Functions to convert SS3 output into FLQuant(s)
+#'
+#' A series of auxiliary functions that convert one or more elements, typically
+#' of class `data.frame`. in the list returned by `r4ss::SS_output` into particular
+#' FLQuant or FLQuants objects.
+#'
+#' @return An FLQuant or FLQuants object, depending on the converted data structure
+#'
+#' @name ss3slot
+#' @rdname ss3slot
+#'
+#' @author Iago Mosqueira, EC JRC D02
+#' @seealso \code{\link{FLQuant}} \code{\link{readFLss3}}
+#' @keywords classes
+
+#' @rdname ss3slot
+#' @aliases ss3index
+#' @param cpue A data frame obtained from SS_output$cpue.
+#' @param fleets A named list of vector of the fleets to be extracted.
+#' @details - `ss3index` returns the `index` slot of each survey/CPUE fleet.
+
 ss3index <- function(cpue, fleets) {
   
   index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Obs")]
@@ -502,8 +523,11 @@ ss3index <- function(cpue, fleets) {
   return(as(index, "FLQuants"))
 }
 
-# ss3index.res
-ss3index.res <- function(cpue, fleets) {
+#' @rdname ss3slot
+#' @aliases ss3index.var
+#' @details - `ss3index.var` returns the `index.var` slot of each survey/CPUE fleet.
+
+ss3index.var <- function(cpue, fleets) {
   
   cpue[, Res := Obs-Exp]
   index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Res")]
@@ -517,8 +541,8 @@ ss3index.res <- function(cpue, fleets) {
   return(as(index, "FLQuants"))
 }
 
-# ss3index.var
-ss3index.var <- function(cpue, fleets) {
+# ss3index.var2
+ss3index.var2 <- function(cpue, fleets) {
 
   index.var <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "SE")]
 
@@ -536,7 +560,10 @@ ss3index.var <- function(cpue, fleets) {
   return(index.var)
 }
 
-# ss3index.q
+#' @rdname ss3slot
+#' @aliases ss3index.q
+#' @details - `ss3index.q` returns the `index.q` slot of each survey/CPUE fleet.
+
 ss3index.q <- function(cpue, fleets) {
 
   index.q <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Calc_Q")]
@@ -549,6 +576,12 @@ ss3index.q <- function(cpue, fleets) {
   # CONVERT to FLQuants
   return(as(index.q, "FLQuants"))
 }
+
+#' @rdname ss3slot
+#' @aliases ss3sel.pattern
+#' @param selex A data frame obtained from SS_output$ageselex.
+#' @param years Vector of years for which the index applies
+#' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
 
 # ss3sel.pattern
 ss3sel.pattern <- function(selex, years, fleets) {
@@ -576,7 +609,13 @@ ss3sel.pattern <- function(selex, years, fleets) {
   return(sel.pattern)
 }
 
-# ss3wt
+#' @rdname ss3slot
+#' @aliases ss3wt
+#' @param endgrowth A data frame obtained from SS_output$endgrowth.
+#' @param dmns dimnames of the output object, usually obatined using `getDimnames`.
+#' @param birthseas The birthseasons for this stock as a numeric vector.
+#' @details - `ss3wt` returns the `stock.wt` slot.
+
 ss3wt <- function(endgrowth, dmns, birthseas) {
   
   # EXTRACT stock.wt - endgrowth[, Seas, BirthSeas, Age, M]
@@ -595,7 +634,10 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
     year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
 }
 
-# ss3mat
+#' @rdname ss3slot
+#' @aliases ss3mat
+#' @details - `ss3mat` returns the `mat` slot.
+
 ss3mat <- function(endgrowth, dmns, birthseas) {
 
   # EXTRACT mat - endgrowth
@@ -608,12 +650,15 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
 
   # EXPAND by year & unit
   mat <- FLCore::expand(as.FLQuant(mat[, .(season, age, data)],
-    units="NA"), year=dmns$year, unit=dmns$unit, season=dmns$season)
+    units=""), year=dmns$year, unit=dmns$unit, season=dmns$season)
 
   return(mat)
 }
 
-# ss3m
+#' @rdname ss3slot
+#' @aliases ss3m
+#' @details - `ss3m` returns the `m` slot.
+
 ss3m <- function(endgrowth, dmns, birthseas) {
 
   # EXTRACT m - biol[, Seas, BirthSeas, Age, M]
@@ -631,11 +676,18 @@ ss3m <- function(endgrowth, dmns, birthseas) {
 	names(m) <- c("BirthSeas", "Sex", "season", "age", "data", "unit")
   
   # EXPAND by year, unit & season
+  # BUG expand not filling
   m <- FLCore::expand(as.FLQuant(m[,.(season, age, data, unit)], units="m"),
     year=dmns$year, unit=dmns$unit, season=dmns$season)
+
+  return(m)
 }
 
-# ss3n
+#' @rdname ss3slot
+#' @aliases ss3n
+#' @param n A data frame obtained from SS_output$natage.
+#' @details - `ss3m` returns the `m` slot.
+
 ss3n <- function(n, dmns, birthseas) {
   
   # SELECT start of season (Beg/Mid == 'B'), Era == 'TIME' & cols
@@ -664,7 +716,13 @@ ss3n <- function(n, dmns, birthseas) {
   return(n)
 }
 
-# ss3catch
+#' @rdname ss3slot
+#' @aliases ss3catch
+#' @param catage A data frame obtained from SS_output$catage.
+#' @param wtatage A data frame obtained from SS_output$endgrowth but subset for `birthseas` and `RetWt:_idx`.
+#' @param idx The fishing fleets, as in `SS_output$fleet_ID[SS_output$IsFishFleet]`.
+#' @details - `ss3catch` currently returns the `landings.n` slot, equal to `catch.n` as discards are not being parsed.
+
 ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
 
   # RECONSTRUCT BirthSeas from Morph & Sex

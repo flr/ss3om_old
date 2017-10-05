@@ -1,0 +1,70 @@
+---
+title: Loading your SS3 results into FLR with ss3om
+author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{ss3om}
+  %\VignetteEncoding{UTF-8}
+tags:
+abstract:
+license: Creative Commons Attribution-ShareAlike 4.0 International Public License
+---
+
+```{r, pkgs, echo=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE,
+  fig.width=5, fig.height=4.5,)
+```
+
+# Using `read` functions to load SS3 results
+
+
+```{r loadpkg}
+library(ss3om)
+```
+
+```{r setpwd}
+dir <- system.file("ext-data/ioalb", package="ss3om")
+```
+
+## *FLStock*
+
+```{r readfls}
+ioalb <- readFLSss3(dir, name="ALB",
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+```
+
+## *FLSR*
+
+
+```{r readfls}
+dir <- system.file("ext-data/simple_3.24", package="ss3om")
+simp324 <- readFLSss3(dir, name="simple324",
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+```
+
+```{r readfls}
+dir <- system.file("ext-data/simple_3.30", package="ss3om")
+simp330 <- readFLSss3(dir, name="simple330",
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+```
+
+```{r ssout}
+out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+  printstats=FALSE, covar=FALSE, forecast=FALSE,
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+  
+format(object.size(out), units='Mb')
+
+```
+
+
+# Loading a full OM grid using `load`
+
+# Flow of information SS3 - FLR
+
+# Tested model structures
+
+
