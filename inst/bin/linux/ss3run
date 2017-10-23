@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# To be used with GNU parallel from grid dir
+# parallel ./ss3run ::: `ls -f`
+
+EXEC=ss3
+SS3PATH=$HOME/R/x86_64-pc-linux-gnu-library/3.3/ioalbmse/bin/linux/
+
+cd $1
+export PATH="$PATH:$SS3PATH"
+$EXEC

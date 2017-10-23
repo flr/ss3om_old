@@ -354,18 +354,19 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 
 # readFLIBss3 {{{
 
-#' A function to read the CPUE series from an SS3 run into anm FLIndex object
+#' A function to read the CPUE series from an SS3 run into an `FLIndex` object
 #'
 #' @references
 #' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
 #' framework for fish stock assessment and fishery management.
 #' Fisheries Research 142: 86-99.
 #'
-#' @param dir Directory holding the SS3 output files
-#' @param name Name of the output object to fil the name slot
-#' @param desc Description of the output object to fill the desc slot
+#' @param dir Directory containing the SS3 output files
+#' @param fleets A named list of vector of the fleets to be extracted.
+#' @param birthseas The birthseasons for this stock as a numeric vector.
+#' @param ... Any other argument to be passed to `r4ss::SS_output`
 #'
-#' @return An object of class \code{\link{FLStock}}
+#' @return An object of class [FLStock][FLCore::FLStock]
 #'
 #' @name readFLIBss3
 #' @rdname readFLIBss3
@@ -524,10 +525,10 @@ ss3index <- function(cpue, fleets) {
 }
 
 #' @rdname ss3slot
-#' @aliases ss3index.var
-#' @details - `ss3index.var` returns the `index.var` slot of each survey/CPUE fleet.
+#' @aliases ss3index.res
+#' @details - `ss3index.res` returns the `index.res` slot of each survey/CPUE fleet.
 
-ss3index.var <- function(cpue, fleets) {
+ss3index.res <- function(cpue, fleets) {
   
   cpue[, Res := Obs-Exp]
   index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Res")]
@@ -541,8 +542,11 @@ ss3index.var <- function(cpue, fleets) {
   return(as(index, "FLQuants"))
 }
 
-# ss3index.var2
-ss3index.var2 <- function(cpue, fleets) {
+#' @rdname ss3slot
+#' @aliases ss3index.var
+#' @details - `ss3index.var` returns the `index.var` slot of each survey/CPUE fleet.
+
+ss3index.var <- function(cpue, fleets) {
 
   index.var <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "SE")]
 

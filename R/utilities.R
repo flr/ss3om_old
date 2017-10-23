@@ -66,8 +66,8 @@ deSS3 <- function(object, spwnSeason=4, stockSeason=1) {
 
 	# harvest.spwn & m.spwn
   harvest.spwn <- m.spwn <- m
-  harvest.spwn[] <- 0.75
-  m.spwn[] <- 0.75
+  harvest.spwn[] <- (spwnSeason - 1) / 4
+  m.spwn[] <- (spwnSeason - 1) / 4
 
 	# CREATE FLStock
 	res <- FLStock(name=name(object), desc=desc(object), range=range(object),

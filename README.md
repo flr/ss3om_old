@@ -1,6 +1,6 @@
 # ss3om
-- Version: 0.0.2.9001
-- Date: 2017-09-21
+- Version: 0.0.2.9002
+- Date: 2017-10-23
 - Author: Iago Mosqueira, EC JRC
 - Maintainer: Iago Mosqueira <iago.mosqueira@ec.europa.eu>
 - Repository: <https://github.com/iagomosqueira/ss3om/>
@@ -18,11 +18,10 @@ To install this package, start R and enter:
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/iagomosqueira/ss3om?branch=master&svg=true)](https://ci.appveyor.com/project/iagomosqueira/ss3om)
 
 ## Releases
-- [Latest release](https://github.com/iagomosqueira/ss3om/releases/tag/)
 - [All release](https://github.com/iagomosqueira/ss3om/releases/)
 
 ## License
-Copyright (c) 2017 European Union. Released under the [European Union Public License 1.2](https://joinup.ec.europa.eu/community/eupl/og_page/eupl-text-11-12).
+Copyright (c) 2017 European Union. Released under the [European Union Public License 1.2](https://joinup.ec.europa.eu/page/eupl-text-11-12).
 
 ## Contact
 You are welcome to:

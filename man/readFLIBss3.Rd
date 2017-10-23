@@ -2,22 +2,24 @@
 % Please edit documentation in R/readSS3.R
 \name{readFLIBss3}
 \alias{readFLIBss3}
-\title{A function to read the CPUE series from an SS3 run into anm FLIndex object}
+\title{A function to read the CPUE series from an SS3 run into an \code{FLIndex} object}
 \usage{
 readFLIBss3(dir, fleets, birthseas = out$spawnseas, ...)
 }
 \arguments{
-\item{dir}{Directory holding the SS3 output files}
+\item{dir}{Directory containing the SS3 output files}
 
-\item{name}{Name of the output object to fil the name slot}
+\item{fleets}{A named list of vector of the fleets to be extracted.}
 
-\item{desc}{Description of the output object to fill the desc slot}
+\item{birthseas}{The birthseasons for this stock as a numeric vector.}
+
+\item{...}{Any other argument to be passed to \code{r4ss::SS_output}}
 }
 \value{
-An object of class \code{\link{FLStock}}
+An object of class \link[FLCore:FLStock]{FLStock}
 }
 \description{
-A function to read the CPUE series from an SS3 run into anm FLIndex object
+A function to read the CPUE series from an SS3 run into an \code{FLIndex} object
 }
 \references{
 Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical

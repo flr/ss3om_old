@@ -3,6 +3,7 @@
 \name{ss3slot}
 \alias{ss3slot}
 \alias{ss3index}
+\alias{ss3index.res}
 \alias{ss3index.var}
 \alias{ss3index.q}
 \alias{ss3sel.pattern}
@@ -14,6 +15,8 @@
 \title{Functions to convert SS3 output into FLQuant(s)}
 \usage{
 ss3index(cpue, fleets)
+
+ss3index.res(cpue, fleets)
 
 ss3index.var(cpue, fleets)
 
@@ -65,6 +68,10 @@ FLQuant or FLQuants objects.
 \details{
 \itemize{
 \item \code{ss3index} returns the \code{index} slot of each survey/CPUE fleet.
+}
+
+\itemize{
+\item \code{ss3index.res} returns the \code{index.res} slot of each survey/CPUE fleet.
 }
 
 \itemize{

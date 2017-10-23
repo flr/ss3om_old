@@ -21,5 +21,6 @@ export(
   "readFLSss3",
   "readFLIBss3",
   "readRPss3",
-  "readFLQsss3"
+  "readFLQsss3",
+  "runss3grid"
 )

@@ -15,7 +15,7 @@ license: Creative Commons Attribution-ShareAlike 4.0 International Public Licens
 ```{r, pkgs, echo=FALSE, message=FALSE}
 library(knitr)
 opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE,
-  fig.width=5, fig.height=4.5,)
+  fig.width=5, fig.height=4.5)
 ```
 
 # Using `read` functions to load SS3 results
@@ -39,13 +39,13 @@ ioalb <- readFLSss3(dir, name="ALB",
 ## *FLSR*
 
 
-```{r readfls}
+```{r}
 dir <- system.file("ext-data/simple_3.24", package="ss3om")
 simp324 <- readFLSss3(dir, name="simple324",
   repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 ```
 
-```{r readfls}
+```{r, eval=FALSE}
 dir <- system.file("ext-data/simple_3.30", package="ss3om")
 simp330 <- readFLSss3(dir, name="simple330",
   repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
