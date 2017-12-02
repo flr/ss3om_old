@@ -311,14 +311,15 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
     c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", idx)), with=FALSE]
 
   landings <- ss3catch(catage, wtatage, dmns, birthseas, idx)
-
+  
   # CALCULATE total landings.n
   landings.n <- FLQuant(0, dimnames=dmns, units="1000")
   for (i in seq(length(idx)))
     landings.n <- landings.n %++% landings[[i]]$landings.n
   
   # BUG: USE landings.wt from fleet 1
-  landings.wt <- FLCore::expand(landings[[1]]$landings.wt, year=dmns$year, area=dmns$area)
+  landings.wt <- FLCore::expand(landings[[1]]$landings.wt,
+    year=dmns$year, area=dmns$area)
 
   # EXPAND m and mat by area
   m <- do.call(FLCore::expand, c(list(x=m), dmns))
