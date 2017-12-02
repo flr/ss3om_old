@@ -1,5 +1,5 @@
 # run.R - DESC
-# /run.R
+# ss3om/R/run.R
 
 # Copyright European Union, 2017
 # Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
@@ -19,10 +19,9 @@ nameGrid <- function(df, dir, from=1) {
 }
 # }}}
 
-# rungrid {{{
+# runss3grid {{{
 runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
-  logfile=paste0(dir, '/run_grid_log'),
-	options="") {
+  logfile=paste0(dir, '/run_grid_log'), options="", pack=FALSE) {
 	
 	cat("START: ", date(), "\n", file=logfile)
 
@@ -53,6 +52,8 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
 		workdir <- getwd()
 		setwd(dirname)
 		system(paste(exe, options), ignore.stdout = TRUE, ignore.stderr = TRUE)
+    if(pack)
+      packss3run(".")
 		setwd(workdir)
 
 		cat("DONE ", grid[row,'id'], ": ", date(), "\n", file=logfile, append=TRUE)

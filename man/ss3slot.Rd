@@ -22,7 +22,7 @@ ss3index.var(cpue, fleets)
 
 ss3index.q(cpue, fleets)
 
-ss3sel.pattern(selex, years, fleets)
+ss3sel.pattern(selex, years, fleets, morphs)
 
 ss3wt(endgrowth, dmns, birthseas)
 

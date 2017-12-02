@@ -10,82 +10,90 @@ utils::globalVariables(c("BirthSeas", "Age", "Seas", "Sex", "Area", "Fleet",
   "Morph", "Yr", "Era", "yr", "seas", "gender", "birthseas", "fleet", "Gender",
   "factor", "year", "morph"))
 
-# TODO convert to r4ss
-# loadres(dirs, vars, progress=TRUE) {{{
-loadres <- function(dirs,
-  vars=list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2014=3, F_2014=3,
-  Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2, Convergence_Level=2,
-  Survey=2, Length_comp=2, Catch_like=2, Recruitment=2), progress=TRUE,
-  repfile="Report.sso", covarfile = "covar.sso") {
+# loadom(dir, progress=TRUE) {{{
+loadom <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, ...) {
 
-	# Loop over dirs
-	out <- foreach(i=seq(length(dirs)), .errorhandling = "remove" ) %dopar% {
+  if(progress)
+    cat("[1]\n", sep="")
 
-		if(progress)
-			cat(paste0('[', i, ']\n'))
-    
-    # CONVERGED?
-    if(!file.exists(file.path(dirs[i], covarfile))) {
-      setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
-    } else {
-    # READ results
-		readRPss3(file.path(dirs[i], repfile), vars)
-    }
-	}
+  # GET first iter
+  master <- readFLSss3(subdirs[1], ...)
 
-  # rbind 
-  res <- rbindlist(out)
-
-  # names(res)[4] <- "STD_SSB_MSY"
-
-  # res <- cbind(res, grid)
-
-	# CHANGE SSB_MSY to both sexes
-	# res$SSB_MSY <- res$SSB_MSY
-
-	return(res)
-} # }}}
-
-# loadrec(dirs, progress=TRUE) {{{
-loadrec <- function(dirs, progress=TRUE, object="resid") {
-
-	# Loop over dirs
-	out <- foreach(i=seq(length(dirs)), .errorhandling = "remove" ) %dopar% {
-
-		if(progress)
-			cat(paste0('[', i, ']\n'))
-
-		readFLQsss3(dirs[i])
-	}
-	
-  res <- foreach(i=object, .errorhandling = "remove" ) %dopar% {
-    lapply(out, "[[", i)
-  }
-  
-  res <- lapply(res, function(x) Reduce(combine, x))
-  names(res) <- object
-
-	return(res)
-} # }}}
-
-# loadom(dirs, progress=TRUE) {{{
-loadom <- function(dirs, progress=TRUE, ...) {
-
-  master <- readFLSss3(dirs[1], ...)
-
-	# LOOP over dirs
-  om <- foreach(i=seq(length(dirs)),
-    .combine=function(...) rbindlist(list(...)), .multicombine=TRUE) %dopar% {
+	# LOOP over subdirs
+  om <- foreach(i=seq(2, length(subdirs)),
+    # PROPAGATE .init
+    .init=propagate(master, length(subdirs), FALSE),
+    # COMBINE by assigning to iter in .init
+    .combine=function(master, x) {
+      FLCore::iter(master, x$i) <- x$x
+      return(master)}, .inorder=TRUE,
+    .errorhandling="remove", .multicombine=FALSE) %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
 
-    dt <- data.table(as.data.frame(readFLSss3(dirs[i], ...)))
-    dt[, iter := NULL]
-    dt[, iter := i]
-    dt
+    # OUPUT list with FLStock and iter number
+    list(x=readFLSss3(subdirs[i], ...), i=i)
   }
   
+  if(progress)
+    cat("[ Converting ... ]\n")
+  
+  # DROP undeeded extra iters
+  om <- slim(om)
+
+	return(om)
+} # }}}
+
+# loadomFLStocks(dir, progress=TRUE) {{{
+loadomFLStocks <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, ...) {
+
+  if(progress)
+    cat("[1]\n", sep="")
+
+	# LOOP over subdirs
+  om <- foreach(i=seq(1, length(subdirs)),
+    .inorder=TRUE, .errorhandling="remove") %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    readFLSss3(subdirs[i], ...)
+  }
+
+  if(progress)
+    cat("[ Converting ... ]\n")
+  
+  names(om) <- seq(1, length(subdirs))
+  
+	return(FLStocks(om))
+} # }}}
+
+# loadomDT(dir, progress=TRUE) {{{
+loadomDT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, ...) {
+
+  master <- readFLSss3(subdirs[1], ...)
+
+	# LOOP over subdirs
+  om <- foreach(i=seq(length(subdirs)),
+    .combine=function(...) rbindlist(list(...)), .errorhandling="remove",
+    .multicombine=TRUE) %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    dt <- data.table(as.data.frame(readFLSss3(subdirs[i], ...)))
+    
+    # SET iter to i
+    dt[, iter := NULL]
+    dt[, iter := i]
+
+    dt
+  }
   if(progress)
     cat("[ Converting ... ]\n")
   
@@ -93,7 +101,7 @@ loadom <- function(dirs, progress=TRUE, ...) {
   range(om) <- range(master)
 
   # DROP undeeded extra iters
-  om <- slimFLStock(om)
+  om <- slim(om)
 
 	return(om)
 } # }}}
@@ -141,6 +149,69 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
   om <- as(om, "FLStock")
 
 	return(om)
+} # }}}
+
+# loadres(dirs, vars, progress=TRUE) {{{
+loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  vars=list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2015=3, F_2015=3,
+  Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2, Convergence_Level=2,
+  Survey=2, Length_comp=2, Catch_like=2, Recruitment=2), progress=TRUE,
+  repfile="Report.sso", covarfile = "covar.sso", grid=NULL) {
+
+  # ASSEMBLE paths
+  if(!missing(subdirs) & !missing(dir))
+    subdirs <- paste(dir, subdirs, sep="/")
+
+	# Loop over dirs
+	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
+    .inorder=TRUE) %dopar% {
+		
+    if(progress)
+			cat(paste0('[', i, ']\n'))
+    
+    # CONVERGED?
+    if(!file.exists(file.path(subdirs[i], covarfile))) {
+      setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
+    } else {
+    # READ results
+		readRPss3(file.path(subdirs[i], repfile), vars)
+    }
+	}
+  # rbind 
+  res <- rbindlist(out)
+
+  # RBIND grid
+  if(!is.null(grid))
+    res <- cbind(grid[, !colnames(grid) %in% 'id'], res)
+
+	return(res)
+} # }}}
+
+# loadquants(dirs, progress=TRUE) {{{
+loadquants <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, object="resid", ...) {
+  
+  # Loop over subdirs
+	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove" ) %dopar% {
+
+		if(progress)
+			cat(paste0('[', i, ']\n'))
+
+		readFLQsss3(subdirs[i], ...)
+	}
+	
+  res <- foreach(i=object, .errorhandling = "remove" ) %dopar% {
+    lapply(out, "[[", i)
+  }
+  
+  res <- lapply(res, function(x) Reduce(combine, x))
+  
+  if(length(object) == 1)
+    return(res[[1]])
+
+  names(res) <- object
+
+	return(res)
 } # }}}
 
 # loadindex(dirs, progress=TRUE) {{{

@@ -407,14 +407,15 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
   index.q <- ss3index.q(cpue, fleets)
 
   # --- sel.pattern
-  sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets)
+  sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets,
+    morphs=unique(selex$Morph))
 
   # --- index.var (var)
   index.var <- ss3index.var(cpue, fleets)
 
   # --- catch.n
-  catch<- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=4),
-    birthseas=4, idx=fleets)
+  catch<- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
+    birthseas=birthseas, idx=fleets)
   catch.n <- lapply(catch, "[[", "landings.n")
   
   # --- FLIndices
@@ -422,10 +423,13 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
     index=index[[x]],
     index.q=index.q[[x]],
     index.var=index.var[[x]],
-    catch.n=catch.n[[x]],
+    catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
+      end=dims(index[[x]])$maxyear)),
     sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
       end=dims(index[[x]])$maxyear)))
-  
+
+  names(cpues) <- names(fleets)
+ 
   if(length(fleets) > 1)
     return(FLIndices(cpues))
   else
@@ -461,15 +465,15 @@ readFLQsss3 <- function(dir, ...) {
 
   # REC
   recruit <- data.table(out$recruit)
-  rec <- FLQuant(recruit[, pred_recr], dimnames=list(age='0', year=recruit[, year]),
+  rec <- FLQuant(recruit[, pred_recr], dimnames=list(age='0', year=recruit[, Yr]),
     units="1000")[, yrs]
 
   # SPB
-  ssb <- FLQuant(recruit[, spawn_bio], dimnames=list(age='all', year=recruit[, year]),
+  ssb <- FLQuant(recruit[, SpawnBio], dimnames=list(age='all', year=recruit[, Yr]),
     units="t")[, yrs]
 
   # RESID
-  resid <- FLQuant(recruit[, dev], dimnames=list(age='all', year=recruit[, year]),
+  resid <- FLQuant(recruit[, dev], dimnames=list(age='all', year=recruit[, Yr]),
     units="t")[, yrs]
 
   # BBMSY
@@ -588,12 +592,12 @@ ss3index.q <- function(cpue, fleets) {
 #' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
 
 # ss3sel.pattern
-ss3sel.pattern <- function(selex, years, fleets) {
+ss3sel.pattern <- function(selex, years, fleets, morphs) {
 
   setkey(selex, "Factor", Fleet, Yr, Morph)
 
-  # SUBSET Asel2, fleets, cpue years
-  selex <- selex[CJ("Asel2", fleets, years, c(4,8))]
+  # SUBSET Asel2, fleets, cpue years for Morph
+  selex <- selex[CJ("Asel2", fleets, years, morphs)]
   selex[, c("Factor", "Morph", "Label") := NULL]
 
   # RESHAPE to long
@@ -602,7 +606,8 @@ ss3sel.pattern <- function(selex, years, fleets) {
 
   # CHANGE names & SORT
   names(selex) <- c("qname", "year", "season", "unit", "age", "data")
-  setorder(selex, year, season, age, unit, qname)
+  selex[, age:=as.numeric(age)]
+  setorder(selex, qname, age, year, unit, season)
 
   # CONVERT to FLQuants
   sel.pattern <- as(as.data.frame(selex), 'FLQuants')
@@ -750,7 +755,7 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
     measure.vars=dmns$age, variable.name="age")
   names(catage) <- c("area", "fleet", "year", "season", "unit", "age", "data")
 
-  # RENAME Season if only 1
+  # RENAME Area and Season if only 1
   cols <- c("Seas")
   wtatage[, (cols) := lapply(.SD, as.character), .SDcols = cols]
   wtatage[, Seas := if(length(unique(Seas)) == 1) "all" else Seas]
@@ -765,13 +770,14 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   names(wtatage) <- c("age", "unit", "season", "fleet", "data")
   wtatage[,fleet:=sub("RetWt:_", "", fleet)]
 
-  # FLQuant for landings per fleet
+  # FLQuants for landings per fleet
   landings <- lapply(idx, function(x) {
     landings.n <- as.FLQuant(catage[fleet %in% x,][, fleet:=NULL], units="1000")
-    landings.wt <- as.FLQuant(wtatage[fleet %in% x,][, fleet:=NULL], units="kg")
+    landings.wt <- do.call('expand',
+      c(list(x=as.FLQuant(wtatage[fleet %in% x,][, fleet:=NULL], units="kg")),
+    dimnames(landings.n)[c("year", "area")]))
     return(FLQuants(landings.n=landings.n, landings.wt=landings.wt))
     }
   )
-
   return(landings)
 } # }}}

@@ -10,13 +10,15 @@ importFrom("utils", "data")
 
 export(
   "%++%",
-  "deSS3",
   "loadhessian",
   "loadindex",
   "loadom",
-  "loadom2csv",
-  "loadrec",
+  "loadomFLStocks",
+  "loadomDT",
+  "loadquants",
   "loadres",
+  "nameGrid",
+  "packss3run",
   "readFLBFss3",
   "readFLSss3",
   "readFLIBss3",
