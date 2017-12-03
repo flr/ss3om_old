@@ -6,10 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-utils::globalVariables(c("BirthSeas", "Age", "Seas", "Sex", "Area", "Fleet",
-  "Morph", "Yr", "Era", "yr", "seas", "gender", "birthseas", "fleet", "Gender",
-  "factor", "year", "morph"))
-
 # loadom(dir, progress=TRUE) {{{
 loadom <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
@@ -94,6 +90,7 @@ loadomDT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
     dt
   }
+  
   if(progress)
     cat("[ Converting ... ]\n")
   
@@ -120,7 +117,7 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
     dt <- data.table(as.data.frame(readFLSss3(dirs[i], ...)))
     dt[, iter := NULL]
     dt[, iter := i]
-    setcolorder(dt, "age", "year", "unit", "season", "area", "iter", "data")
+    setcolorder(dt, c("age", "year", "unit", "season", "area", "iter", "data"))
 
     fwrite(dt, file=paste0(dirs[i], "/om.csv"))
     paste0(dirs[i], "/om.csv")

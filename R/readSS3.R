@@ -317,9 +317,25 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
   for (i in seq(length(idx)))
     landings.n <- landings.n %++% landings[[i]]$landings.n
   
-  # BUG: USE landings.wt from fleet 1
-  landings.wt <- FLCore::expand(landings[[1]]$landings.wt,
+  # AVERAGE landings.wt weighted by landings.n
+  landings.wt <-  FLCore::expand(Reduce("+", lapply(landings,
+    function(x) x$landings.n * x$landings.wt)) %/% landings.n,
     year=dmns$year, area=dmns$area)
+  
+#   lwt <- lapply(landings, function(x) x$landings.n * x$landings.wt)
+#   ln <- lapply(landings, function(x) x$landings.n)
+#   
+#   Reduce("+", lwt[1]) %/% ln[[1]]
+#   Reduce("+", lwt[1:2]) %/% Reduce("+", ln[1:2])
+#   Reduce("+", lwt[1:3]) %/% Reduce("+", ln[1:3])
+#   Reduce("+", lwt[1:4]) %/% Reduce("+", ln[1:4])
+#   Reduce("+", lwt[1:5]) %/% Reduce("+", ln[1:5])
+#   Reduce("+", lwt[1:6]) %/% Reduce("+", ln[1:6])
+#   Reduce("+", lwt[1:7]) %/% Reduce("+", ln[1:7])
+#   Reduce("+", lwt[1:8]) %/% Reduce("+", ln[1:8])
+#   Reduce("+", lwt[1:9]) %/% Reduce("+", ln[1:9])
+#   Reduce("+", lwt[1:10]) %/% Reduce("+", ln[1:10])
+#   Reduce("+", lwt[1:11]) %/% Reduce("+", ln[1:11])
 
   # EXPAND m and mat by area
   m <- do.call(FLCore::expand, c(list(x=m), dmns))
@@ -507,7 +523,7 @@ readFLQsss3 <- function(dir, ...) {
 #' @rdname ss3slot
 #'
 #' @author Iago Mosqueira, EC JRC D02
-#' @seealso \code{\link{FLQuant}} \code{\link{readFLss3}}
+#' @seealso \code{\link{FLQuant}} \code{\link{readFLSss3}}
 #' @keywords classes
 
 #' @rdname ss3slot
@@ -590,6 +606,8 @@ ss3index.q <- function(cpue, fleets) {
 #' @aliases ss3sel.pattern
 #' @param selex A data frame obtained from SS_output$ageselex.
 #' @param years Vector of years for which the index applies
+#' @param fleets Vecttor of fleets codes
+#' @param morphs Vector of morphs to use
 #' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
 
 # ss3sel.pattern

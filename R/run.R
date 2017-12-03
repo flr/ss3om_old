@@ -7,10 +7,15 @@
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
 # nameGrid {{{
+
 #' nameGrid
 #'
 #' Creates folder names from a 'grid' df of scenarios
 #'
+#' @param df Model grid data.frame
+#' @param dir Folder name
+#' @param from Starting number
+
 nameGrid <- function(df, dir, from=1) {
 	df$number <- seq(from=from, length=nrow(df))
 	df$id <- paste(df$number, apply(df, 1, function(x)
