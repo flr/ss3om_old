@@ -9,40 +9,51 @@ GITVERS=$(shell (date -d `git log -1 --date=short --pretty=format:"%ad"` +%Y%m%d
 R_FILES := $(wildcard $(PKGSRC)/R/*.R)
 HELP_FILES := $(wildcard $(PKGSRC)/man/*.Rd)
 
-all: README.md build
+all: build
+
+.PHONY: all release roxygen
 
 README.md: DESCRIPTION
 	sed -i 's/Version: *\([^ ]*\)/Version: $(PKGVERS)/' README.md
 	sed -i 's/Date: *\([^ ]*\)/Date: $(PKGDATE)/' README.md
 
-TEST: NEWS.md
-	awk '1;/^## CHANGES/{print}' README.md > TMP
-	sed 's/^#/##/' NEWS.md >> TMP
-	mv TMP README.md
-
 NEWS: NEWS.md
 	sed 's/^# / /' NEWS.md > NEWS
 	sed -i 's/^##//' NEWS
 
-docs: $(HELP_FILES) README.md
+docs: $(HELP_FILES) README.md NEWS
 	R --vanilla --silent -e "options(repos='http://cran.r-project.org'); pkgdown::build_site(preview=FALSE)"
 
-roxygen: $(R_FILES)
+roxygen: $(HELP_FILES)
+	R --vanilla --silent -e "library(devtools);" \
+		-e "document(roclets='rd')"
+
+$(HELP_FILES): $(R_FILES)
 	R --vanilla --silent -e "library(devtools);" \
 		-e "document(roclets='rd')"
 
 update:
 	sed -i 's/Date: *\([^ ]*\)/Date: $(GITDATE)/' DESCRIPTION
 
-build: roxygen
+release: build docs
+
+build:
 	cd ..;\
 	R CMD build $(PKGSRC) --compact-vignettes
 
-install: build
+buildNV:
+	cd ..;\
+	R CMD build $(PKGSRC) --no-build-vignettes
+
+install: ../$(PKGNAME)_$(PKGVERS).tar.gz
 	cd ..;\
 	R CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
 
-check: README.md build
+check: buildNV
+	cd ..;\
+	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz
+
+checkCRAN: build
 	cd ..;\
 	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz --as-cran
 
