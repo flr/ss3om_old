@@ -107,7 +107,7 @@ FLQuant or FLQuants objects.
 }
 }
 \seealso{
-\code{\link{FLQuant}} \code{\link{readFLss3}}
+\code{\link{FLQuant}} \code{\link{readFLSss3}}
 }
 \author{
 Iago Mosqueira, EC JRC D02
