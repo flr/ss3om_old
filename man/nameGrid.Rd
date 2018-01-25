@@ -6,6 +6,13 @@
 \usage{
 nameGrid(df, dir, from = 1)
 }
+\arguments{
+\item{df}{Model grid data.frame}
+
+\item{dir}{Folder name}
+
+\item{from}{Starting number}
+}
 \description{
 Creates folder names from a 'grid' df of scenarios
 }

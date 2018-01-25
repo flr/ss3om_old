@@ -6,6 +6,8 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+utils::globalVariables(".")
+
 # readFLBFss3 {{{
 
 readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
@@ -95,22 +97,22 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
   
   # SELECT start of season (Beg/Mid == 'B'), Era == 'TIME' & cols
   n <- n[`Beg/Mid` == "B" & Era == 'TIME',
-    .SD, .SDcols = c("Sex", "BirthSeason", "Yr", "Seas", ages)]
+    .SD, .SDcols = c("Sex", "BirthSeas", "Yr", "Seas", ages)]
 
   # MELT by Gender, BirthSeas, Yr & Seas
   # BUG: BirthSeason should turn at some point to BirthSeas
-	n <- data.table::melt(n, id.vars=c("Sex", "BirthSeason","Yr","Seas"),
+	n <- data.table::melt(n, id.vars=c("Sex", "BirthSeas","Yr","Seas"),
     variable.name="age")
   
   # SUBSET according to birthseas
-  n <- n[BirthSeason %in% birthseas, ]
+  n <- n[BirthSeas %in% birthseas, ]
 
   # CREATE unit from Gender + BirthSeas
   n[, unit:=paste0(ifelse(Sex == 1, "F", "M"),
-    ifelse(length(birthseas) == 1, "", BirthSeason)),]
+    ifelse(length(birthseas) == 1, "", BirthSeas)),]
   
   # DROP Gender and BirthSeas
-  n[, c("Sex","BirthSeason") := NULL]
+  n[, c("Sex","BirthSeas") := NULL]
 
   # RENAME
   names(n) <- c("year", "season", "age", "data", "unit")
@@ -138,12 +140,12 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
   catage <- data.table(out$catage,
     key=c("Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era"))
   wtatage <- data.table(out$wtatage,
-    key=c("yr", "seas", "gender", "birthseas", "fleet"))
+    key=c("Yr", "Seas", "Sex", "BirthSeas", "Fleet"))
   ageselex <- data.table(out$ageselex,
     key=c("Factor", "Fleet", "Yr", "Seas", "Sex", "Morph"))[Factor == "Asel2",]
 
-  # BUG: yr in wtatage is negative
-  wtatage[, yr:=abs(yr)]
+  # BUG: Yr in wtatage is negative
+  wtatage[, Yr:=abs(Yr)]
 
   # RECONSTRUCT BirthSeas from Morph & Gender
   catage[, BirthSeas := Morph - (max(Seas) * (Gender - 1))]
@@ -154,15 +156,15 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
   catage <- catage[Fleet %in% idx & Era == "TIME" & BirthSeas %in% birthseas,]
   # BUG: scoping does not allow [ on variable with name matching column name
   ref <- birthseas
-  wtatage <- wtatage[fleet %in% idx & birthseas %in% ref,]
+  wtatage <- wtatage[Fleet %in% idx & BirthSeas %in% ref,]
   ageselex <- ageselex[Yr >= min(catage[, Yr]) & Yr <= max(catage[, Yr]) &
     BirthSeas %in% birthseas,]
 
   # CREATE unit from Gender + BirthSeas
   catage[, unit:=paste0(ifelse(Gender == 1, "F", "M"),
     ifelse(length(birthseas) == 1, "", BirthSeas)),]
-  wtatage[, unit:=paste0(ifelse(gender == 1, "F", "M"),
-  ifelse(length(ref) == 1, "", birthseas)),]
+  wtatage[, unit:=paste0(ifelse(Sex == 1, "F", "M"),
+    ifelse(length(ref) == 1, "", BirthSeas)),]
   ageselex[, unit:=paste0(ifelse(Sex == 1, "F", "M"),
     ifelse(length(ref) == 1, "", BirthSeas)),]
 
@@ -171,7 +173,7 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
     measure.vars=ages, variable.name="age")
   names(catage) <- c("area", "fleet", "year", "season", "unit", "age", "data")
 
-  wtatage <- data.table::melt(wtatage, id.vars=c("yr", "seas", "fleet", "unit"),
+  wtatage <- data.table::melt(wtatage, id.vars=c("Yr", "Seas", "Fleet", "unit"),
     measure.vars=ages, variable.name="age")
   names(wtatage) <- c("year", "season", "fleet", "unit", "age", "data")
 
@@ -288,7 +290,6 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 
   # NATAGE
   natage <- data.table(out$natage)
-    setnames(natage, c("BirthSeason"), c("BirthSeas"))
   
   # CATCH.N
   catage <- data.table(out$catage)
@@ -322,21 +323,6 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
     function(x) x$landings.n * x$landings.wt)) %/% landings.n,
     year=dmns$year, area=dmns$area)
   
-#   lwt <- lapply(landings, function(x) x$landings.n * x$landings.wt)
-#   ln <- lapply(landings, function(x) x$landings.n)
-#   
-#   Reduce("+", lwt[1]) %/% ln[[1]]
-#   Reduce("+", lwt[1:2]) %/% Reduce("+", ln[1:2])
-#   Reduce("+", lwt[1:3]) %/% Reduce("+", ln[1:3])
-#   Reduce("+", lwt[1:4]) %/% Reduce("+", ln[1:4])
-#   Reduce("+", lwt[1:5]) %/% Reduce("+", ln[1:5])
-#   Reduce("+", lwt[1:6]) %/% Reduce("+", ln[1:6])
-#   Reduce("+", lwt[1:7]) %/% Reduce("+", ln[1:7])
-#   Reduce("+", lwt[1:8]) %/% Reduce("+", ln[1:8])
-#   Reduce("+", lwt[1:9]) %/% Reduce("+", ln[1:9])
-#   Reduce("+", lwt[1:10]) %/% Reduce("+", ln[1:10])
-#   Reduce("+", lwt[1:11]) %/% Reduce("+", ln[1:11])
-
   # EXPAND m and mat by area
   m <- do.call(FLCore::expand, c(list(x=m), dmns))
   mat <- do.call(FLCore::expand, c(list(x=mat), dmns))
@@ -379,7 +365,6 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
 #' Fisheries Research 142: 86-99.
 #'
 #' @param dir Directory containing the SS3 output files
-#' @param fleets A named list of vector of the fleets to be extracted.
 #' @param birthseas The birthseasons for this stock as a numeric vector.
 #' @param ... Any other argument to be passed to `r4ss::SS_output`
 #'
@@ -606,7 +591,7 @@ ss3index.q <- function(cpue, fleets) {
 #' @aliases ss3sel.pattern
 #' @param selex A data frame obtained from SS_output$ageselex.
 #' @param years Vector of years for which the index applies
-#' @param fleets Vecttor of fleets codes
+#' @param fleets Named vector of fleets (numeric) codes
 #' @param morphs Vector of morphs to use
 #' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
 

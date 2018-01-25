@@ -43,6 +43,8 @@ ss3catch(catage, wtatage, dmns, birthseas, idx)
 
 \item{years}{Vector of years for which the index applies}
 
+\item{morphs}{Vector of morphs to use}
+
 \item{endgrowth}{A data frame obtained from SS_output$endgrowth.}
 
 \item{dmns}{dimnames of the output object, usually obatined using \code{getDimnames}.}
@@ -56,6 +58,8 @@ ss3catch(catage, wtatage, dmns, birthseas, idx)
 \item{wtatage}{A data frame obtained from SS_output$endgrowth but subset for \code{birthseas} and \code{RetWt:_idx}.}
 
 \item{idx}{The fishing fleets, as in \code{SS_output$fleet_ID[SS_output$IsFishFleet]}.}
+
+\item{fleets}{Named vector of fleets (numeric) codes}
 }
 \value{
 An FLQuant or FLQuants object, depending on the converted data structure

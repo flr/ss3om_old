@@ -41,21 +41,21 @@ build:
 	cd ..;\
 	R CMD build $(PKGSRC) --compact-vignettes
 
-buildNV:
+buildNV: README.md NEWS
 	cd ..;\
 	R CMD build $(PKGSRC) --no-build-vignettes
 
-install: ../$(PKGNAME)_$(PKGVERS).tar.gz
+install: build
 	cd ..;\
 	R CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
-
-check: buildNV
-	cd ..;\
-	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz
 
 checkCRAN: build
 	cd ..;\
 	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz --as-cran
+
+check: buildNV
+	cd ..;\
+	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz
 
 clean:
 	cd ..;\

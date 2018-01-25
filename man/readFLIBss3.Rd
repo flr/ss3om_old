@@ -9,8 +9,6 @@ readFLIBss3(dir, fleets, birthseas = out$spawnseas, ...)
 \arguments{
 \item{dir}{Directory containing the SS3 output files}
 
-\item{fleets}{A named list of vector of the fleets to be extracted.}
-
 \item{birthseas}{The birthseasons for this stock as a numeric vector.}
 
 \item{...}{Any other argument to be passed to \code{r4ss::SS_output}}

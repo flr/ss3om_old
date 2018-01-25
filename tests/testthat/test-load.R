@@ -12,21 +12,21 @@ library(ss3om)
 
 # FLStock
 system.time(
-ioalb <- readFLSss3(system.file("ext-data/ioalb", package="ss3om"),
-  name="ALB", repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+simple_3.24 <- readFLSss3(system.file("ext-data/simple_3.24", package="ss3om"),
+  name="simple", repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 )
 
 # FLBiol + FLFisheries
 system.time(
-ioalbf <- readFLBFss3(system.file("ext-data/ioalb", package="ss3om"),
-  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2", wtfile="wtatage.ss_new.bz2",
-  covarfile="covar.sso.bz2", birthseas=4)
+simple_3.24f <- readFLBFss3(system.file("ext-data/simple_3.24", package="ss3om"),
+  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2", wtfile="wtatage.ss_new",
+  covarfile="covar.sso.bz2", birthseas=1)
 )
 
 # FLindexBiomass for LLCPUE3
 system.time(
-iocp <- readFLIBss3(system.file("ext-data/ioalb", package="ss3om"), birthseas=4,
-  fleets=c(LLCPUE3=3), repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
+simplei <- readFLIBss3(system.file("ext-data/simple_3.24", package="ss3om"), birthseas=1,
+  fleets=c(SURVEY1=1), repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 )
 
 # RPs df
@@ -34,12 +34,6 @@ vars <- list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2014=3, F_2014=3,
   Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3)
 
 system.time(
-iorps <- readRPss3(system.file("ext-data/ioalb", "Report.sso.bz2", package="ss3om"), vars)
+simplerps <- readRPss3(system.file("ext-data/simple_3.24", "Report.sso.bz2",
+  package="ss3om"), vars)
 )
-
-# ---
-
-out <- r4ss::SS_output(system.file("ext-data/ioalb", package="ss3om"),
-  verbose=FALSE, hidewarn=TRUE, warn=FALSE, printstats=FALSE, covar=FALSE,
-  forecast=FALSE, repfile="Report.sso.bz2", compfile="CompReport.sso.bz2",
-  wtfile="wtatage.ss_new.bz2", covarfile="covar.sso.bz2")
