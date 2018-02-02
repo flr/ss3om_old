@@ -261,7 +261,7 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, birthseas=out$spawnseas, name="",
+readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
   desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
 
   # LOAD SS_output list

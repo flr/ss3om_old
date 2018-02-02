@@ -51,7 +51,7 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
 		dirname <- paste(dir, grid[row, "id"], sep="/")
 		
     cat("[", i, "]\n")
-    cat(grid[row,'id'], ": ", date(), "\n", file=logfile, append=TRUE)
+    cat(grid[row,'id'], date(), "START\n", file=logfile, append=TRUE, sep=": ")
 
 		# SS3!
 		workdir <- getwd()
@@ -61,10 +61,41 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
       packss3run(".")
 		setwd(workdir)
 
-		cat("DONE ", grid[row,'id'], ": ", date(), "\n", file=logfile, append=TRUE)
+    cat(grid[row,'id'], date(), "END\n", file=logfile, append=TRUE, sep=": ")
 	}
 
-	cat("END: ", date(), "\n", file=logfile, append=TRUE)
+	cat("END: ", date(), "\n", file=logfile, append=TRUE, sep="")
 
-	invisible(0)
+	invisible(readLines("run_grid_log"))
+
+} # }}}
+
+# parselog {{{
+parselog <- function(log, format="%a %b %d %H:%M:%S %Y") {
+
+  # GET total time
+  ini <- strptime(sub("START: ", "", log[1]), format=format)
+  end <- strptime(sub("END: ", "", log[length(log)]), format=format)
+
+  # OUTPUT times per run
+  out <- lapply(log[-c(1, length(log))],
+    function(x) unlist(strsplit(x, ": ")))
+ 
+  idx <- unlist(lapply(out, "[", 3))
+
+  oini <- out[idx == "START"]
+  oend <- out[idx == "END"]
+
+  idx <- match(unlist(lapply(oini, "[", 1)), unlist(lapply(oend, "[", 1)))
+  oend <- oend[idx]  
+
+  oini <- rbindlist(lapply(oini, function(x)
+    as.data.frame(t(setNames(x, nm=c("id", "date", "moment"))))))
+  
+  oend <- rbindlist(lapply(oend, function(x)
+    if(!is.null(x))
+      as.data.frame(t(setNames(x, nm=c("id", "date", "moment"))))
+    else
+      data.frame()
+    ))
 } # }}}
