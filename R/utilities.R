@@ -69,14 +69,23 @@ getRange <- function(x) {
 } # }}}
 
 # packss3run {{{
-packss3run <- function(dir,
+packss3run <- function(dir=getwd(),
   gzfiles=c("Report.sso", "covar.sso", "wtatage.ss_new", "CompReport.sso"),
-  keepfiles=c("warning.sso", "Forecast-report.sso")) {
+  keepfiles=c("warning.sso", "Forecast-report.sso"),
+  inputfiles=list.files(dir, pattern="*.ctl|dat$")
+  
+  ) {
+
+  # CHECK if already compressed
+  if(file.exists(file.path(dir, paste0(gzfiles[1], ".gz")))) {
+    message(paste0("Files in ", dir, "already compressed, skipping."))
+    invisible(0)
+  }
 
   # REMOVE unneeded files
-  keepfiles <- c(gzfiles, keepfiles)
   allfiles <- list.files(dir)
-  rmfiles <- allfiles[-match(keepfiles, allfiles)]
+  filemat <- match(c(gzfiles, keepfiles, inputfiles), allfiles)
+  rmfiles <- allfiles[-filemat[!is.na(filemat)]]
   res <-  file.remove(file.path(dir, rmfiles))
 
   # gzip files
