@@ -6,7 +6,6 @@ import("foreach")
 importFrom("stats", "optimize")
 import("r4ss")
 importFrom("stats", "setNames")
-importFrom("utils", "data")
 
 export(
   "%++%",

@@ -271,14 +271,14 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
-    "FleetNames", "spawnseas", "inputs", "SS_version")]
+    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_version")]
 
   # GET range
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
   idx <- out$fleet_ID[out$IsFishFleet]
 
-  dmns <- getDimnames(out, birthseas=birthseas)
+  dmns <- getDimnames(out, birthseas=out$birthseas)
   dim <- unlist(lapply(dmns, length))
 
   # EXTRACT from out
@@ -632,7 +632,7 @@ ss3sel.pattern <- function(selex, years, fleets, morphs) {
 ss3wt <- function(endgrowth, dmns, birthseas) {
   
   # EXTRACT stock.wt - endgrowth[, Seas, BirthSeas, Age, M]
-  wt <- endgrowth[BirthSeas == birthseas,
+  wt <- endgrowth[BirthSeas %in% birthseas,
     list(BirthSeas, Sex, Seas, Age, Wt_Beg)]
 
   # CREATE unit from Sex + BirthSeas
@@ -708,13 +708,14 @@ ss3n <- function(n, dmns, birthseas) {
     .SD, .SDcols = c("Area", "Sex", "BirthSeas", "Yr", "Seas", dmns$age)]
 
   # MELT by Sex, BirthSeas, Yr & Seas
-	n <- data.table::melt(n, id.vars=c("Area", "Sex", "BirthSeas","Yr","Seas"),
+	n <- data.table::melt(n, id.vars=c("Area", "Sex", "BirthSeas", "Yr", "Seas"),
     variable.name="age")
   
   # SUBSET according to birthseas
   n <- n[BirthSeas %in% birthseas,]
 
   # CREATE unit from Sex + BirthSeas
+  # BUG No Sex but BirthSeas, n[, unit:=paste0(dmns$unit[BirthSeas])]
   n[, unit:=paste0(dmns$unit[Sex],
     ifelse(length(birthseas) == 1, "", BirthSeas)),]
   
