@@ -150,14 +150,14 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
 
 # loadres(dirs, vars, progress=TRUE) {{{
 loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  vars=list(TotBio_Unfished=3, SPB_1950=3, SSB_MSY=3, SPB_2015=3, F_2015=3,
+  vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3, SPB_endyr=3, F_endyr=3,
   Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2, Convergence_Level=2,
   Survey=2, Length_comp=2, Catch_like=2, Recruitment=2), progress=TRUE,
   repfile="Report.sso", covarfile = "covar.sso", grid=NULL) {
 
   # ASSEMBLE paths
   if(!missing(subdirs) & !missing(dir))
-    subdirs <- paste(dir, subdirs, sep="/")
+    subdirs <- file.path(dir, subdirs)
 
 	# Loop over dirs
 	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",

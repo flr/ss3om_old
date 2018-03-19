@@ -278,7 +278,7 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
   ages <- ac(seq(range['min'], range['max']))
   idx <- out$fleet_ID[out$IsFishFleet]
 
-  dmns <- getDimnames(out, birthseas=out$birthseas)
+  dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 
   # EXTRACT from out
@@ -444,6 +444,13 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
 readRPss3 <- function(file, vars) {
 	
 	dat <- readLines(file, n=2000)
+
+  # GET endyr name
+  idx <- grep("SPB_", dat)
+  elin <- unlist(strsplit(dat[idx[length(idx)]], " "))
+  endyr <- sub("SPB_", "", elin[nchar(elin) > 1][1])
+  names(vars) <- sub("endyr", as.character(endyr), names(vars))
+
 	for(i in names(vars)) {
 		# vector with string
 		str <- unlist(strsplit(dat[grep(paste0(gsub("\\(", "\\\\\\(", i), "[ ,:]"),
@@ -519,7 +526,7 @@ readFLQsss3 <- function(dir, ...) {
 
 ss3index <- function(cpue, fleets) {
   
-  index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Obs")]
+  index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Exp")]
 
   # CHANGE names and SORT
   names(index) <- c("qname", "year", "season", "data")
