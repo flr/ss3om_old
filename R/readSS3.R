@@ -441,8 +441,10 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
 
 # readRPss3 {{{
 # TODO Convert to using SS_output
-readRPss3 <- function(file, vars) {
-	
+readRPss3 <- function(file, vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3,
+  SPB_endyr=3, F_endyr=3, Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2,
+  Convergence_Level=2, Survey=2, Length_comp=2, Catch_like=2, Recruitment=2)) {
+
 	dat <- readLines(file, n=2000)
 
   # GET endyr name
