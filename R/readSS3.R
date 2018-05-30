@@ -273,7 +273,7 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_version")]
 
-  # GET range
+  # GET range from catage
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
   idx <- out$fleet_ID[out$IsFishFleet]

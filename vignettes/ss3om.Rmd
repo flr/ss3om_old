@@ -32,7 +32,6 @@ dir <- system.file("ext-data/simple_3.24", package="ss3om")
 ## *FLStock*
 
 ```{r readfls}
-dir <- system.file("ext-data/simple_3.24", package="ss3om")
 simp324 <- readFLSss3(dir, name="simple324",
   repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 ```
@@ -46,11 +45,14 @@ format(object.size(out), units='Mb')
 
 ```
 
-
 # Loading a full OM grid using `load`
 
 # Flow of information SS3 - FLR
 
 # Tested model structures
 
+# Checking an operating model
 
+- Convergence
+- Estimates of B0
+- Recruitment residual trends
