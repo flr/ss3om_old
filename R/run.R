@@ -17,8 +17,8 @@
 #' @param from Starting number
 
 nameGrid <- function(df, dir, from=1) {
-	df$number <- seq(from=from, length=nrow(df))
-	df$id <- paste(df$number, apply(df, 1, function(x)
+	df$iter <- seq(from=from, length=nrow(df))
+	df$id <- paste(df$iter, apply(df, 1, function(x)
 		paste0(gsub(" ", "", paste0(names(x), as.character(x))), collapse="_")), sep="-")
 	return(df)
 }

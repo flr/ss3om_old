@@ -150,7 +150,7 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
 
 # loadres(dirs, vars, progress=TRUE) {{{
 loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, repfile="Report.sso", covarfile = "covar.sso", grid=NULL, ...) {
+  progress=TRUE, repfile="Report.sso", covarfile="covar.sso", grid=NULL, ...) {
 
   # ASSEMBLE paths
   if(!missing(subdirs) & !missing(dir))
@@ -168,15 +168,20 @@ loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
       setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
     } else {
     # READ results
-		readRPss3(file.path(subdirs[i], repfile), ...)
+		cbind(iter=i, readRPss3(file.path(subdirs[i], repfile), ...))
     }
 	}
   # rbind 
   res <- rbindlist(out)
-
+  
   # RBIND grid
-  if(!is.null(grid))
-    res <- cbind(grid[, !colnames(grid) %in% 'id'], res)
+  if(!is.null(grid)) {
+    grid <- data.table(grid)
+    res <- cbind(grid[grid$iter %in% res$iter,][, !c('id', 'iter'), with=FALSE],
+      res)
+  } else {
+    res <- cbind(res, id=subdirs)
+  }
 
 	return(res)
 } # }}}
@@ -252,9 +257,9 @@ loadhessian <- function(dir, grid) {
   dirs <- paste(dir, grid$id, sep='/')
 
 	res <- vector('list', length=nrow(grid))
-		names(res) <- grid$number
+		names(res) <- grid$iter
 
-	for(i in seq(length(grid$number))) {
+	for(i in seq(length(grid$iter))) {
 
     cat(paste0("[", i, "]\n"))
 

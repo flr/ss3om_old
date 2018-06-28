@@ -261,7 +261,7 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
+readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
   desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
 
   # LOAD SS_output list
@@ -320,12 +320,12 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
   
   # AVERAGE landings.wt weighted by landings.n
   landings.wt <-  FLCore::expand(Reduce("+", lapply(landings,
-    function(x) x$landings.n * x$landings.wt)) %/% landings.n,
+    function(x) x$landings.n %*% x$landings.wt)) %/% landings.n,
     year=dmns$year, area=dmns$area)
   
   # EXPAND m and mat by area
-  m <- do.call(FLCore::expand, c(list(x=m), dmns))
-  mat <- do.call(FLCore::expand, c(list(x=mat), dmns))
+  # m <- do.call(FLCore::expand, c(list(x=m), dmns))
+  # mat <- do.call(FLCore::expand, c(list(x=mat), dmns))
   
   # FLStock
   stock <- FLStock(
@@ -345,8 +345,8 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
   stock(stock) <- computeStock(stock)
 
   # ASSIGN harvest.spwn and m.spwn in birthseas
-  harvest.spwn(stock)[,,,birthseas] <- 0.5
-  m.spwn(stock)[,,,birthseas] <- 0.5
+  harvest.spwn(stock)[,,,birthseas] <- 0
+  m.spwn(stock)[,,,birthseas] <- 0
 
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
@@ -378,7 +378,7 @@ readFLSss3 <- function(dir, birthseas=out$spawnseas, name="ss3",
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
+readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 
   # LOAD SS_output list
   out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
@@ -390,7 +390,7 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
   
   # SUBSET from out
   out <- out[c("cpue", "ageselex", "endgrowth", "catage",
-    "nsexes", "nseasons", "nareas", "spawnseas")]
+    "nsexes", "nseasons", "nareas", "birthseas")]
   cpue <- data.table(out[["cpue"]])
   selex <- data.table(out[["ageselex"]])
   endgrowth <- data.table(out[["endgrowth"]])
@@ -440,24 +440,27 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$spawnseas, ...) {
 } # }}}
 
 # readRPss3 {{{
-# TODO Convert to using SS_output
 readRPss3 <- function(file, vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3,
   SPB_endyr=3, F_endyr=3, Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2,
-  Convergence_Level=2, Survey=2, Length_comp=2, Catch_like=2, Recruitment=2)) {
+  Convergence_Level=2, Survey=2, Length_comp=2, Catch_like=2, Recruitment=2),
+  endyr=missing) {
 
 	dat <- readLines(file, n=2000)
 
   # GET endyr name
-  idx <- grep("SPB_", dat)
-  elin <- unlist(strsplit(dat[idx[length(idx)]], " "))
-  endyr <- sub("SPB_", "", elin[nchar(elin) > 1][1])
+  if(missing(endyr)) {
+    idx <- grep("SPB_", dat)
+    elin <- unlist(strsplit(dat[idx[length(idx)]], " "))
+    endyr <- sub("SPB_", "", elin[nchar(elin) > 1][1])
+  }
+
   names(vars) <- sub("endyr", as.character(endyr), names(vars))
 
 	for(i in names(vars)) {
 		# vector with string
 		str <- unlist(strsplit(dat[grep(paste0(gsub("\\(", "\\\\\\(", i), "[ ,:]"),
       dat, fixed=FALSE)], " "))
-		vars[[i]] <- as.numeric(str[vars[[i]]])
+		vars[[i]] <- suppressWarnings(as.numeric(str[vars[[i]]]))
 	}
 	return(as.data.frame(t(unlist(vars))))
 } # }}}
@@ -645,11 +648,13 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
     list(BirthSeas, Sex, Seas, Age, Wt_Beg)]
 
   # CREATE unit from Sex + BirthSeas
-  wt[, unit:=paste0(dmns$unit[Sex],
-    ifelse(length(birthseas) == 1, "", BirthSeas)),]
+  wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
+  wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  wt[, unit:=paste0(uSex, uBirthSeas)]
+  wt[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # RENAME
-  names(wt) <- c("BirthSeas", "Sex", "season", "age", "data", "unit")
+  names(wt) <- c("season", "age", "data", "unit")
 
   # EXPAND by year, unit & season
   wt <- FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
@@ -664,15 +669,24 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
 
   # EXTRACT mat - endgrowth
   # NOTE that only Sex 1 (F) is used, M is all -1
-  mat <- endgrowth[BirthSeas == birthseas & Sex == 1,
+  mat <- endgrowth[BirthSeas %in% birthseas,
     list(BirthSeas, Sex, Seas, Age, Age_Mat)]
 
   # RENAME
-  names(mat) <- c("BirthSeas", "unit", "season", "age", "data")
+  names(mat) <- c("BirthSeas", "Sex", "season", "age", "data")
+
+  # TURN -1 to 0
+  mat[, data:=ifelse(data==-1, 0, data)]
+
+  # SWT unit from Sex and BirthSeas
+  mat[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
+  mat[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  mat[, unit:=paste0(uSex, uBirthSeas)]
+  mat[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # EXPAND by year & unit
-  mat <- FLCore::expand(as.FLQuant(mat[, .(season, age, data)],
-    units=""), year=dmns$year, unit=dmns$unit, season=dmns$season)
+  mat <- FLCore::expand(as.FLQuant(mat[, .(season, unit, age, data)],
+    units=""), year=dmns$year, season=dmns$season)
 
   return(mat)
 }
@@ -684,18 +698,20 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
 ss3m <- function(endgrowth, dmns, birthseas) {
 
   # EXTRACT m - biol[, Seas, BirthSeas, Age, M]
-  m <- endgrowth[BirthSeas == birthseas,
+  m <- endgrowth[BirthSeas %in% birthseas,
     list(BirthSeas, Sex, Seas, Age, M)]
 
   # CREATE unit from Sex + BirthSeas
-  m[, unit:=paste0(dmns$unit[Sex],
-    ifelse(length(birthseas) == 1, "", BirthSeas)),]
+  m[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
+  m[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  m[, unit:=paste0(uSex, uBirthSeas)]
+  m[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # SPLIT M across seasons
   m[, M:=M/length(dmns$season)]
 
   # RENAME
-	names(m) <- c("BirthSeas", "Sex", "season", "age", "data", "unit")
+	names(m) <- c("season", "age", "data", "unit")
   
   # EXPAND by year, unit & season
   # BUG expand not filling
@@ -723,13 +739,14 @@ ss3n <- function(n, dmns, birthseas) {
   # SUBSET according to birthseas
   n <- n[BirthSeas %in% birthseas,]
 
-  # CREATE unit from Sex + BirthSeas
-  # BUG No Sex but BirthSeas, n[, unit:=paste0(dmns$unit[BirthSeas])]
-  n[, unit:=paste0(dmns$unit[Sex],
-    ifelse(length(birthseas) == 1, "", BirthSeas)),]
-  
   # DROP Sex and BirthSeas
-  n[ ,c("Sex","BirthSeas") := NULL]
+
+  # CREATE unit from Sex + BirthSeas
+  n[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
+  n[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  n[, unit:=paste0(uSex, uBirthSeas)]
+  n[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
+
 
   # RENAME
   names(n) <- c("area", "year", "season", "age", "data", "unit")
@@ -751,12 +768,18 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   # RECONSTRUCT BirthSeas from Morph & Sex
   catage[, BirthSeas := Morph - max(Seas) * (Gender - 1)]
   
+  # CREATE unit from Sex + BirthSeas
+  catage[, uSex:={if(length(unique(Gender)) == 1){""} else {c("F","M")[Gender]}}]
+  catage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  catage[, unit:=paste0(uSex, uBirthSeas)]
+  wtatage[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
+  wtatage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
+  wtatage[, unit:=paste0(uSex, uBirthSeas)]
+
   # FIND and SUBSET fishing fleets, TIME and BirthSeas
   catage <- catage[Fleet %in% idx & Era == "TIME" & BirthSeas %in% birthseas,]
-
-  # CREATE unit from Sex + BirthSeas
-  catage[, unit:=paste0(dmns$unit[Gender],
-    ifelse(length(birthseas) == 1, "", BirthSeas)),]
+  
+  catage[ ,c("Gender","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # RENAME Area and Season if only 1
   cols <- c("Seas", "Area")

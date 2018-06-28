@@ -34,7 +34,7 @@ getDimnames <- function(out, birthseas) {
   dmns <- list(age=ages,
     year=seq(range['minyear'], range['maxyear']),
     # unit = combinations(Sex, birthseas)
-    unit=c(t(outer(switch(out$nsexes, "unique", c("F", "M")),
+    unit=c(t(outer(switch(out$nsexes, "", c("F", "M")),
       switch((length(birthseas) > 1) + 1, "", birthseas), paste0))),
     season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
     area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
@@ -71,7 +71,8 @@ getRange <- function(x) {
 # packss3run {{{
 packss3run <- function(dir=getwd(),
   gzfiles=c("Report.sso", "covar.sso", "wtatage.ss_new", "CompReport.sso"),
-  keepfiles=c("warning.sso", "Forecast-report.sso"),
+  keepfiles=c("warning.sso", "Forecast-report.sso", "starter.ss", "forecast.ss",
+    "ss3.par"),
   inputfiles=list.files(dir, pattern="*.ctl|dat$")
   
   ) {

@@ -45,7 +45,7 @@ buildNV: README.md NEWS
 	cd ..;\
 	R CMD build $(PKGSRC) --no-build-vignettes
 
-install: build
+install:
 	cd ..;\
 	R CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
 

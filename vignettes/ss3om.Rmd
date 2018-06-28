@@ -34,7 +34,7 @@ dir <- system.file("ext-data/simple_3.24", package="ss3om")
 ```{r readfls}
 simp324 <- readFLSss3(dir, name="simple324",
   repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
-```
+
 
 ```{r ssout}
 out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
