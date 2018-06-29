@@ -1,7 +1,7 @@
-# CHANGES IN FLPKG VERSION 0.0.0
+# CHANGES IN FLPKG VERSION 0.1.4
 
 ## NEW FEATURES
-- A new feature
+- runss3grid will use the local ss3 executable, if available in the system
 
 ## USER-VISIBLE CHANGES
 
