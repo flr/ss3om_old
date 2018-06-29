@@ -32,11 +32,19 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
 
   # FIND ss3 in pkg
 	if (.Platform$OS.type == "unix") {
-    ss3path <- system.file("bin/linux/", package="ss3om")
+    # FIND ss3 in system
+    ss3path <- dirname(Sys.which("ss3"))
+    # IF missing, use in pkg
+    if(nchar(ss3path) == 0)
+      ss3path <- system.file("bin/linux/", package="ss3om")
     sep <- ":"
     exe <- "ss3"
 	} else if (.Platform$OS.type == "windows") {
-    ss3path <- system.file("bin/windows/", package="ss3om")
+    # FIND ss3 in system
+    ss3path <- dirname(Sys.which("ss3"))
+    # IF missing, use in pkg
+    if(nchar(ss3path) == 0)
+      ss3path <- system.file("bin/windows/", package="ss3om")
     sep <- ";"
     exe <- "ss3.exe"
   }
