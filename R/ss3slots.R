@@ -272,6 +272,7 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   catage[, uSex:={if(length(unique(Gender)) == 1){""} else {c("F","M")[Gender]}}]
   catage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
   catage[, unit:=paste0(uSex, uBirthSeas)]
+  
   wtatage[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   wtatage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
   wtatage[, unit:=paste0(uSex, uBirthSeas)]
@@ -297,10 +298,6 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   wtatage[, (cols) := lapply(.SD, as.character), .SDcols = cols]
   wtatage[, Seas := if(length(unique(Seas)) == 1) "all" else Seas]
 
-  # CREATE unit from Sex + BirthSeas
-  wtatage[, unit:=paste0(dmns$unit[Sex],
-    ifelse(length(birthseas) == 1, "", BirthSeas)),]
- 
   # MELT by Sex, BirthSeas, Yr & Seas
   wtatage <- data.table::melt(wtatage, id.vars=c("Age", "unit", "Seas"),
     measure.vars=paste0("RetWt:_", idx), variable.name="fleet")

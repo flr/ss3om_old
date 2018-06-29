@@ -1,5 +1,5 @@
-# readSS3.R - DESC
-# ioalbmse/R/readSS3.R
+# build.R - Function to build FLR objects from the list returned by SS_output
+# ioalbmse/R/build.R
 
 # Copyright European Union, 2015-2017
 # Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
@@ -8,8 +8,8 @@
 
 # buildFLBFss3 {{{
 
-buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas), ...) {
-
+buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
+  
   out <- out[c("catage", "wtatage", "natage", "ageselex", "endgrowth",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "timeseries", "parameters")]
@@ -314,20 +314,23 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name="ss3",
 
 # buildFLIBss3 {{{
 
-buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
+buildFLIBss3 <- function(out, fleets=missing, birthseas=out$birthseas, ...) {
 
-  # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
-
-  # TODO LOAD ctl$sizeselex, to match fleets if not given
-
-  fleets <- unlist(fleets)
-  
   # SUBSET from out
   out <- out[c("cpue", "ageselex", "endgrowth", "catage",
     "nsexes", "nseasons", "nareas", "birthseas")]
+
   cpue <- data.table(out[["cpue"]])
+  
+  allfleets <- setNames(seq(length(unique(cpue$Name))), unique(cpue$Name))
+  
+  if(missing(fleets))
+    fleets <- allfleets
+  else if(is.character(fleets))
+    fleets <- allfleets[names(allfleets) %in% fleets]
+  else if(is.numeric(fleets))
+    fleets <- allfleets[fleets]
+
   selex <- data.table(out[["ageselex"]])
   endgrowth <- data.table(out[["endgrowth"]])
   wtatage <- endgrowth[BirthSeas %in% birthseas,
@@ -337,9 +340,6 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   # --- index
   index <- ss3index(cpue, fleets)
-
-  # --- index.var
-  # index.var <- ss3index.var(cpue, fleets)
 
   # --- index.q
   index.q <- ss3index.q(cpue, fleets)
@@ -357,17 +357,22 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
   catch.n <- lapply(catch, "[[", "landings.n")
   
   # --- FLIndices
-  cpues <- lapply(names(fleets), function(x) FLIndexBiomass(name=x,
-    index=index[[x]],
-    index.q=index.q[[x]],
-    index.var=index.var[[x]],
-    catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
-      end=dims(index[[x]])$maxyear)),
-    sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
-      end=dims(index[[x]])$maxyear)))
+  cpues <- lapply(names(fleets), function(x) {
+    dmns <- dimnames(index[[x]])
+
+    FLIndexBiomass(name=x,
+      index=index[[x]],
+      index.q=index.q[[x]],
+      index.var=index.var[[x]],
+      # TRIM catch.n to index seasons
+      catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
+        end=dims(index[[x]])$maxyear))[,,,dmns$season],
+      sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
+        end=dims(index[[x]])$maxyear))[,,,dmns$season]
+    })
 
   names(cpues) <- names(fleets)
- 
+  
   if(length(fleets) > 1)
     return(FLIndices(cpues))
   else
@@ -375,38 +380,64 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
 } # }}}
 
-# readRPss3 {{{
-readRPss3 <- function(file, vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3,
-  SPB_endyr=3, F_endyr=3, Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2,
-  Convergence_Level=2, Survey=2, Length_comp=2, Catch_like=2, Recruitment=2),
-  endyr=missing) {
+# buildFLSRss3 {{{
+buildFLSRss3 <- function(out, ...) {
+  
+  # SUBSET out
+  out <- out[c("parameters", "recruit", "derived_quants", "likelihoods_used")]
 
-	dat <- readLines(file, n=2000)
+  recruit <- data.table(out$recruit)
+  parameters <- data.table(out$parameters)
+  dquants <- data.table(out$derived_quants)
+  lkhds <- out$likelihoods_used
 
-  # GET endyr name
-  if(missing(endyr)) {
-    idx <- grep("SPB_", dat)
-    elin <- unlist(strsplit(dat[idx[length(idx)]], " "))
-    endyr <- sub("SPB_", "", elin[nchar(elin) > 1][1])
+  yrs <- recruit$Yr
+
+  # params & model
+  rawp <- parameters[grepl("SR_", Label), .(Label, Value)]
+
+  # BH
+  if("SR_BH_steep" %in% rawp$Label) {
+    params <- FLPar(
+      s=rawp[Label == "SR_BH_steep", Value],
+      R0=exp(rawp[Label == "SR_LN(R0)", Value]),
+      v=dquants[Label == "SSB_Virgin", Value],
+      units=c("", "1000", "t"))
+    model <- bevholtss3()$model
+  # survSRR
+  } else if("SR_surv_Sfrac" %in% rawp$Label) {
+    params <- FLPar(
+      R0=exp(rawp[Label == "SR_LN(R0)", Value]),
+      Sfrac=exp(rawp[Label == "SR_surv_Sfrac", Value]),
+      beta=exp(rawp[Label == "SR_surv_Beta", Value]),
+      SF0=dquants[Label == "SSB_Virgin", Value],
+      units=c("1", "", "", "pups"))
+    model <- survSRR()$model
   }
 
-  names(vars) <- sub("endyr", as.character(endyr), names(vars))
+  # rec
+  rec <- FLQuant(recruit$exp_recr, dimnames=list(year=yrs), units="1000")
+  # ssb
+  ssb <- FLQuant(recruit$SpawnBio, dimnames=list(year=yrs), units="t")
+  # fitted
+  fitted <- FLQuant(recruit$pred_recr, dimnames=list(year=yrs), units="1000")
+  # residuals
+  residuals <- FLQuant(recruit$dev, dimnames=list(year=yrs), units="")
 
-	for(i in names(vars)) {
-		# vector with string
-		str <- unlist(strsplit(dat[grep(paste0(gsub("\\(", "\\\\\\(", i), "[ ,:]"),
-      dat, fixed=FALSE)], " "))
-		vars[[i]] <- suppressWarnings(as.numeric(str[vars[[i]]]))
-	}
-	return(as.data.frame(t(unlist(vars))))
-} # }}}
+  # logLik
+  logLik <- lkhds[rownames(lkhds) == "Recruitment", "values"]
+  class(logLik) <- "logLik"
+  attr(logLik, "df") <- NA
 
-# readFLQsss3 {{{
-readFLQsss3 <- function(dir, ...) {
+  # vcov
 
-  # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=TRUE, forecast=FALSE, ...)
+  return(FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,
+    residuals=residuals, logLik=logLik))
+}
+# }}}
+
+# buildFLQsss3 {{{
+buildFLQsss3 <- function(out, ...) {
 
   # SUBSET out
   out <- out[c("derived_quants", "recruit", "startyr", "endyr", "Kobe")]

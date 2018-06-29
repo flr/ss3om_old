@@ -1,0 +1,8 @@
+SS-V3.24f-safe-Win64;_08/03/2012;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_11
+Wed Jun 27 08:54:27 2018
+
+ Are you sure you want so few early recrdevs? 5
+ Minimum size bin is:_55; which is >10cm, which is large for use as size-at-age 0.0 recruitment
+Final gradient: 1.25871e-005 is larger than final_conv: 1e-005
+ N warnings: 3
+Number_of_active_parameters_on_or_near_bounds: 0
