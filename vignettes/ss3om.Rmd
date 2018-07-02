@@ -26,13 +26,13 @@ library(ss3om)
 ```
 
 ```{r setpwd}
-dir <- system.file("ext-data/simple_3.24", package="ss3om")
+dir <- system.file("ext-data/alb", package="ss3om")
 ```
 
 ## *FLStock*
 
 ```{r readfls}
-simp324 <- readFLSss3(dir, name="simple324",
+simp324 <- readFLSss3(dir, name="alb",
   repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
 
 

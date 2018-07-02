@@ -6,8 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# ss3slot functions {{{
-
 #' Functions to convert SS3 output into FLQuant(s)
 #'
 #' A series of auxiliary functions that convert one or more elements, typically
@@ -314,4 +312,4 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
     }
   )
   return(landings)
-} # }}}
+} 

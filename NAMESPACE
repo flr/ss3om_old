@@ -3,12 +3,16 @@ import("FLCore")
 import("FLFishery")
 import("data.table")
 import("foreach")
-importFrom("stats", "optimize")
 import("r4ss")
-importFrom("stats", "setNames")
+importFrom("stats", "optimize", "setNames")
 
 export(
   "%++%",
+  "buildFLBFss3",
+  "buildFLIBss3",
+  "buildFLSss3",
+  "buildFLSRss3",
+  "buildFLSss3",
   "loadhessian",
   "loadindex",
   "loadom",
@@ -22,7 +26,6 @@ export(
   "readFLSss3",
   "readFLIBss3",
   "readRPss3",
-  "readFLQsss3",
   "runss3grid",
   "SS_readctl_3.24"
 )

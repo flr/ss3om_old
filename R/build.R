@@ -19,14 +19,8 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
   ages <- ac(seq(range['min'], range['max']))
 
   # GET dimnames
-  dmns <- list(age=ages,
-    year=seq(range['minyear'], range['maxyear']),
-    # unit = combinations(Sex, birthseas)
-    unit=c(t(outer(switch(out$nsexes, "", c("F", "M")),
-    switch(length(birthseas), "", birthseas), paste0))),
-    season=seq(out$nseasons),
-    area=seq(out$nareas),
-    iter=1)
+  dmns <- getDimnames(out, birthseas=birthseas)
+  dim <- unlist(lapply(dmns, length))
 
   # --- BIOL (endgrowth, natage)
 
@@ -222,13 +216,13 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
 
 # buildFLSss3 {{{
 
-buildFLSss3 <- function(out, birthseas=out$birthseas, name="ss3",
-  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
+buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
+  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - ")) {
 
   # SUBSET out
-  out <- out[c("catage", "natage", "ageselex", "endgrowth",
+  out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
-    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_version")]
+    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort")]
 
   # GET range from catage
   range <- getRange(out$catage)
@@ -280,6 +274,10 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name="ss3",
     function(x) x$landings.n %*% x$landings.wt)) %/% landings.n,
     year=dmns$year, area=dmns$area)
   
+  landings.wt[is.na(landings.wt)] <- (Reduce("+",
+    lapply(landings, '[[', 'landings.wt')) / length(landings))[is.na(landings.wt)]
+
+
   # EXPAND m and mat by area
   # m <- do.call(FLCore::expand, c(list(x=m), dmns))
   # mat <- do.call(FLCore::expand, c(list(x=mat), dmns))
@@ -314,29 +312,37 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name="ss3",
 
 # buildFLIBss3 {{{
 
-buildFLIBss3 <- function(out, fleets=missing, birthseas=out$birthseas, ...) {
+buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   # SUBSET from out
-  out <- out[c("cpue", "ageselex", "endgrowth", "catage",
+  out <- out[c("cpue", "ageselex", "endgrowth", "catage", "definitions",
     "nsexes", "nseasons", "nareas", "birthseas")]
 
   cpue <- data.table(out[["cpue"]])
-  
-  allfleets <- setNames(seq(length(unique(cpue$Name))), unique(cpue$Name))
+ 
+  # GET cpue fleets 
+  cpuefleets <- setNames(seq(length(unique(cpue$Name))), unique(cpue$Name))
   
   if(missing(fleets))
-    fleets <- allfleets
-  else if(is.character(fleets))
-    fleets <- allfleets[names(allfleets) %in% fleets]
-  else if(is.numeric(fleets))
-    fleets <- allfleets[fleets]
+    fleets <- cpuefleets
+  else {
+    # STOP if wrong fleets
+    if(!all(fleets %in% cpuefleets))
+      stop("selected fleets not found in Report.sso file")
+  
+    if(is.character(fleets))
+      fleets <- cpuefleets[names(cpuefleets) %in% fleets]
+    else if(is.numeric(fleets))
+      fleets <- cpuefleets[fleets]
+  }
 
   selex <- data.table(out[["ageselex"]])
   endgrowth <- data.table(out[["endgrowth"]])
   wtatage <- endgrowth[BirthSeas %in% birthseas,
     c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
   catage <- data.table(out[["catage"]])
-  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+    setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+  definitions <- data.table(out$definitions)
 
   # --- index
   index <- ss3index(cpue, fleets)
@@ -352,23 +358,28 @@ buildFLIBss3 <- function(out, fleets=missing, birthseas=out$birthseas, ...) {
   index.var <- ss3index.var(cpue, fleets)
 
   # --- catch.n
-  catch<- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
+  catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
     birthseas=birthseas, idx=fleets)
   catch.n <- lapply(catch, "[[", "landings.n")
   
   # --- FLIndices
   cpues <- lapply(names(fleets), function(x) {
+    
     dmns <- dimnames(index[[x]])
+    
+    selpat <- window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
+        end=dims(index[[x]])$maxyear)
 
     FLIndexBiomass(name=x,
       index=index[[x]],
       index.q=index.q[[x]],
       index.var=index.var[[x]],
+      # TODO How to link each cpue fleet to catch fleets for catch.n
       # TRIM catch.n to index seasons
-      catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
-        end=dims(index[[x]])$maxyear))[,,,dmns$season],
-      sel.pattern=window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
-        end=dims(index[[x]])$maxyear))[,,,dmns$season]
+   #   catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
+   #     end=dims(index[[x]])$maxyear))[,,,dmns$season],
+      # NORMALIZE sel.pattern
+      sel.pattern=selpat %/% apply(selpat, 2:6, max))[,,,dmns$season]
     })
 
   names(cpues) <- names(fleets)
@@ -384,91 +395,64 @@ buildFLIBss3 <- function(out, fleets=missing, birthseas=out$birthseas, ...) {
 buildFLSRss3 <- function(out, ...) {
   
   # SUBSET out
-  out <- out[c("parameters", "recruit", "derived_quants", "likelihoods_used")]
+  out <- out[c("parameters", "recruit", "derived_quants",
+    "likelihoods_used", "SRRtype")]
 
-  recruit <- data.table(out$recruit)
+  recruit <- data.table(out$recruit)[!era %in% "Forecast",]
   parameters <- data.table(out$parameters)
   dquants <- data.table(out$derived_quants)
   lkhds <- out$likelihoods_used
 
   yrs <- recruit$Yr
+  recruit[, deviates := exp(dev)]
+  recruit[, obs_rec := rowSums(.SD, na.rm=TRUE), .SDcols=c("pred_recr", "deviates")]
+
+  # logLik
+  logLik <- lkhds[rownames(lkhds) == "Recruitment", "values"]
+  class(logLik) <- "logLik"
 
   # params & model
   rawp <- parameters[grepl("SR_", Label), .(Label, Value)]
 
   # BH
-  if("SR_BH_steep" %in% rawp$Label) {
+  if(out$SRRtype == 3) {
     params <- FLPar(
       s=rawp[Label == "SR_BH_steep", Value],
       R0=exp(rawp[Label == "SR_LN(R0)", Value]),
       v=dquants[Label == "SSB_Virgin", Value],
       units=c("", "1000", "t"))
-    model <- bevholtss3()$model
+    model <- "bevholtss3"
+    attr(logLik, "df") <- 2
   # survSRR
-  } else if("SR_surv_Sfrac" %in% rawp$Label) {
+  } else if(out$SRRtype == 7) {
     params <- FLPar(
       R0=exp(rawp[Label == "SR_LN(R0)", Value]),
       Sfrac=exp(rawp[Label == "SR_surv_Sfrac", Value]),
       beta=exp(rawp[Label == "SR_surv_Beta", Value]),
       SF0=dquants[Label == "SSB_Virgin", Value],
       units=c("1", "", "", "pups"))
-    model <- survSRR()$model
+    model <- "survSRR"
+    attr(logLik, "df") <- 3
   }
 
   # rec
-  rec <- FLQuant(recruit$exp_recr, dimnames=list(year=yrs), units="1000")
+  rec <- FLQuant(recruit$obs_rec, dimnames=list(year=yrs),
+    units="1000")
   # ssb
   ssb <- FLQuant(recruit$SpawnBio, dimnames=list(year=yrs), units="t")
   # fitted
   fitted <- FLQuant(recruit$pred_recr, dimnames=list(year=yrs), units="1000")
   # residuals
   residuals <- FLQuant(recruit$dev, dimnames=list(year=yrs), units="")
+  
+  # TODO vcov
+  res <- FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,
+    residuals=residuals)
+  
+  # BUG logLik, distribution in FLSR()
+  logLik(res) <- logLik
+  distribution(res)[1] <- "lnorm"
 
-  # logLik
-  logLik <- lkhds[rownames(lkhds) == "Recruitment", "values"]
-  class(logLik) <- "logLik"
-  attr(logLik, "df") <- NA
-
-  # vcov
-
-  return(FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,
-    residuals=residuals, logLik=logLik))
+  return(res)
 }
 # }}}
-
-# buildFLQsss3 {{{
-buildFLQsss3 <- function(out, ...) {
-
-  # SUBSET out
-  out <- out[c("derived_quants", "recruit", "startyr", "endyr", "Kobe")]
-
-  yrs <- ac(seq(out$startyr, out$endyr))
-
-  # REC
-  recruit <- data.table(out$recruit)
-  rec <- FLQuant(recruit[, pred_recr], dimnames=list(age='0', year=recruit[, Yr]),
-    units="1000")[, yrs]
-
-  # SPB
-  ssb <- FLQuant(recruit[, SpawnBio], dimnames=list(age='all', year=recruit[, Yr]),
-    units="t")[, yrs]
-
-  # RESID
-  resid <- FLQuant(recruit[, dev], dimnames=list(age='all', year=recruit[, Yr]),
-    units="t")[, yrs]
-
-  # BBMSY
-  kobe <- data.table(out$Kobe)
-  bbmsy <- FLQuant(kobe[, B.Bmsy], dimnames=list(age='all', year=kobe[, Year]),
-    units="NA")[, yrs]
-
-  ffmsy <- FLQuant(kobe[, F.Fmsy], dimnames=list(age='all', year=kobe[, Year]),
-    units="NA")[, yrs]
-
-  # $Dynamic_Bzero
-
-  # $derived_quants
-  # F_1950
-
-  return(FLQuants(rec=rec, ssb=ssb, resid=resid, bbmsy=bbmsy, ffmsy=ffmsy))
-} # }}}

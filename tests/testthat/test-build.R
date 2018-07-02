@@ -6,12 +6,21 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+# SMA
 
-out <- r4ss::SS_output("alb", repfile="Report.sso.bz2",
+out <- r4ss::SS_output("sma", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
-out2 <- r4ss::SS_output("sma", repfile="Report.sso.bz2",
+# SMA
+
+out <- r4ss::SS_output("bet", repfile="Report.sso.gz",
+  compfile="CompReport.sso.gz", covarfile="covar.sso.gz",
+  warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
+
+# ALB
+
+out <- r4ss::SS_output("alb", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
@@ -27,14 +36,14 @@ verify(stk)
 
 # FLSR
 
-fsr <- buildFLSRss3(out, model='bevholtss3')
+srr <- buildFLSRss3(out)
 
 
 # FLIndices
 
-idx <- buildFLIBss3(out, fleets=list(`LLCPUE1`=1))
-
 idx <- buildFLIBss3(out)
+
+idx <- buildFLIBss3(out, fleets=1)
 
 idx <- buildFLIBss3(out, fleets=1:4)
 
@@ -43,4 +52,4 @@ idx <- buildFLIBss3(out, fleets=c("LLCPUE3"))
 
 # FLBiol + FLFisheries
 
-#BUG fbf <- buildFLBFss3(out)
+fbf <- buildFLBFss3(out)
