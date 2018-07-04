@@ -13,7 +13,6 @@ export(
   "buildFLSss3",
   "buildFLSRss3",
   "buildFLSss3",
-  "loadhessian",
   "loadindex",
   "loadom",
   "loadomFLStocks",

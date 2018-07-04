@@ -12,10 +12,10 @@ out <- r4ss::SS_output("sma", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
-# SMA
+# BET
 
-out <- r4ss::SS_output("bet", repfile="Report.sso.gz",
-  compfile="CompReport.sso.gz", covarfile="covar.sso.gz",
+out <- r4ss::SS_output("bet", repfile="Report.sso.bz2",
+  compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
 # ALB
@@ -36,16 +36,27 @@ verify(stk)
 
 # FLSR
 
+# bet: recruit$SpawnBio = ssb(srr)[,,4,1]
+
 srr <- buildFLSRss3(out)
+
+validObject(srr)
 
 
 # FLIndices
+
+# cpue[, Vuln_bio := Exp / Eff_Q]
+# TODO cpue[, Dev := Obs - Exp] ??
+cpue <- data.table(out$cpue)
+cpue[, newDev := Obs - Exp]
+cpue[, expDev := exp(Dev)]
+
 
 idx <- buildFLIBss3(out)
 
 idx <- buildFLIBss3(out, fleets=1)
 
-idx <- buildFLIBss3(out, fleets=1:4)
+idx <- buildFLIBss3(out, fleets=1:2)
 
 idx <- buildFLIBss3(out, fleets=c("LLCPUE3"))
 

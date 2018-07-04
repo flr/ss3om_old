@@ -311,7 +311,6 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 } # }}}
 
 # buildFLIBss3 {{{
-
 buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   # SUBSET from out
@@ -371,6 +370,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
         end=dims(index[[x]])$maxyear)
 
     FLIndexBiomass(name=x,
+      distribution="lnorm", 
       index=index[[x]],
       index.q=index.q[[x]],
       index.var=index.var[[x]],

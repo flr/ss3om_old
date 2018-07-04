@@ -152,4 +152,3 @@ readRPss3 <- function(file, vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3
 	}
 	return(as.data.frame(t(unlist(vars))))
 } # }}}
-

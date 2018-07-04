@@ -6,6 +6,17 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+# loadOMBF
+
+# loadOMS
+
+# loadFLS
+
+# loadFLIBs
+
+# loadres
+
+
 # loadom(dir, progress=TRUE) {{{
 loadom <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
@@ -186,33 +197,6 @@ loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	return(res)
 } # }}}
 
-# loadquants(dirs, progress=TRUE) {{{
-loadquants <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, object="resid", ...) {
-  
-  # Loop over subdirs
-	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove" ) %dopar% {
-
-		if(progress)
-			cat(paste0('[', i, ']\n'))
-
-		readFLQsss3(subdirs[i], ...)
-	}
-	
-  res <- foreach(i=object, .errorhandling = "remove" ) %dopar% {
-    lapply(out, "[[", i)
-  }
-  
-  res <- lapply(res, function(x) Reduce(combine, x))
-  
-  if(length(object) == 1)
-    return(res[[1]])
-
-  names(res) <- object
-
-	return(res)
-} # }}}
-
 # loadindex(dirs, progress=TRUE) {{{
 loadindex <- function(dirs, progress=TRUE, fleets) {
 
@@ -249,35 +233,4 @@ loadindex <- function(dirs, progress=TRUE, fleets) {
   sel.pattern <- Reduce(combine, lapply(ind, "[[", 'sel.pattern'))
 
 	return(FLQuants(index=index, index.q=index.q, sel.pattern=sel.pattern))
-} # }}}
-
-# loadhessian {{{
-loadhessian <- function(dir, grid) {
-	
-  dirs <- paste(dir, grid$id, sep='/')
-
-	res <- vector('list', length=nrow(grid))
-		names(res) <- grid$iter
-
-	for(i in seq(length(grid$iter))) {
-
-    cat(paste0("[", i, "]\n"))
-
-		filename <- file(paste(dir, grid$id[i], "admodel.hes", sep='/'), "rb")
-
-  	num.pars <- readBin(filename, "integer", 1)
-  	hes.vec <- readBin(filename, "numeric", num.pars^2)
-  
-		hes <- matrix(hes.vec, ncol=num.pars, nrow=num.pars)
-  	hybrid_bounded_flag <- readBin(filename, "integer", 1)
-  	scale <- readBin(filename, "numeric", num.pars)
-  	
-		res[[i]] <- list(num.pars = num.pars, hes = hes,
-			hybrid_bounded_flag = hybrid_bounded_flag, scale = scale)
-
-		close(filename)
-	}
-
-	return(res)
-
 } # }}}

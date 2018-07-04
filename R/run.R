@@ -6,24 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# nameGrid {{{
-
-#' nameGrid
-#'
-#' Creates folder names from a 'grid' df of scenarios
-#'
-#' @param df Model grid data.frame
-#' @param dir Folder name
-#' @param from Starting number
-
-nameGrid <- function(df, dir, from=1) {
-	df$iter <- seq(from=from, length=nrow(df))
-	df$id <- paste(df$iter, apply(df, 1, function(x)
-		paste0(gsub(" ", "", paste0(names(x), as.character(x))), collapse="_")), sep="-")
-	return(df)
-}
-# }}}
-
 # runss3grid {{{
 runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
   logfile=paste0(dir, '/run_grid_log'), options="", pack=FALSE) {
@@ -77,6 +59,24 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
 	invisible(readLines("run_grid_log"))
 
 } # }}}
+
+# nameGrid {{{
+
+#' nameGrid
+#'
+#' Creates folder names from a 'grid' df of scenarios
+#'
+#' @param df Model grid data.frame
+#' @param dir Folder name
+#' @param from Starting number
+
+nameGrid <- function(df, dir, from=1) {
+	df$iter <- seq(from=from, length=nrow(df))
+	df$id <- paste(df$iter, apply(df, 1, function(x)
+		paste0(gsub(" ", "", paste0(names(x), as.character(x))), collapse="_")), sep="-")
+	return(df)
+}
+# }}}
 
 # parselog {{{
 parselog <- function(log, format="%a %b %d %H:%M:%S %Y") {
