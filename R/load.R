@@ -179,7 +179,7 @@ loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
       setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
     } else {
     # READ results
-		cbind(iter=i, readRPss3(file.path(subdirs[i], repfile), ...))
+		cbind(iter=i, readFLRPss3(file.path(subdirs[i], repfile), ...))
     }
 	}
   # rbind 

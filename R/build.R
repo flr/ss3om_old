@@ -325,14 +325,14 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
   if(missing(fleets))
     fleets <- cpuefleets
   else {
-    # STOP if wrong fleets
-    if(!all(fleets %in% cpuefleets))
-      stop("selected fleets not found in Report.sso file")
-  
     if(is.character(fleets))
       fleets <- cpuefleets[names(cpuefleets) %in% fleets]
     else if(is.numeric(fleets))
       fleets <- cpuefleets[fleets]
+    
+    # STOP if wrong fleets
+    if(length(fleets) == 0 | any(is.na(fleets)))
+      stop("selected fleets not found in Report.sso file")
   }
 
   selex <- data.table(out[["ageselex"]])
@@ -384,10 +384,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   names(cpues) <- names(fleets)
   
-  if(length(fleets) > 1)
-    return(FLIndices(cpues))
-  else
-    return(cpues[[1]])
+  return(FLIndices(cpues))
 
 } # }}}
 
@@ -396,7 +393,7 @@ buildFLSRss3 <- function(out, ...) {
   
   # SUBSET out
   out <- out[c("parameters", "recruit", "derived_quants",
-    "likelihoods_used", "SRRtype")]
+    "likelihoods_used", "SRRtype", "spawnseas", "CoVar", "nsexes")]
 
   recruit <- data.table(out$recruit)[!era %in% "Forecast",]
   parameters <- data.table(out$parameters)
@@ -412,8 +409,8 @@ buildFLSRss3 <- function(out, ...) {
   class(logLik) <- "logLik"
 
   # params & model
-  rawp <- parameters[grepl("SR_", Label), .(Label, Value)]
-
+  rawp <- parameters[grepl("SR_", Label),]
+  
   # BH
   if(out$SRRtype == 3) {
     params <- FLPar(
@@ -422,7 +419,7 @@ buildFLSRss3 <- function(out, ...) {
       v=dquants[Label == "SSB_Virgin", Value],
       units=c("", "1000", "t"))
     model <- "bevholtss3"
-    attr(logLik, "df") <- 2
+    attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   # survSRR
   } else if(out$SRRtype == 7) {
     params <- FLPar(
@@ -432,27 +429,115 @@ buildFLSRss3 <- function(out, ...) {
       SF0=dquants[Label == "SSB_Virgin", Value],
       units=c("1", "", "", "pups"))
     model <- "survSRR"
-    attr(logLik, "df") <- 3
+    attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   }
 
+  # SET sratio if 2 sex model
+  if(out$nsexes == 2)
+    params <- rbind(params, FLPar(sratio=0.5, units=""))
+
+  # TODO SETUP for multiple recruit season/units
+
   # rec
-  rec <- FLQuant(recruit$obs_rec, dimnames=list(year=yrs),
+  rec <- FLQuant(recruit$obs_rec, dimnames=list(year=yrs, season=out$spawnseas),
     units="1000")
   # ssb
-  ssb <- FLQuant(recruit$SpawnBio, dimnames=list(year=yrs), units="t")
+  ssb <- FLQuant(recruit$SpawnBio, dimnames=list(year=yrs, season=out$spawnseas),
+    units="t")
   # fitted
-  fitted <- FLQuant(recruit$pred_recr, dimnames=list(year=yrs), units="1000")
+  fitted <- FLQuant(recruit$pred_recr, dimnames=list(year=yrs, season=out$spawnseas),
+    units="1000")
   # residuals
-  residuals <- FLQuant(recruit$dev, dimnames=list(year=yrs), units="")
+  residuals <- FLQuant(recruit$dev, dimnames=list(year=yrs, season=out$spawnseas),
+    units="")
   
-  # TODO vcov
+  # vcov
+  estpar <- parameters[grepl("SR_", Label),][!is.na(Active_Cnt),]
+  
+  # CREATE var is only one param estimated
+  if(dim(estpar)[1] == 1)
+    vcov <- array((estpar$Parm_StDev)^2, dim=c(1,1,1),
+      dimnames=list(estpar$Label, estpar$Label, iter=1))
+  else if(dim(estpar)[1] > 1) {
+    # TODO
+    CoVar <- data.table(out$CoVar)
+    vcov <- CoVar[label.i %in% estpar$Label & label.j %in% estpar$Label,]
+    vcov <- array(numeric(0))
+  }
+
   res <- FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,
-    residuals=residuals)
+    residuals=residuals, vcov=vcov)
   
-  # BUG logLik, distribution in FLSR()
   logLik(res) <- logLik
   distribution(res)[1] <- "lnorm"
 
   return(res)
 }
 # }}}
+
+# buildFLRPss3 {{{
+buildFLRPss3 <- function(out, ...) {
+
+  # SUBSET out
+  dquants <- data.table(out$derived_quants)
+
+  FLPar(
+    # SB0
+    SB0=dquants[Label == "SSB_Unfished", Value],
+    
+    # B0
+    B0=dquants[Label == "TotBio_Unfished", Value],
+
+    # R0
+    R0=dquants[Label == "Recr_Unfished", Value],
+
+    # SBMSY
+    SBMSY=dquants[Label == "SSB_MSY", Value],
+
+    # FMSY
+    FMSY=dquants[Label == "Fstd_MSY", Value],
+
+    # MSY
+    MSY=dquants[Label == "TotYield_MSY", Value],
+    
+    units=c("t", "t", "1000", "t", "f", "t"))
+} # }}}
+
+# buildRESsss3 {{{
+buildRESss3 <- function(out, ...) {
+
+  lkels <- c("TOTAL", "Catch", "Survey", "Length_comp", "Recruitment")
+  lknms <- c("LIKELIHOOD", "Catch", "Survey", "Length_comp", "Recruitment")
+  setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)
+  
+  res <- cbind(data.frame(
+  
+    # SR_LN(R0)
+    `SR_LN(R0)`=out$estimated_non_dev_parameters['SR_LN(R0)', 'Value'],
+
+    # Convergence_Level
+    Convergence_Level=out$maximum_gradient_component,
+
+    # SSB_endyr
+    `SSB_endyr`=out$derived_quants[paste0("SSB_", out$endyr), "Value"],
+  
+    # F_endyr
+    `F_endyr`=out$derived_quants[paste0("F_", out$endyr), "Value"]),
+
+    # LIKELIHOOD
+    data.frame(setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)))
+
+  return(res)
+} # }}}
+
+# buildkobe {{{
+buildKobess3 <- function(out, ...) {
+
+  yrs <- out$Kobe[,'Year']
+  res <- FLQuants(
+    B.BMSY=FLQuant(out$Kobe[,'B.Bmsy'], dimnames=list(year=yrs), units=""),
+    F.FMSY=FLQuant(out$Kobe[,'F.Fmsy'], dimnames=list(year=yrs), units=""))
+
+  return(res)
+
+} # }}}

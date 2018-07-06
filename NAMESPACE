@@ -1,6 +1,7 @@
 import("methods")
 import("FLCore")
 import("FLFishery")
+import("mse")
 import("data.table")
 import("foreach")
 import("r4ss")
@@ -10,21 +11,34 @@ export(
   "%++%",
   "buildFLBFss3",
   "buildFLIBss3",
+  "buildKobess3",
+  "buildFLRPss3",
+  "buildRESss3",
   "buildFLSss3",
   "buildFLSRss3",
   "buildFLSss3",
+
   "loadindex",
   "loadom",
   "loadomFLStocks",
   "loadomDT",
-  "loadquants",
   "loadres",
+  
   "nameGrid",
   "packss3run",
+
   "readFLBFss3",
-  "readFLSss3",
   "readFLIBss3",
-  "readRPss3",
-  "runss3grid",
-  "SS_readctl_3.24"
+  "readKobess3",
+  "readFLRPss3",
+  "readRESss3",
+  "readFLSss3",
+  "readFLSRss3",
+  "readFLSss3",
+
+  "runss3grid"
 )
+
+exportMethods(
+  "results",
+  "results<-")

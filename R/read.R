@@ -11,7 +11,7 @@
 readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 
   # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=TRUE, forecast=FALSE, ...)
 
 } # }}}
@@ -53,7 +53,7 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
   desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
 
   # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
   buildFLSss3(out, birthseas=out$birthseas, name=out$Control_File,
@@ -87,7 +87,7 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
 readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 
   # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
   buildFLIBss3(out, fleets=fleets, birthseas=out$birthseas)
@@ -120,35 +120,92 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
 
   # LOAD SS_output list
-  out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
   buildFLSRss3(out, birthseas=out$birthseas)
 
 } # }}}
 
-# readRPss3 {{{
-readRPss3 <- function(file, vars=list(TotBio_Unfished=3, SPB_Virgin=3, SSB_MSY=3,
-  SPB_endyr=3, F_endyr=3, Fstd_MSY=3, TotYield_MSY=3, `SR_LN(R0)`=3, LIKELIHOOD=2,
-  Convergence_Level=2, Survey=2, Length_comp=2, Catch_like=2, Recruitment=2),
-  endyr=missing) {
+# readFLRPss3 {{{
+readFLRPss3 <- function(dir, ...) {
 
-	dat <- readLines(file, n=2000)
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
-  # GET endyr name
-  if(missing(endyr)) {
-    idx <- grep("SPB_", dat)
-    elin <- unlist(strsplit(dat[idx[length(idx)]], " "))
-    endyr <- sub("SPB_", "", elin[nchar(elin) > 1][1])
-  }
+  buildFLRPss3(out)
 
-  names(vars) <- sub("endyr", as.character(endyr), names(vars))
+} # }}}
 
-	for(i in names(vars)) {
-		# vector with string
-		str <- unlist(strsplit(dat[grep(paste0(gsub("\\(", "\\\\\\(", i), "[ ,:]"),
-      dat, fixed=FALSE)], " "))
-		vars[[i]] <- suppressWarnings(as.numeric(str[vars[[i]]]))
-	}
-	return(as.data.frame(t(unlist(vars))))
+# readRESss3 {{{
+readRESss3 <- function(dir, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  buildRESss3(out)
+
+} # }}}
+
+# readKobess3 {{{
+readKobess3 <- function(dir, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  buildKobess3(out)
+
+} # }}}
+
+# readOMss3 {{{
+readOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  # FLS
+  stk <- buildFLSss3(out, birthseas=birthseas)
+
+  # FLSR
+  srr <- buildFLSRss3(out)
+
+  # FLIB
+  idx <- buildFLIBss3(out, fleets=fleets)
+
+  # RPs
+  rps <- buildFLRPss3(out)
+
+  # Results
+  res <- buildRESss3(out)
+
+  return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res))
+} # }}}
+
+# readFLomss3 {{{
+readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  # FLS
+  stk <- buildFLSss3(out, birthseas=birthseas)
+
+  # FLSR
+  srr <- buildFLSRss3(out)
+
+  # FLIB
+  idx <- buildFLIBss3(out, fleets=fleets)
+
+  # RPs
+  rps <- buildFLRPss3(out)
+
+  # Results
+  res <- buildRESss3(out)
+
+  return(FLom(stock=stk, sr=srr, brp=rps))
 } # }}}

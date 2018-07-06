@@ -184,7 +184,7 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
 
   # EXPAND by year & unit
   mat <- FLCore::expand(as.FLQuant(mat[, .(season, unit, age, data)],
-    units=""), year=dmns$year, season=dmns$season)
+    units=""), year=dmns$year)
 
   return(mat)
 }
@@ -265,6 +265,7 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
 
   # RECONSTRUCT BirthSeas from Morph & Sex
   catage[, BirthSeas := Morph - max(Seas) * (Gender - 1)]
+  catage <- catage[BirthSeas %in% birthseas,]
   
   # CREATE unit from Sex + BirthSeas
   catage[, uSex:={if(length(unique(Gender)) == 1){""} else {c("F","M")[Gender]}}]

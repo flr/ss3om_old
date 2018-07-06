@@ -1,6 +1,6 @@
 # ss3om
-- Version: 0.1.3.9002
-- Date: 2018-06-29
+- Version: 0.1.4
+- Date: 2018-07-05
 - Author: Iago Mosqueira, EC JRC
 - Maintainer: Iago Mosqueira <iago.mosqueira@ec.europa.eu>
 - Repository: <https://github.com/iagomosqueira/ss3om/>
@@ -12,6 +12,8 @@ Tools for conditioning of Operating Models based on SS3 by considering structura
 To install this package, start R and enter:
 
 	devtools::install_github("iagomosqueira/ss3om")
+
+## Usage
 
 ## Build Status
 [![Travis Build Status](https://travis-ci.org/iagomosqueira/ss3om.svg?branch=master)](https://travis-ci.org/iagomosqueira/ss3om)
