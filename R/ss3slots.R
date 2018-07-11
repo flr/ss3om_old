@@ -184,7 +184,7 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
 
   # EXPAND by year & unit
   mat <- FLCore::expand(as.FLQuant(mat[, .(season, unit, age, data)],
-    units=""), year=dmns$year)
+    units=""), year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
 
   return(mat)
 }
