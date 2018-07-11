@@ -56,6 +56,9 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
   buildFLSss3(out, birthseas=out$birthseas, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "))
 
@@ -90,6 +93,9 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
   buildFLIBss3(out, fleets=fleets, birthseas=out$birthseas)
 
 } # }}}
@@ -123,6 +129,9 @@ readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
   buildFLSRss3(out, birthseas=out$birthseas)
 
 } # }}}
@@ -133,6 +142,9 @@ readFLRPss3 <- function(dir, ...) {
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
 
   buildFLRPss3(out)
 
@@ -145,6 +157,9 @@ readRESss3 <- function(dir, ...) {
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
   buildRESss3(out)
 
 } # }}}
@@ -156,6 +171,9 @@ readKobess3 <- function(dir, ...) {
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
   buildKobess3(out)
 
 } # }}}
@@ -166,6 +184,9 @@ readOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLS
   stk <- buildFLSss3(out, birthseas=birthseas)
@@ -191,6 +212,9 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLS
   stk <- buildFLSss3(out, birthseas=birthseas)
