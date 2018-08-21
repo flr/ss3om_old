@@ -151,11 +151,11 @@ readFLRPss3 <- function(dir, ...) {
 } # }}}
 
 # readRESss3 {{{
-readRESss3 <- function(dir, ...) {
+readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+    printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
@@ -178,8 +178,81 @@ readKobess3 <- function(dir, ...) {
 
 } # }}}
 
-# readOMss3 {{{
-readOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+# readFLomss3 {{{
+readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # FLS
+  stk <- buildFLSss3(out, birthseas=birthseas)
+
+  # FLSR
+  srr <- buildFLSRss3(out)
+
+  # RPs
+  rps <- buildFLRPss3(out)
+
+  return(FLom(stock=stk, sr=srr, brp=rps))
+} # }}}
+
+# readFLoemss3 {{{
+readFLoemss3 <- function(dir, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # FLIB
+  idx <- buildFLIBss3(out, fleets=fleets)
+  
+  oem <- FLoem(observations=list(idx=idx))
+
+  return(oem)
+} # }}}
+
+# readFLomess3 {{{
+readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # FLS
+  stk <- buildFLSss3(out, birthseas=birthseas)
+
+  # FLSR
+  srr <- buildFLSRss3(out)
+
+  # FLIB
+  idx <- buildFLIBss3(out, fleets=fleets)
+
+  # RPs
+  rps <- buildFLRPss3(out)
+
+  # Results
+  res <- buildRESss3(out)
+
+  om <- FLom(stock=stk, sr=srr, brp=rps)
+  attributes(om, "res") <- res
+
+  oem <- FLoem(observations=list(idx=idx))
+
+  return(list(om=om, oem=oem))
+} # }}}
+
+# readOMSss3 {{{
+readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
@@ -204,32 +277,4 @@ readOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   res <- buildRESss3(out)
 
   return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res))
-} # }}}
-
-# readFLomss3 {{{
-readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
-
-  # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
-
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas)
-
-  # FLSR
-  srr <- buildFLSRss3(out)
-
-  # FLIB
-  idx <- buildFLIBss3(out, fleets=fleets)
-
-  # RPs
-  rps <- buildFLRPss3(out)
-
-  # Results
-  res <- buildRESss3(out)
-
-  return(FLom(stock=stk, sr=srr, brp=rps))
 } # }}}

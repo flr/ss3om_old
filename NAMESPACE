@@ -17,16 +17,10 @@ export(
   "buildFLSss3",
   "buildFLSRss3",
   "buildFLSss3",
-
-  "loadindex",
-  "loadom",
-  "loadomFLStocks",
-  "loadomDT",
-  "loadres",
-  
+  "loadOM",
+  "loadRES",
   "nameGrid",
   "packss3run",
-
   "readFLBFss3",
   "readFLIBss3",
   "readKobess3",
@@ -35,7 +29,7 @@ export(
   "readFLSss3",
   "readFLSRss3",
   "readFLSss3",
-
+  "readOMSss3",
   "runss3grid"
 )
 

@@ -7,7 +7,7 @@
 - Bug reports: <https://github.com/iagomosqueira/ss3om/issues>
 
 ## Overview
-Tools for conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions, jackknifing of models and use of McMC output. A grid of SS3 runs is created and results are loaded on various FLR objects using functions from the r4ss package.
+Tools for conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions, jackknifing of models and use of McMC output. A grid of SS3 runs is created and results are loaded on various FLR objects using functions from the [r4ss](https://github.com/r4ss/r4ss) package.
 
 To install this package, start R and enter:
 

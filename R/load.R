@@ -6,16 +6,118 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# loadOMBF
+# loadOM {{{
+loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, ...) {
 
-# loadOMS
+  if(progress)
+    cat("[1]\n", sep="")
+
+  # READ first element
+  first <- readFLomss3(subdirs[1], ...)
+
+  # and RETURN if no more
+  if(length(subdirs) == 1)
+    return(first)
+
+	# LOOP over subdirs
+  om <- foreach(i=seq(2, length(subdirs)),
+    # PROPAGATE .init
+    .init=propagate(first, length(subdirs), FALSE),
+    # COMBINE by assigning to iter in .init
+    .combine=combine, .inorder=TRUE,
+    .errorhandling="remove", .multicombine=TRUE) %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    readFLomss3(subdirs[i], ...)
+  }
+
+  # DROP undeeded extra iters
+  om@stock <- slim(om@stock)
+  
+  return(om)
+
+} # }}}
+
+# loadOMS {{{
+loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, ...) {
+
+	# LOOP over subdirs
+  out <- foreach(i=seq(1, length(subdirs)),
+    .inorder=TRUE, .errorhandling="remove") %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    run <- readOMSss3(subdirs[i], ...)
+
+    # CONVERT stock to data.table
+    run$stock <- data.table(as.data.frame(run$stock))
+    run$stock[, iter := NULL]
+    run$stock[, iter := i]
+
+    run
+  }
+
+  # COMBINE
+  stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
+  sr <- Reduce(combine, lapply(out, function(x) x$sr))
+
+
+  return(out)
+
+} # }}}
+
+# loadRES {{{
+loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, repfile="Report.sso", compfile="CompReport.sso",
+  covarfile="covar.sso", grid=NULL, ...) {
+
+  # ASSEMBLE paths
+  if(!missing(subdirs) & !missing(dir))
+    subdirs <- file.path(dir, subdirs)
+
+	# Loop over dirs
+	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
+    .inorder=TRUE) %dopar% {
+		
+    if(progress)
+			cat(paste0('[', i, ']\n'))
+    
+    # CONVERGED? (covar.sso exists)
+    if(!file.exists(file.path(subdirs[i], covarfile))) {
+      setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
+    } else {
+    # READ results
+		cbind(iter=i, readRESss3(subdirs[i], repfile=repfile, compfile=compfile))
+    }
+	}
+
+  # rbind 
+  res <- rbindlist(out)
+  
+  # RBIND grid
+  if(!is.null(grid)) {
+    grid <- data.table(grid)
+    res <- cbind(grid[grid$iter %in% res$iter,][, !c('id', 'iter'), with=FALSE],
+      res)
+  } else {
+    res <- cbind(res, id=subdirs)
+  }
+
+	return(res)
+} # }}}
 
 # loadFLS
 
 # loadFLIBs
 
-# loadres
-
+# ---
 
 # loadom(dir, progress=TRUE) {{{
 loadom <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
@@ -157,44 +259,6 @@ loadom2csv <- function(dirs, progress=TRUE, ...) {
   om <- as(om, "FLStock")
 
 	return(om)
-} # }}}
-
-# loadres(dirs, vars, progress=TRUE) {{{
-loadres <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, repfile="Report.sso", covarfile="covar.sso", grid=NULL, ...) {
-
-  # ASSEMBLE paths
-  if(!missing(subdirs) & !missing(dir))
-    subdirs <- file.path(dir, subdirs)
-
-	# Loop over dirs
-	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
-    .inorder=TRUE) %dopar% {
-		
-    if(progress)
-			cat(paste0('[', i, ']\n'))
-    
-    # CONVERGED?
-    if(!file.exists(file.path(subdirs[i], covarfile))) {
-      setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
-    } else {
-    # READ results
-		cbind(iter=i, readFLRPss3(file.path(subdirs[i], repfile), ...))
-    }
-	}
-  # rbind 
-  res <- rbindlist(out)
-  
-  # RBIND grid
-  if(!is.null(grid)) {
-    grid <- data.table(grid)
-    res <- cbind(grid[grid$iter %in% res$iter,][, !c('id', 'iter'), with=FALSE],
-      res)
-  } else {
-    res <- cbind(res, id=subdirs)
-  }
-
-	return(res)
 } # }}}
 
 # loadindex(dirs, progress=TRUE) {{{
