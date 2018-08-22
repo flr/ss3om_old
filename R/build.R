@@ -217,7 +217,8 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
 # buildFLSss3 {{{
 
 buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
-  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - ")) {
+  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
+  fleets=out$fleet_ID[out$IsFishFleet]) {
 
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
@@ -227,7 +228,6 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # GET range from catage
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
-  idx <- out$fleet_ID[out$IsFishFleet]
 
   dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
@@ -260,13 +260,13 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # CATCH.WT, assumes _mat_option == 3
   wtatage <- endgrowth[BirthSeas %in% birthseas,
-    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", idx)), with=FALSE]
+    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
 
-  landings <- ss3catch(catage, wtatage, dmns, birthseas, idx)
+  landings <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
   
   # CALCULATE total landings.n
   landings.n <- FLQuant(0, dimnames=dmns, units="1000")
-  for (i in seq(length(idx)))
+  for (i in seq(length(fleets)))
     landings.n <- landings.n %++% landings[[i]]$landings.n
   
   # AVERAGE landings.wt weighted by landings.n

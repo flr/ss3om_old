@@ -50,7 +50,8 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @keywords classes
 
 readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
-  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "), ...) {
+  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
+  fleets=out$fleet_ID[out$IsFishFleet], ...) {
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
@@ -58,8 +59,8 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
-
-  buildFLSss3(out, birthseas=out$birthseas, name=out$Control_File,
+  
+  buildFLSss3(out, birthseas=out$birthseas, name=out$Control_File, fleets=fleets,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "))
 
 } # }}}
