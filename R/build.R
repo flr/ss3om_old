@@ -223,7 +223,8 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
-    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort")]
+    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
+    "discard")]
 
   # GET range from catage
   range <- getRange(out$catage)
@@ -261,39 +262,68 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CATCH.WT, assumes _mat_option == 3
   wtatage <- endgrowth[BirthSeas %in% birthseas,
     c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
-
-  landings <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
   
-  # CALCULATE total landings.n
-  landings.n <- FLQuant(0, dimnames=dmns, units="1000")
+  catch <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
+  
+  # CALCULATE total catch.n
+  catch.n <- FLQuant(0, dimnames=dmns, units="1000")
   for (i in seq(length(fleets)))
-    landings.n <- landings.n %++% landings[[i]]$landings.n
+    catch.n <- catch.n %++% catch[[i]]$catch.n
   
-  # AVERAGE landings.wt weighted by landings.n
-  landings.wt <-  FLCore::expand(Reduce("+", lapply(landings,
-    function(x) x$landings.n %*% x$landings.wt)) %/% landings.n,
+  # AVERAGE catch.wt weighted by catch.n
+  catch.wt <-  FLCore::expand(Reduce("+", lapply(catch,
+    function(x) x$catch.n %*% x$catch.wt)) %/% catch.n,
     year=dmns$year, area=dmns$area)
   
-  landings.wt[is.na(landings.wt)] <- (Reduce("+",
-    lapply(landings, '[[', 'landings.wt')) / length(landings))[is.na(landings.wt)]
+  catch.wt[is.na(catch.wt)] <- (Reduce("+",
+    lapply(catch, '[[', 'catch.wt')) / length(catch))[is.na(catch.wt)]
 
+  # DISCARDS
+  if(!is.na(out["discard"])) {
 
-  # EXPAND m and mat by area
-  # m <- do.call(FLCore::expand, c(list(x=m), dmns))
-  # mat <- do.call(FLCore::expand, c(list(x=mat), dmns))
-  
+    ageselex <- data.table(out$ageselex)
+
+  # SELEX
+    # RETAINED by fleets (landings)
+  seltot <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
+    factor="sel_nums")
+    # DIFFERENCE in retained and total selectivity
+  sellan <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
+    factor="sel*ret_nums")
+    # DEAD (landings + dead discards)
+  selcat <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
+    factor="dead_nums")
+
+  browser()
+
+  # APPLY selex to n
+  names(seltot) <- names(sellan) <- names(selcat) <- letters[1:4]
+  st <- Reduce("+", lapply(seltot, function(x) n[,'2013'] * x))
+  sl <- Reduce("+", lapply(sellan, function(x) n[,'2013'] * x))
+  sc <- Reduce("+", lapply(selcat, function(x) n[,'2013'] * x))
+
+  # COMPARE with catch.n
+  st / catch.n[,'2013']
+  sl / catch.n[,'2013']
+  sc / catch.n[,'2013']
+
+  } else {
+    discards.n <- catch.n
+    discards.n[] <- 0
+    units(discards.n) <- units(catch.n)
+    discards.wt <- catch.wt
+  }
+
   # FLStock
   stock <- FLStock(
     name=name, desc=desc,
-    landings.n=landings.n, landings.wt=landings.wt,
+    catch.n=catch.n, catch.wt=catch.wt,
+    discards.n=discards.n, discards.wt=discards.wt,
+    landings.n=catch.n - discards.n, landings.wt=catch.wt,
     stock.n=n, stock.wt=wt,
     m=m, mat=mat)
 
   # CALCULATE stock, catch, landings & discards
-  discards.n(stock) <- 0
-  units(discards.n(stock)) <- units(landings.n(stock))
-  discards.wt(stock) <- landings.wt(stock)
-
   landings(stock) <- computeLandings(stock)
   discards(stock) <- computeDiscards(stock)
   catch(stock) <- computeCatch(stock, slot='all')

@@ -106,12 +106,12 @@ ss3index.q <- function(cpue, fleets) {
 #' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
 
 # ss3sel.pattern
-ss3sel.pattern <- function(selex, years, fleets, morphs) {
+ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
 
   setkey(selex, "Factor", Fleet, Yr, Morph)
 
   # SUBSET Asel2, fleets, cpue years for Morph
-  selex <- selex[CJ("Asel2", fleets, years, morphs)]
+  selex <- selex[CJ(factor, fleets, years, morphs)]
   selex[, c("Factor", "Morph", "Label") := NULL]
 
   # RESHAPE to long
@@ -303,14 +303,14 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   names(wtatage) <- c("age", "unit", "season", "fleet", "data")
   wtatage[,fleet:=sub("RetWt:_", "", fleet)]
 
-  # FLQuants for landings per fleet
-  landings <- lapply(idx, function(x) {
-    landings.n <- as.FLQuant(catage[fleet %in% x,][, fleet:=NULL], units="1000")
-    landings.wt <- do.call('expand',
+  # FLQuants for catch per fleet
+  catch <- lapply(idx, function(x) {
+    catch.n <- as.FLQuant(catage[fleet %in% x,][, fleet:=NULL], units="1000")
+    catch.wt <- do.call('expand',
       c(list(x=as.FLQuant(wtatage[fleet %in% x,][, fleet:=NULL], units="kg")),
-    dimnames(landings.n)[c("year", "area")]))
-    return(FLQuants(landings.n=landings.n, landings.wt=landings.wt))
+    dimnames(catch.n)[c("year", "area")]))
+    return(FLQuants(catch.n=catch.n, catch.wt=catch.wt))
     }
   )
-  return(landings)
+  return(catch)
 } 
