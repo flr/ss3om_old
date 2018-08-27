@@ -245,7 +245,7 @@ readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   res <- buildRESss3(out)
 
   om <- FLom(stock=stk, sr=srr, brp=rps)
-  attributes(om, "res") <- res
+  attr(om, "res") <- res
 
   oem <- FLoem(observations=list(idx=idx))
 
