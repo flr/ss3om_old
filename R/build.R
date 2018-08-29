@@ -224,7 +224,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
-    "discard")]
+    "discard", "catch")]
 
   # GET range from catage
   range <- getRange(out$catage)
@@ -263,49 +263,74 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   wtatage <- endgrowth[BirthSeas %in% birthseas,
     c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
   
-  catch <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
+  catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
   
   # CALCULATE total catch.n
   catch.n <- FLQuant(0, dimnames=dmns, units="1000")
   for (i in seq(length(fleets)))
-    catch.n <- catch.n %++% catch[[i]]$catch.n
+    catch.n <- catch.n %++% catches[[i]]$catch.n
   
   # AVERAGE catch.wt weighted by catch.n
-  catch.wt <-  FLCore::expand(Reduce("+", lapply(catch,
+  catch.wt <-  FLCore::expand(Reduce("+", lapply(catches,
     function(x) x$catch.n %*% x$catch.wt)) %/% catch.n,
     year=dmns$year, area=dmns$area)
   
   catch.wt[is.na(catch.wt)] <- (Reduce("+",
-    lapply(catch, '[[', 'catch.wt')) / length(catch))[is.na(catch.wt)]
-
+    lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
+  
   # DISCARDS
   if(!is.na(out["discard"])) {
 
     ageselex <- data.table(out$ageselex)
+    lastyr <- unique(ageselex[Factor=="sel_nums", Yr])
 
-  # SELEX
-    # RETAINED by fleets (landings)
-  seltot <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
-    factor="sel_nums")
-    # DIFFERENCE in retained and total selectivity
-  sellan <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
-    factor="sel*ret_nums")
-    # DEAD (landings + dead discards)
-  selcat <- ss3sel.pattern(ageselex, 2013, 1:4, morphs=unique(ageselex$Morph),
-    factor="dead_nums")
+    # TOTAL selex
+    seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+      factor="sel_nums")
 
-  browser()
+    # RETAINED selex
+    selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+      factor="sel*ret_nums")
+    
+    # DEAD selex
+    seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+      factor="dead_nums")
+    
+    # DISCARD fraction
+    seldis <- mapply(function(x, y) x-y, seltot, selret, SIMPLIFY=FALSE)
 
-  # APPLY selex to n
-  names(seltot) <- names(sellan) <- names(selcat) <- letters[1:4]
-  st <- Reduce("+", lapply(seltot, function(x) n[,'2013'] * x))
-  sl <- Reduce("+", lapply(sellan, function(x) n[,'2013'] * x))
-  sc <- Reduce("+", lapply(selcat, function(x) n[,'2013'] * x))
+    catch <- data.table(out$catch)
+    discard <- data.table(out$discard)
 
-  # COMPARE with catch.n
-  st / catch.n[,'2013']
-  sl / catch.n[,'2013']
-  sc / catch.n[,'2013']
+    # F_discards by fleet: catch from last estimation yr
+    Fdiscards <- FLQuants(mapply(function(x, y) x * y, seldis,
+      catch[Yr == max(Yr) & Fleet %in% fleets, F], SIMPLIFY=FALSE))
+
+    # CALCULATE Baranov for discards.n
+    discards.n <- Reduce('+', mapply(function(x)
+      (x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, Fdiscards, SIMPLIFY=FALSE))
+    dimnames(discards.n) <- dimnames(catch.n)
+    units(discards.n) <- "1000"
+
+    # SET discards.n not in discard period as 0
+    discards.n[, !dimnames(discards.n)$year %in% discard$Yr] <- 0
+    
+    discards.wt <- catch.wt
+
+    ## -- CHECK
+    # discards
+    discards <- discard[, .(Fleet, Yr, Exp_cat)]
+    setnames(discards, c("qname", "year", "data"))
+    discards <- as(discards, "FLQuants")
+    discards <- lapply(mcf(discards), function(x) {x[is.na(x)] <- 0; x})
+    Reduce("+", discards)
+
+    discards <- discard[, sum(Exp_cat), by=Yr]
+    setnames(discards, c("year", "data"))
+    as.FLQuant(discards)
+
+    # FROM discards.n
+    window(unitSums(quantSums(discards.n * discards.wt)), start=1986)
 
   } else {
     discards.n <- catch.n

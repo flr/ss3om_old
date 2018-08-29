@@ -141,7 +141,7 @@ ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
 
 ss3wt <- function(endgrowth, dmns, birthseas) {
   
-  # EXTRACT stock.wt - endgrowth[, Seas, BirthSeas, Age, M]
+  # EXTRACT stock.wt - Wt_mid @ endgrowth[, Seas, BirthSeas, Age, M]
   wt <- endgrowth[BirthSeas %in% birthseas,
     list(BirthSeas, Sex, Seas, Age, Wt_Beg)]
 
@@ -164,16 +164,25 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
 #' @details - `ss3mat` returns the `mat` slot.
 
 ss3mat <- function(endgrowth, dmns, birthseas) {
-
+  
   # EXTRACT mat - endgrowth
-  # NOTE that only Sex 1 (F) is used, M is all -1
   mat <- endgrowth[BirthSeas %in% birthseas,
-    list(BirthSeas, Sex, Seas, Age, Age_Mat)]
+    # Mat_Numbers
+    list(BirthSeas, Sex, Seas, Age, Age_Mat, `Mat*Fecund`, Wt_Beg)]
+
+  # TODO CHECK maturity_option 2, 4, 5
+  # IF maturity_option == 3, mat = mat / wt
+  if(all(mat[, Age_Mat] %in% c(0,1)))
+    mat[, `Mat*Fecund`:= `Mat*Fecund` / Wt_Beg]
+
+  mat[ ,`:=`(Age_Mat = NULL, Wt_Beg = NULL)]
 
   # RENAME
   names(mat) <- c("BirthSeas", "Sex", "season", "age", "data")
 
   # TURN -1 to 0
+  # TODO CHECK M values == 0
+  # TODO TURN !birthseas to 0
   mat[, data:=ifelse(data==-1, 0, data)]
 
   # SWT unit from Sex and BirthSeas

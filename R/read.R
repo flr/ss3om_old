@@ -55,13 +55,13 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+    printstats=FALSE, covar=FALSE, forecast=TRUE, ...)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
   
-  buildFLSss3(out, birthseas=out$birthseas, name=out$Control_File, fleets=fleets,
-  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "))
+  buildFLSss3(out, birthseas=birthseas, name=name, fleets=fleets,
+  desc=desc)
 
 } # }}}
 
