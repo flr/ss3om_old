@@ -6,6 +6,11 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+# SSB
+
+# catch.n ~ stock.n + harvest + m
+
+
 # checkFLSss3 {{{
 
 checkFLSss3 <- function(object, dir, ...) {
