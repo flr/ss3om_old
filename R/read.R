@@ -51,7 +51,7 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 
 readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
   desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
-  fleets=out$fleet_ID[out$IsFishFleet], ...) {
+  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet]), ...) {
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,

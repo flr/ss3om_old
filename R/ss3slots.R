@@ -128,6 +128,12 @@ ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
   
   # ASSIGN names
   names(sel.pattern) <- names(fleets)
+  
+  # SET units
+  sel.pattern <- lapply(sel.pattern, function(x) {
+    units(x) <- ""
+    return(x)
+  })
 
   return(sel.pattern)
 }

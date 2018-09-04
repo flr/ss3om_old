@@ -218,18 +218,20 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
 
 buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
-  fleets=out$fleet_ID[out$IsFishFleet]) {
-
+  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet])) {
+  
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
     "discard", "catch")]
 
+  # TODO: call spread()
+
   # GET range from catage
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
-
+  
   dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 
@@ -280,62 +282,46 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   
   # DISCARDS
   if(!is.na(out["discard"])) {
-
+    
     ageselex <- data.table(out$ageselex)
     lastyr <- unique(ageselex[Factor=="sel_nums", Yr])
-
-    # TOTAL selex
+    
+    # TOTAL selex (catch$kill_nums)
     seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
       factor="sel_nums")
-
-    # RETAINED selex
+    
+    # RETAINED selex (catch$ret_num)
     selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
       factor="sel*ret_nums")
     
-    # DEAD selex
+    # DEAD selex (catch$kill_num)
     seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
       factor="dead_nums")
     
-    # DISCARD fraction
-    seldis <- mapply(function(x, y) x-y, seltot, selret, SIMPLIFY=FALSE)
+    # DISCARD selex (dead + alive)
+    seldis <- mapply(function(x, y) x - y, seltot, selret, SIMPLIFY=FALSE)
 
-    catch <- data.table(out$catch)
     discard <- data.table(out$discard)
+    catch <- data.table(out$catch)
 
     # F_discards by fleet: catch from last estimation yr
     Fdiscards <- FLQuants(mapply(function(x, y) x * y, seldis,
-      catch[Yr == max(Yr) & Fleet %in% fleets, F], SIMPLIFY=FALSE))
+      as.list(catch[Yr == max(Yr) & Fleet %in% fleets, F]), SIMPLIFY=FALSE))
 
-    # CALCULATE Baranov for discards.n
+    # APPLY Baranov for discards.n
     discards.n <- Reduce('+', mapply(function(x)
-      (x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, Fdiscards, SIMPLIFY=FALSE))
+      FLQuant((x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, units="1000"),
+      Fdiscards, SIMPLIFY=FALSE))
     dimnames(discards.n) <- dimnames(catch.n)
-    units(discards.n) <- "1000"
 
     # SET discards.n not in discard period as 0
     discards.n[, !dimnames(discards.n)$year %in% discard$Yr] <- 0
     
     discards.wt <- catch.wt
 
-    ## -- CHECK
-    # discards
-    discards <- discard[, .(Fleet, Yr, Exp_cat)]
-    setnames(discards, c("qname", "year", "data"))
-    discards <- as(discards, "FLQuants")
-    discards <- lapply(mcf(discards), function(x) {x[is.na(x)] <- 0; x})
-    Reduce("+", discards)
-
-    discards <- discard[, sum(Exp_cat), by=Yr]
-    setnames(discards, c("year", "data"))
-    as.FLQuant(discards)
-
-    # FROM discards.n
-    window(unitSums(quantSums(discards.n * discards.wt)), start=1986)
-
   } else {
     discards.n <- catch.n
     discards.n[] <- 0
-    units(discards.n) <- units(catch.n)
     discards.wt <- catch.wt
   }
 

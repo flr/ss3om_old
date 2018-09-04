@@ -17,6 +17,7 @@ export(
   "buildFLSss3",
   "buildFLSRss3",
   "buildFLSss3",
+  "checkFLSss3",
   "loadOM",
   "loadRES",
   "nameGrid",
