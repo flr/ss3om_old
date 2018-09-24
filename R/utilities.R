@@ -30,7 +30,7 @@ getDimnames <- function(out, birthseas) {
   # GET range
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
- 
+  
   dmns <- list(age=ages,
     year=seq(range['minyear'], range['maxyear']),
     # unit = combinations(Sex, birthseas)
@@ -39,6 +39,10 @@ getDimnames <- function(out, birthseas) {
     season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
     area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
     iter=1)
+
+  # TODO HACK
+  if(dmns$unit == "")
+    dmns$unit <- "unique"
 
   return(dmns)
 } # }}}

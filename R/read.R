@@ -59,6 +59,10 @@ readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
+
+  # CHECK fleets has names
+  if(!missing(fleets) & is.null(names(fleets)))
+    fleets <- setNames(fleets, fleets)
   
   buildFLSss3(out, birthseas=birthseas, name=name, fleets=fleets,
   desc=desc)

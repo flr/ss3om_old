@@ -155,11 +155,12 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
   wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
   wt[, unit:=paste0(uSex, uBirthSeas)]
-  wt[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
+  wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
+  wt[, c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # RENAME
   names(wt) <- c("season", "age", "data", "unit")
-
+  
   # EXPAND by year, unit & season
   wt <- FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
     year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
@@ -285,11 +286,11 @@ ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
   # CREATE unit from Sex + BirthSeas
   catage[, uSex:={if(length(unique(Gender)) == 1){""} else {c("F","M")[Gender]}}]
   catage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  catage[, unit:=paste0(uSex, uBirthSeas)]
+  catage[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
   
   wtatage[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   wtatage[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  wtatage[, unit:=paste0(uSex, uBirthSeas)]
+  wtatage[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
 
   # FIND and SUBSET fishing fleets, TIME and BirthSeas
   catage <- catage[Fleet %in% idx & Era == "TIME" & BirthSeas %in% birthseas,]

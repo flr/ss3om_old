@@ -231,7 +231,6 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # GET range from catage
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
-  
   dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 

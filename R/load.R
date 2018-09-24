@@ -6,7 +6,7 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# loadOM {{{
+# loadOM - FLom {{{
 loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
 
@@ -42,12 +42,12 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 } # }}}
 
-# loadOMS {{{
+# loadOMS - list(FLS, FLSR) {{{
 loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
 
 	# LOOP over subdirs
-  out <- foreach(i=seq(1, length(subdirs)),
+  out <- foreach(i=seq(length(subdirs)),
     .inorder=TRUE, .errorhandling="remove") %dopar% {
 
     if(progress)
@@ -69,7 +69,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   sr <- Reduce(combine, lapply(out, function(x) x$sr))
 
 
-  return(out)
+  return(list(stock=stock, sr=sr))
 
 } # }}}
 
@@ -91,15 +91,15 @@ loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     
     # CONVERGED? (covar.sso exists)
     if(!file.exists(file.path(subdirs[i], covarfile))) {
-      setNames(data.frame(matrix(NA, ncol = length(vars), nrow = 1)), names(vars))
+      data.frame(iter=i)
     } else {
     # READ results
 		cbind(iter=i, readRESss3(subdirs[i], repfile=repfile, compfile=compfile))
     }
 	}
-
+  
   # rbind 
-  res <- rbindlist(out)
+  res <- rbindlist(out, use.names=TRUE, fill=TRUE)
   
   # RBIND grid
   if(!is.null(grid)) {
