@@ -408,7 +408,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
     
     selpat <- window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
         end=dims(index[[x]])$maxyear)
-
+    
     FLIndexBiomass(name=x,
       distribution="lnorm", 
       index=index[[x]],
@@ -543,12 +543,12 @@ buildFLRPss3 <- function(out, ...) {
     units=c("t", "t", "1000", "t", "f", "t"))
 } # }}}
 
-# buildRESsss3 {{{
+# buildRESss3 {{{
 buildRESss3 <- function(out, ...) {
 
   lkels <- c("TOTAL", "Catch", "Survey", "Length_comp", "Recruitment")
   lknms <- c("LIKELIHOOD", "Catch", "Survey", "Length_comp", "Recruitment")
-  setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)
+  # setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)
   
   res <- cbind(data.frame(
   
@@ -563,6 +563,27 @@ buildRESss3 <- function(out, ...) {
   
     # F_endyr
     `F_endyr`=out$derived_quants[paste0("F_", out$endyr), "Value"]),
+
+    # TotBio_Unfished
+    `TotBio_Unfished`=out$derived_quants["TotBio_Unfished", "Value"],
+
+    # SSB_Virgin
+    `SSB_Virgin`=out$derived_quants["SSB_Virgin", "Value"],
+
+    # Recr_Virgin
+    `Recr_Virgin`=out$derived_quants["Recr_Virgin", "Value"],
+
+    # SSB_MSY
+    `SSB_MSY`=out$derived_quants["SSB_MSY", "Value"],
+    
+    # Fstd_MSY
+    `Fstd_MSY`=out$derived_quants["Fstd_MSY", "Value"],
+    
+    # TotYield_MSY
+    `TotYield_MSY`=out$derived_quants["TotYield_MSY", "Value"],
+    
+    # RetYield_MSY
+    `RetYield_MSY`=out$derived_quants["RetYield_MSY", "Value"],
 
     # LIKELIHOOD
     data.frame(setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)))

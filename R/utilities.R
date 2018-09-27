@@ -41,7 +41,7 @@ getDimnames <- function(out, birthseas) {
     iter=1)
 
   # TODO HACK
-  if(dmns$unit == "")
+  if(all(dmns$unit == ""))
     dmns$unit <- "unique"
 
   return(dmns)

@@ -42,7 +42,7 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 } # }}}
 
-# loadOMS - list(FLS, FLSR) {{{
+# loadOMS - list(stock, sr, indices, results, refpts) {{{
 loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
 
@@ -57,19 +57,31 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     run <- readOMSss3(subdirs[i], ...)
 
     # CONVERT stock to data.table
-    run$stock <- data.table(as.data.frame(run$stock))
+    run$stock <- data.table(as.data.frame(run$stock, units=TRUE))
     run$stock[, iter := NULL]
     run$stock[, iter := i]
 
     run
   }
-
+  
+  if(progress)
+    cat("[combining now ...]\n", sep="")
+  
   # COMBINE
   stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
+  
   sr <- Reduce(combine, lapply(out, function(x) x$sr))
+  
+  refpts <- Reduce(cbind, lapply(out, function(x) x$refpts))
+  
+  results <- rbindlist(lapply(out, function(x) x$results),
+    use.names=TRUE, fill=TRUE, idcol="iter")
+  
+  indices <- lapply(names(out[[1]]$indices), function(x) {
+    Reduce(combine, lapply(out, function(y) y$indices[[x]]))
+  })
 
-
-  return(list(stock=stock, sr=sr))
+  return(list(stock=stock, sr=sr, refpts=refpts, results=results, indices=indices))
 
 } # }}}
 
@@ -98,18 +110,43 @@ loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     }
 	}
   
+  if(progress)
+	  cat(paste0('[assembling now ...]\n'))
+  
   # rbind 
   res <- rbindlist(out, use.names=TRUE, fill=TRUE)
   
   # RBIND grid
   if(!is.null(grid)) {
     grid <- data.table(grid)
-    res <- cbind(grid[grid$iter %in% res$iter,][, !c('id', 'iter'), with=FALSE],
-      res)
-  } else {
-    res <- cbind(res, id=subdirs)
+    res <- cbind(grid[, !c("id"), with=FALSE], res[, !c("iter"), with=FALSE])
   }
+  return(res)
+} # }}}
 
+# loadRPs {{{
+loadRPs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, repfile="Report.sso", compfile="CompReport.sso",
+  covarfile="covar.sso", ...) {
+
+  # ASSEMBLE paths
+  if(!missing(subdirs) & !missing(dir))
+    subdirs <- file.path(dir, subdirs)
+
+	# Loop over dirs
+	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
+    .inorder=TRUE) %dopar% {
+		
+    if(progress)
+			cat(paste0('[', i, ']\n'))
+    
+    # READ results
+		readFLRPss3(subdirs[i], repfile=repfile, compfile=compfile)
+	}
+  
+  # rbind 
+  res <- Reduce(cbind, out)
+  
 	return(res)
 } # }}}
 
