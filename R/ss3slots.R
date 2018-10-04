@@ -170,7 +170,7 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
 #' @aliases ss3mat
 #' @details - `ss3mat` returns the `mat` slot.
 
-ss3mat <- function(endgrowth, dmns, birthseas) {
+ss3mat <- function(endgrowth, dmns, birthseas, option=3) {
   
   # EXTRACT mat - endgrowth
   mat <- endgrowth[BirthSeas %in% birthseas,
@@ -181,6 +181,10 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
   # IF maturity_option == 3, mat = mat / wt
   if(all(mat[, Age_Mat] %in% c(0,1)))
     mat[, `Mat*Fecund`:= `Mat*Fecund` / Wt_Beg]
+  
+  # maturity option 3: mat=Age_Mat
+  if(option == 3)
+    mat[, `Mat*Fecund`:= Age_Mat]
 
   mat[ ,`:=`(Age_Mat = NULL, Wt_Beg = NULL)]
 
@@ -195,7 +199,7 @@ ss3mat <- function(endgrowth, dmns, birthseas) {
   # SWT unit from Sex and BirthSeas
   mat[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   mat[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  mat[, unit:=paste0(uSex, uBirthSeas)]
+  mat[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
   mat[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # EXPAND by year & unit
