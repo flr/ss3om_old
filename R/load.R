@@ -225,8 +225,6 @@ loadRPs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	return(res)
 } # }}}
 
-# loadFLIBs
-
 # loadSRIs - list(sr, indices) {{{
 loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, combine=TRUE, ...) {
@@ -282,3 +280,5 @@ loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   return(list(sr=sr, indices=indices))
 
 } # }}}
+
+# loadFLIBs

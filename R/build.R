@@ -6,7 +6,7 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# buildFLBFss3 {{{
+# buildFLBFss3 - list(FLBiol, FLFisheries) {{{
 
 buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
   
@@ -214,7 +214,92 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
 
 } # }}}
 
-# buildFLSss3 {{{
+# buildFLIBss3 - FLIndices(FLIndexBiomass) {{{
+buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
+
+  # SUBSET from out
+  out <- out[c("cpue", "ageselex", "endgrowth", "catage", "definitions",
+    "nsexes", "nseasons", "nareas", "birthseas")]
+
+  cpue <- data.table(out[["cpue"]])
+ 
+  # GET cpue fleets 
+  cpuefleets <- setNames(seq(length(unique(cpue$Fleet_name))), unique(cpue$Fleet_name))
+  
+  if(missing(fleets))
+    fleets <- cpuefleets
+  else {
+    if(is.character(fleets))
+      fleets <- cpuefleets[names(cpuefleets) %in% fleets]
+    else if(is.numeric(fleets))
+      fleets <- cpuefleets[fleets]
+    
+    # STOP if wrong fleets
+    if(length(fleets) == 0 | any(is.na(fleets)))
+      stop("selected fleets not found in Report.sso file")
+  }
+
+  selex <- data.table(out[["ageselex"]])
+  endgrowth <- data.table(out[["endgrowth"]])
+  wtatage <- endgrowth[BirthSeas %in% birthseas,
+    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
+  catage <- data.table(out[["catage"]])
+    setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+  definitions <- data.table(out$definitions)
+
+  # --- index
+  index <- ss3index(cpue, fleets)
+
+  # --- index.q
+  index.q <- ss3index.q(cpue, fleets)
+
+  # --- sel.pattern
+  sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets,
+    morphs=unique(selex$Morph))
+
+  # --- index.var (var)
+  index.var <- ss3index.var(cpue, fleets)
+  
+  # --- index.res (var)
+  index.res <- ss3index.res(cpue, fleets)
+
+  # --- catch.n
+  catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
+    birthseas=birthseas, idx=fleets)
+  catch.n <- lapply(catch, "[[", "landings.n")
+  
+  # --- FLIndices
+  cpues <- lapply(names(fleets), function(x) {
+    
+    dmns <- dimnames(index[[x]])
+    
+    selpat <- window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
+        end=dims(index[[x]])$maxyear)
+    
+    FLIndexBiomass(name=x,
+      distribution="lnorm", 
+      index=index[[x]],
+      index.q=index.q[[x]],
+      index.var=index.res[[x]],
+      # TODO How to link each cpue fleet to catch fleets for catch.n
+      # TRIM catch.n to index seasons
+   #   catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
+   #     end=dims(index[[x]])$maxyear))[,,,dmns$season],
+      # NORMALIZE sel.pattern
+      sel.pattern=selpat %/% apply(selpat, 2:6, max))[,,,dmns$season]
+    })
+
+  names(cpues) <- names(fleets)
+  
+  return(FLIndices(cpues))
+
+} # }}}
+
+# buildFLIss3
+
+# buildMetricsss3
+
+# buildFLSss3 - FLStock {{{
 
 buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
@@ -350,88 +435,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
 } # }}}
 
-# buildFLIBss3 {{{
-buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
-
-  # SUBSET from out
-  out <- out[c("cpue", "ageselex", "endgrowth", "catage", "definitions",
-    "nsexes", "nseasons", "nareas", "birthseas")]
-
-  cpue <- data.table(out[["cpue"]])
- 
-  # GET cpue fleets 
-  cpuefleets <- setNames(seq(length(unique(cpue$Fleet_name))), unique(cpue$Fleet_name))
-  
-  if(missing(fleets))
-    fleets <- cpuefleets
-  else {
-    if(is.character(fleets))
-      fleets <- cpuefleets[names(cpuefleets) %in% fleets]
-    else if(is.numeric(fleets))
-      fleets <- cpuefleets[fleets]
-    
-    # STOP if wrong fleets
-    if(length(fleets) == 0 | any(is.na(fleets)))
-      stop("selected fleets not found in Report.sso file")
-  }
-
-  selex <- data.table(out[["ageselex"]])
-  endgrowth <- data.table(out[["endgrowth"]])
-  wtatage <- endgrowth[BirthSeas %in% birthseas,
-    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
-  catage <- data.table(out[["catage"]])
-    setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
-  definitions <- data.table(out$definitions)
-
-  # --- index
-  index <- ss3index(cpue, fleets)
-
-  # --- index.q
-  index.q <- ss3index.q(cpue, fleets)
-
-  # --- sel.pattern
-  sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets,
-    morphs=unique(selex$Morph))
-
-  # --- index.var (var)
-  index.var <- ss3index.var(cpue, fleets)
-  
-  # --- index.res (var)
-  index.res <- ss3index.res(cpue, fleets)
-
-  # --- catch.n
-  catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
-    birthseas=birthseas, idx=fleets)
-  catch.n <- lapply(catch, "[[", "landings.n")
-  
-  # --- FLIndices
-  cpues <- lapply(names(fleets), function(x) {
-    
-    dmns <- dimnames(index[[x]])
-    
-    selpat <- window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
-        end=dims(index[[x]])$maxyear)
-    
-    FLIndexBiomass(name=x,
-      distribution="lnorm", 
-      index=index[[x]],
-      index.q=index.q[[x]],
-      index.var=index.res[[x]],
-      # TODO How to link each cpue fleet to catch fleets for catch.n
-      # TRIM catch.n to index seasons
-   #   catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
-   #     end=dims(index[[x]])$maxyear))[,,,dmns$season],
-      # NORMALIZE sel.pattern
-      sel.pattern=selpat %/% apply(selpat, 2:6, max))[,,,dmns$season]
-    })
-
-  names(cpues) <- names(fleets)
-  
-  return(FLIndices(cpues))
-
-} # }}}
-
-# buildFLSRss3 {{{
+# buildFLSRss3 - FLSR {{{
 buildFLSRss3 <- function(out, ...) {
   
   # SUBSET out
@@ -519,7 +523,7 @@ buildFLSRss3 <- function(out, ...) {
 }
 # }}}
 
-# buildFLRPss3 {{{
+# buildFLRPss3 - FLPar {{{
 buildFLRPss3 <- function(out, ...) {
 
   # SUBSET out
@@ -547,7 +551,19 @@ buildFLRPss3 <- function(out, ...) {
     units=c("t", "t", "1000", "t", "f", "t"))
 } # }}}
 
-# buildRESss3 {{{
+# buildKobess3 - data.frame {{{
+buildKobess3 <- function(out, ...) {
+
+  yrs <- out$Kobe[,'Year']
+  res <- FLQuants(
+    B.BMSY=FLQuant(out$Kobe[,'B.Bmsy'], dimnames=list(year=yrs), units=""),
+    F.FMSY=FLQuant(out$Kobe[,'F.Fmsy'], dimnames=list(year=yrs), units=""))
+
+  return(res)
+
+} # }}}
+
+# buildRESss3 - data.table {{{
 buildRESss3 <- function(out, ...) {
 
   lkels <- c("TOTAL", "Catch", "Survey", "Length_comp", "Recruitment")
@@ -592,17 +608,6 @@ buildRESss3 <- function(out, ...) {
     # LIKELIHOOD
     data.frame(setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)))
 
-  return(res)
+  return(data.table(res))
 } # }}}
 
-# buildkobe {{{
-buildKobess3 <- function(out, ...) {
-
-  yrs <- out$Kobe[,'Year']
-  res <- FLQuants(
-    B.BMSY=FLQuant(out$Kobe[,'B.Bmsy'], dimnames=list(year=yrs), units=""),
-    F.FMSY=FLQuant(out$Kobe[,'F.Fmsy'], dimnames=list(year=yrs), units=""))
-
-  return(res)
-
-} # }}}

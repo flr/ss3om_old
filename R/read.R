@@ -16,6 +16,33 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 
 } # }}}
 
+#' @examples
+#' dir <- system.file("ext-data/alb", package="ss3om")
+#' build <- ss3om:::buildFLSss3
+#' stk <- readFLss3(dir, build,
+#'   repfile="Report.sso.bz2", covarfile="covar.sso.bz2", compfile = "CompReport.sso.bz2")
+#' stk <- readFLSss3(dir,
+#'   repfile="Report.sso.bz2", covarfile="covar.sso.bz2", compfile = "CompReport.sso.bz2")
+
+readFLss3 <- function(dir, build, birthseas=out$birthseas, name="ss3",
+  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
+  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet]), ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=TRUE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # CHECK fleets has names
+  if(!missing(fleets) & is.null(names(fleets)))
+    fleets <- setNames(fleets, fleets)
+
+  build(out, birthseas=birthseas, name=name, fleets=fleets, desc=desc)
+}
+
+
 # readFLSss3 {{{
 
 #' A function to read SS3 results as an FLStock object
@@ -49,23 +76,9 @@ readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, birthseas=out$birthseas, name="ss3",
-  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
-  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet]), ...) {
+readFLSss3 <- function(dir, ...) {
 
-  # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=TRUE, ...)
-
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  # CHECK fleets has names
-  if(!missing(fleets) & is.null(names(fleets)))
-    fleets <- setNames(fleets, fleets)
-  
-  buildFLSss3(out, birthseas=birthseas, name=name, fleets=fleets,
-  desc=desc)
+  readFLss3(dir, build=buildFLSss3, ...)
 
 } # }}}
 
