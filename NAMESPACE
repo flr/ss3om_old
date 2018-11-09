@@ -20,6 +20,7 @@ export(
   "checkFLSss3",
   "loadOM",
   "loadOMS",
+  "loadSRIs",
   "loadRES",
   "loadRPs",
   "nameGrid",
@@ -28,10 +29,11 @@ export(
   "readFLIBss3",
   "readKobess3",
   "readFLRPss3",
-  "readRESss3",
   "readFLSss3",
   "readFLSRss3",
   "readFLSss3",
+  "readSRIss3",
+  "readRESss3",
   "readOMSss3",
   "runss3grid"
 )

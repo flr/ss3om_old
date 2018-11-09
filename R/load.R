@@ -44,7 +44,7 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 # loadOMS - list(stock, sr, indices, results, refpts) {{{
 loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, ...) {
+  progress=TRUE, combine=TRUE, ...) {
 
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
@@ -68,8 +68,12 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     cat("[combining now ...]\n", sep="")
   
   # COMBINE
-  stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
-  
+  if(combine)
+    stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
+  else {
+    stock <- rbindlist(lapply(out, function(x) x$stock))
+  }
+ 
   sr <- Reduce(combine, lapply(out, function(x) x$sr))
   
   refpts <- Reduce(cbind, lapply(out, function(x) x$refpts))
@@ -82,6 +86,77 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   })
 
   return(list(stock=stock, sr=sr, refpts=refpts, results=results, indices=indices))
+
+} # }}}
+
+# loadFLS - list(stock, sr, indices, results, refpts) {{{
+loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, combine=TRUE, ...) {
+
+	# LOOP over subdirs
+  out <- foreach(i=seq(length(subdirs)),
+    .inorder=TRUE, .errorhandling="remove") %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    run <- readFLSss3(subdirs[i], ...)
+
+    # CONVERT stock to data.table
+    stock <- data.table(as.data.frame(run, units=TRUE))
+    stock[, iter := NULL]
+    stock[, iter := i]
+
+    stock
+  }
+  
+  # COMBINE
+  if(progress)
+     cat("[combining now ...]\n", sep="")
+
+  if(combine) {
+    stock <- as(rbindlist(out), 'FLStock')
+  } else {
+    stock <- rbindlist(out)
+  }
+  
+  return(stock)
+
+} # }}}
+
+# loadFLQs - list(stock, sr, indices, results, refpts) {{{
+loadFLQs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, convert=TRUE, metrics=list(REC=rec, SSB=ssb, C=catch, F=fbar), ...) {
+
+	# LOOP over subdirs
+  out <- foreach(i=seq(length(subdirs)),
+    .inorder=TRUE, .errorhandling="remove") %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    run <- readFLSss3(subdirs[i], ...)
+
+    if(is.null(run))
+      run <- readFLSss3(subdirs[i], ...)
+
+    dt <- data.table(as.data.frame(metrics(run, metrics)))
+    dt[, iter:=NULL]
+    dt[, iter:=i]
+  }
+
+  # COMBINE
+  if(progress)
+     cat("[combining now ...]\n", sep="")
+
+  metrics <- rbindlist(out)
+
+  if(convert)
+    metrics <- as.FLQuant(metrics)
+  
+  return(metrics)
 
 } # }}}
 
@@ -150,188 +225,60 @@ loadRPs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	return(res)
 } # }}}
 
-# loadFLS
-
 # loadFLIBs
 
-# ---
-
-# loadom(dir, progress=TRUE) {{{
-loadom <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, ...) {
-
-  if(progress)
-    cat("[1]\n", sep="")
-
-  # GET first iter
-  master <- readFLSss3(subdirs[1], ...)
+# loadSRIs - list(sr, indices) {{{
+loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, combine=TRUE, ...) {
 
 	# LOOP over subdirs
-  om <- foreach(i=seq(2, length(subdirs)),
-    # PROPAGATE .init
-    .init=propagate(master, length(subdirs), FALSE),
-    # COMBINE by assigning to iter in .init
-    .combine=function(master, x) {
-      FLCore::iter(master, x$i) <- x$x
-      return(master)}, .inorder=TRUE,
-    .errorhandling="remove", .multicombine=FALSE) %dopar% {
-
-    if(progress)
-      cat("[", i, "]\n", sep="")
-
-    # OUPUT list with FLStock and iter number
-    list(x=readFLSss3(subdirs[i], ...), i=i)
-  }
-  
-  if(progress)
-    cat("[ Converting ... ]\n")
-  
-  # DROP undeeded extra iters
-  om <- slim(om)
-
-	return(om)
-} # }}}
-
-# loadomFLStocks(dir, progress=TRUE) {{{
-loadomFLStocks <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, ...) {
-
-  if(progress)
-    cat("[1]\n", sep="")
-
-	# LOOP over subdirs
-  om <- foreach(i=seq(1, length(subdirs)),
+  out <- foreach(i=seq(length(subdirs)),
     .inorder=TRUE, .errorhandling="remove") %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
 
     # OUPUT list with FLStock and iter number
-    readFLSss3(subdirs[i], ...)
-  }
-
-  if(progress)
-    cat("[ Converting ... ]\n")
-  
-  names(om) <- seq(1, length(subdirs))
-  
-	return(FLStocks(om))
-} # }}}
-
-# loadomDT(dir, progress=TRUE) {{{
-loadomDT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, ...) {
-
-  master <- readFLSss3(subdirs[1], ...)
-
-	# LOOP over subdirs
-  om <- foreach(i=seq(length(subdirs)),
-    .combine=function(...) rbindlist(list(...)), .errorhandling="remove",
-    .multicombine=TRUE) %dopar% {
-
-    if(progress)
-      cat("[", i, "]\n", sep="")
-
-    dt <- data.table(as.data.frame(readFLSss3(subdirs[i], ...)))
+    lapply(readRESIDss3(subdirs[i], ...), function(x) {
+      x <- data.table(as.data.frame(x))
+      x[, iter:=NULL]
+      x[, iter:=i]
+      return(x)
+    })
     
-    # SET iter to i
-    dt[, iter := NULL]
-    dt[, iter := i]
+  }
 
-    dt
+  # BUG
+  idx <- unlist(lapply(out, is.null))
+
+  if(any(idx)) {
+    out[which(idx)] <- lapply(which(idx),
+      function(x) lapply(readRESIDss3(subdirs[x], ...), as.data.frame))
   }
   
   if(progress)
-    cat("[ Converting ... ]\n")
+    cat("[combining now ...]\n", sep="")
   
-  om <- as.FLStock(om, units=units(master))
-  range(om) <- range(master)
+  # COMBINE
+  if(combine) {
 
-  # DROP undeeded extra iters
-  om <- slim(om)
+    sr <- as(rbindlist(lapply(out, "[[", "sr")), "FLQuant")
 
-	return(om)
-} # }}}
+    indices <- lapply(out, "[[", "indices")
 
-# loadom2csv(dirs, progress=TRUE) {{{
-loadom2csv <- function(dirs, progress=TRUE, ...) {
+    indices <- lapply(indices, split, by="qname")
 
-	# LOOP over dirs
-  if(progress)
-    cat("[ Reading ... ]\n")
-  om <- foreach(i=seq(length(dirs))) %dopar% {
+    nms <- names(indices[[1]])
 
-    if(progress)
-      cat("[", i, "] ", sep="")
+    indices <- setNames(lapply(nms, function(x) {
+      res <- rbindlist(lapply(indices, "[[", x))
+      res[, qname:=NULL]
+      return(res)
+      }), nms)
 
-    dt <- data.table(as.data.frame(readFLSss3(dirs[i], ...)))
-    dt[, iter := NULL]
-    dt[, iter := i]
-    setcolorder(dt, c("age", "year", "unit", "season", "area", "iter", "data"))
-
-    fwrite(dt, file=paste0(dirs[i], "/om.csv"))
-    paste0(dirs[i], "/om.csv")
+    indices <- FLQuants(lapply(indices, as.FLQuant))
   }
 
-  # MERGE
-  if(progress)
-    cat("[ Merging ... ]\n")
-  system(paste0("cp ", dirs[1], "/om.csv ./"))
-  for(i in seq(2, length(dirs))) {
-    if(progress)
-      cat("[", i, "] ", sep="")
-    system(paste0("tail -n +2 ", dirs[i], "/om.csv >> om.csv"))
-    system(paste0("rm ", dirs[i], "/om.csv"))
-  }
-  
-  # LOAD
-  if(progress)
-    cat("[ Loading ... ]\n")
-  om <- fread("om.csv")
-  system("rm om.csv")
+  return(list(sr=sr, indices=indices))
 
-  # COERCE
-  if(progress)
-    cat("[ Coercing ... ]\n")
-  om <- as(om, "FLStock")
-
-	return(om)
-} # }}}
-
-# loadindex(dirs, progress=TRUE) {{{
-loadindex <- function(dirs, progress=TRUE, fleets) {
-
-	# LOOP over dirs
-  ind <- foreach(i=seq(length(dirs))) %dopar% {
-
-    if(progress)
-      cat("[", i, "]\n", sep="")
-
-    out <- r4ss::SS_output(dirs[i], verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-      printstats=FALSE, covar=FALSE, forecast=FALSE)
-    
-    # dfs from out
-    cpue <- data.table(out[[c("cpue")]])
-    selex <- data.table(out[["ageselex"]])
-
-    # EXTRACT index, residuals and selectivity
-    index <- ss3index(cpue, fleets)
-    index.res <- ss3index.res(cpue, fleets)
-    sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), 3)
-    
-    # MERGE across fleets
-    list(index=index,
-      index.res=index.res,
-      sel.pattern=sel.pattern)
-  }
-
-  # ind: iter - slot - index/flqs
-  
-  # out: index - slot - iter
-  
-  index <- Reduce(combine, lapply(ind, "[[", 'index'))
-  index.q <- Reduce(combine, lapply(ind, "[[", 'index.q'))
-  sel.pattern <- Reduce(combine, lapply(ind, "[[", 'sel.pattern'))
-
-	return(FLQuants(index=index, index.q=index.q, sel.pattern=sel.pattern))
 } # }}}

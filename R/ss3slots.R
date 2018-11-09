@@ -29,7 +29,7 @@
 
 ss3index <- function(cpue, fleets) {
   
-  index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Exp")]
+  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Exp")]
 
   # CHANGE names and SORT
   names(index) <- c("qname", "year", "season", "data")
@@ -45,9 +45,10 @@ ss3index <- function(cpue, fleets) {
 #' @details - `ss3index.res` returns the `index.res` slot of each survey/CPUE fleet.
 
 ss3index.res <- function(cpue, fleets) {
-  
+ 
+  # DEBUG Dev vs. Obs-Exp 
   cpue[, Res := Obs-Exp]
-  index <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Res")]
+  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Dev")]
 
   # CHANGE names and SORT
   names(index) <- c("qname", "year", "season", "data")
@@ -64,7 +65,7 @@ ss3index.res <- function(cpue, fleets) {
 
 ss3index.var <- function(cpue, fleets) {
 
-  index.var <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "SE")]
+  index.var <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "SE")]
 
   # CHANGE names and SORT
   names(index.var) <- c("qname", "year", "season", "data")
@@ -86,7 +87,7 @@ ss3index.var <- function(cpue, fleets) {
 
 ss3index.q <- function(cpue, fleets) {
 
-  index.q <- cpue[Name %in% names(fleets), c("Name", "Yr", "Seas", "Calc_Q")]
+  index.q <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Calc_Q")]
 
   # CHANGE names and SORT
   names(index.q) <- c("qname", "year", "season", "data")
@@ -202,7 +203,7 @@ ss3mat <- function(endgrowth, dmns, birthseas, option=3) {
   mat[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
   mat[ ,c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
-  # EXPAND by year & unit
+  # EXPAND by year & unit & area
   mat <- FLCore::expand(as.FLQuant(mat[, .(season, unit, age, data)],
     units=""), year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
 
@@ -231,10 +232,10 @@ ss3m <- function(endgrowth, dmns, birthseas) {
   # RENAME
 	names(m) <- c("season", "age", "data", "unit")
   
-  # EXPAND by year, unit & season
+  # EXPAND by year, unit, season & area
   # BUG expand not filling
   m <- FLCore::expand(as.FLQuant(m[,.(season, age, data, unit)], units="m"),
-    year=dmns$year, unit=dmns$unit, season=dmns$season)
+    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
 
   return(m)
 }

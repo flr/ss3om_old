@@ -360,7 +360,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
   cpue <- data.table(out[["cpue"]])
  
   # GET cpue fleets 
-  cpuefleets <- setNames(seq(length(unique(cpue$Name))), unique(cpue$Name))
+  cpuefleets <- setNames(seq(length(unique(cpue$Fleet_name))), unique(cpue$Fleet_name))
   
   if(missing(fleets))
     fleets <- cpuefleets
@@ -395,6 +395,9 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   # --- index.var (var)
   index.var <- ss3index.var(cpue, fleets)
+  
+  # --- index.res (var)
+  index.res <- ss3index.res(cpue, fleets)
 
   # --- catch.n
   catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
@@ -413,7 +416,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
       distribution="lnorm", 
       index=index[[x]],
       index.q=index.q[[x]],
-      index.var=index.var[[x]],
+      index.var=index.res[[x]],
       # TODO How to link each cpue fleet to catch fleets for catch.n
       # TRIM catch.n to index seasons
    #   catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
@@ -472,6 +475,7 @@ buildFLSRss3 <- function(out, ...) {
     attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   }
 
+  # TODO calculate sratio from stock.n
   # SET sratio if 2 sex model
   if(out$nsexes == 2)
     params <- rbind(params, FLPar(sratio=0.5, units=""))

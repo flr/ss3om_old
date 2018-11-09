@@ -283,3 +283,41 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res))
 } # }}}
+
+# readOMSss3 {{{
+readSRIss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # FLSR
+  srr <- buildFLSRss3(out)
+
+  # FLIB
+  idx <- buildFLIBss3(out, fleets=fleets)
+
+  return(list(sr=srr, indices=idx))
+} # }}}
+
+# readOMSss3 {{{
+readRESIDss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+
+  # LOAD SS_output list
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+
+  if(out$SS_versionNumeric > 3.24)
+    stop("ss3om currently only supports SS3 <= 3.24")
+
+  # FLSR
+  srr <- buildFLSRss3(out)@residuals
+
+  # FLIB
+  idx <- lapply(buildFLIBss3(out, fleets=fleets), index.var)
+  
+  return(list(sr=srr, indices=idx))
+} # }}}
