@@ -17,6 +17,7 @@ export(
   "buildFLRPss3",
   "buildKobess3",
   "buildRESss3",
+  "buildRESss330",
   "checkFLSss3",
   "loadOM",
   "loadOMS",
@@ -36,6 +37,7 @@ export(
   "readFLSss3",
   "readSRIss3",
   "readRESss3",
+  "readRESIDss3",
   "readOMSss3",
   "runss3grid"
 )

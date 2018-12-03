@@ -259,10 +259,10 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
   # --- index.var (var)
   index.var <- ss3index.var(cpue, fleets)
-  
+
   # --- index.res (var)
   index.res <- ss3index.res(cpue, fleets)
-
+  
   # --- catch.n
   catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
     birthseas=birthseas, idx=fleets)

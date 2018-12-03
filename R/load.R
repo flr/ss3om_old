@@ -89,7 +89,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 } # }}}
 
-# loadFLS - list(stock, sr, indices, results, refpts) {{{
+# loadFLS - stock {{{
 loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, combine=TRUE, ...) {
 
@@ -154,7 +154,7 @@ loadFLQs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   metrics <- rbindlist(out)
 
   if(convert)
-    metrics <- as.FLQuant(metrics)
+    metrics <- as(metrics, "FLQuants")
   
   return(metrics)
 
@@ -225,7 +225,7 @@ loadRPs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	return(res)
 } # }}}
 
-# loadSRIs - list(sr, indices) {{{
+# loadRESIDs - list(sr, indices) {{{
 loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, combine=TRUE, ...) {
 

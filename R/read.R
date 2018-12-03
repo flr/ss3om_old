@@ -176,9 +176,9 @@ readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
     printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  buildRESss3(out)
+    buildRESss330(out)
+  else
+    buildRESss3(out)
 
 } # }}}
 
