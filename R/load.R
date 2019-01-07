@@ -71,7 +71,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   if(combine)
     stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
   else {
-    stock <- rbindlist(lapply(out, function(x) x$stock))
+    stock <- FLStocks(lapply(out, function(x) as(x$stock, "FLStock")))
   }
  
   sr <- Reduce(combine, lapply(out, function(x) x$sr))
@@ -118,7 +118,7 @@ loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   if(combine) {
     stock <- as(rbindlist(out), 'FLStock')
   } else {
-    stock <- rbindlist(out)
+    stock <- FLStocks(lapply(out, as, "FLStock"))
   }
   
   return(stock)

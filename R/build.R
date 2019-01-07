@@ -6,6 +6,7 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+
 # buildFLBFss3 - list(FLBiol, FLFisheries) {{{
 
 buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
@@ -321,9 +322,10 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # EXTRACT from out
   if(out$nsexes == 1) {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "BirthSeas", "Age"))
+    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Settlement", "int_Age"))
   } else {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Sex", "BirthSeas", "Age"))
+    endgrowth <- data.table(out$endgrowth,
+      key=c("Seas", "Sex", "Settlement", "int_Age"))
   }
 
   # NATAGE
@@ -331,7 +333,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   
   # CATCH.N
   catage <- data.table(out$catage)
-  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+  setkey(catage, "Area", "Fleet", "Sex", "Morph", "Yr", "Seas", "Era")
 
   # STOCK.WT
   wt <- ss3wt(endgrowth, dmns, birthseas)

@@ -52,10 +52,13 @@ getRange <- function(x) {
 	
   # empty range
 	range <- rep(as.numeric(NA), 7)
-	names(range) <- c("min", "max", "plusgroup", "minyear", "maxyear", "minfbar", "maxfbar")
-	
+	names(range) <- c("min", "max", "plusgroup", "minyear", "maxyear",
+    "minfbar", "maxfbar")
+  
   # age range from catage
-	range[c("min", "max")] <- range(as.numeric(names(x)[-(1:10)]))
+  # TODO FIND more secure way to find ages columns
+  idx <- grep("Era", names(x))
+	range[c("min", "max")] <- range(as.numeric(names(x)[-seq(1, idx)]))
 	
   # plusgroup = max
 	range["plusgroup"] <- range["max"]

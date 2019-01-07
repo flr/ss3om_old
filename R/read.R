@@ -6,42 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# readFLBFss3 {{{
-
-readFLBFss3 <- function(dir, birthseas=unique(out$natage$BirthSeas), ...) {
-
-  # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=TRUE, forecast=FALSE, ...)
-
-} # }}}
-
-#' @examples
-#' dir <- system.file("ext-data/alb", package="ss3om")
-#' build <- ss3om:::buildFLSss3
-#' stk <- readFLss3(dir, build,
-#'   repfile="Report.sso.bz2", covarfile="covar.sso.bz2", compfile = "CompReport.sso.bz2")
-#' stk <- readFLSss3(dir,
-#'   repfile="Report.sso.bz2", covarfile="covar.sso.bz2", compfile = "CompReport.sso.bz2")
-
-readFLss3 <- function(dir, build, birthseas=out$birthseas, name="ss3",
-  desc=paste(out$inputs$repfile, out$SS_version, sep=" - "),
-  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet]), ...) {
-
-  # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=TRUE, ...)
-
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  # CHECK fleets has names
-  if(!missing(fleets) & is.null(names(fleets)))
-    fleets <- setNames(fleets, fleets)
-
-  build(out, birthseas=birthseas, name=name, fleets=fleets, desc=desc)
-}
-
 
 # readFLSss3 {{{
 
@@ -76,10 +40,15 @@ readFLss3 <- function(dir, build, birthseas=out$birthseas, name="ss3",
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, ...) {
+readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
-  readFLss3(dir, build=buildFLSss3, ...)
-
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
+  
+  if(out$SS_versionNumeric > 3.24)
+    buildFLSss330(out, ...)
+  else
+    buildFLSss3(out, ...)
 } # }}}
 
 # readFLIBss3 {{{
@@ -147,9 +116,6 @@ readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
 
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
   buildFLSRss3(out, birthseas=out$birthseas)
 
 } # }}}
@@ -169,11 +135,12 @@ readFLRPss3 <- function(dir, ...) {
 } # }}}
 
 # readRESss3 {{{
-readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
+readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
+    printstats=FALSE, covar=FALSE, forecast=FALSE,
+    repfile=repfile, compfile=compfile, ...)
 
   if(out$SS_versionNumeric > 3.24)
     buildRESss330(out)

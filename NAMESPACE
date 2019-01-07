@@ -28,7 +28,6 @@ export(
   "loadRPs",
   "nameGrid",
   "packss3run",
-  "readFLBFss3",
   "readFLIBss3",
   "readKobess3",
   "readFLRPss3",
