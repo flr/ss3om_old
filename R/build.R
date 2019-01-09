@@ -322,18 +322,16 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # EXTRACT from out
   if(out$nsexes == 1) {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Settlement", "int_Age"))
+    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Age"))
   } else {
-    endgrowth <- data.table(out$endgrowth,
-      key=c("Seas", "Sex", "Settlement", "int_Age"))
+    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Sex", "Age"))
   }
-
   # NATAGE
   natage <- data.table(out$natage)
   
   # CATCH.N
   catage <- data.table(out$catage)
-  setkey(catage, "Area", "Fleet", "Sex", "Morph", "Yr", "Seas", "Era")
+  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
 
   # STOCK.WT
   wt <- ss3wt(endgrowth, dmns, birthseas)

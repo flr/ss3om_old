@@ -26,7 +26,7 @@ ss3sel.pattern(selex, years, fleets, morphs, factor = "Asel2")
 
 ss3wt(endgrowth, dmns, birthseas)
 
-ss3mat(endgrowth, dmns, birthseas)
+ss3mat(endgrowth, dmns, birthseas, option = 3)
 
 ss3m(endgrowth, dmns, birthseas)
 

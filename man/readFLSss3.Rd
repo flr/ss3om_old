@@ -4,20 +4,19 @@
 \alias{readFLSss3}
 \title{A function to read SS3 results as an FLStock object}
 \usage{
-readFLSss3(dir, birthseas = out$birthseas, name = "ss3",
-  desc = paste(out$inputs$repfile, out$SS_version, sep = " - "),
-  fleets = out$fleet_ID[out$IsFishFleet], ...)
+readFLSss3(dir, repfile = "Report.sso", compfile = "CompReport.sso",
+  ...)
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
+
+\item{...}{Any other argument to be passed to \code{r4ss::SS_output}}
 
 \item{birthseas}{Birth seasons for this stock, defaults to spawnseas}
 
 \item{name}{Name of the output object to fil the name slot}
 
 \item{desc}{Description of the output object to fill the desc slot}
-
-\item{...}{Any other argument to be passed to \code{r4ss::SS_output}}
 }
 \value{
 An object of class \code{\link{FLStock}}
