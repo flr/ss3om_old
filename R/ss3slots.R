@@ -163,8 +163,8 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
   names(wt) <- c("season", "age", "data", "unit")
   
   # EXPAND by year, unit & season
-  wt <- FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
-    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
+  return(FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
+    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area))
 }
 
 #' @rdname ss3slot

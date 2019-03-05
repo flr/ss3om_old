@@ -82,6 +82,10 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
       key=c("Seas", "Sex", "Settlement", "int_Age"))
   }
 
+  # BUG ADD Age, BirthSeas to endgrowth
+  endgrowth[, Age:=int_Age]
+  endgrowth[, BirthSeas:=Platoon]
+
   # NATAGE
   natage <- data.table(out$natage)
   
@@ -89,8 +93,11 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   catage <- data.table(out$catage)
   setkey(catage, "Area", "Fleet", "Sex", "Morph", "Yr", "Seas", "Era")
 
+  # BUG Sex to Gender
+  catage[, Gender:=Sex]
+
   # STOCK.WT
-  wt <- ss3wt(endgrowth, dmns, birthseas)
+  wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
   # MAT
   mat <- ss3mat(endgrowth, dmns, birthseas)
@@ -193,10 +200,11 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 } # }}}
 
 
-ss3wt30 <- function(endgrowth, dmns) {
+ss3wt30 <- function(endgrowth, dmns, birthseas) {
   
   # EXTRACT
-  wt <- endgrowth[, list(Sex, Seas, int_Age, Wt_Mid)]
+  # BUG Mid or Beg
+  wt <- endgrowth[, list(Sex, Seas, BirthSeas, int_Age, Wt_Mid)]
 
   # CREATE unit from Sex + BirthSeas
   wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
@@ -209,6 +217,6 @@ ss3wt30 <- function(endgrowth, dmns) {
   names(wt) <- c("season", "age", "data", "unit")
   
   # EXPAND by year, unit & season
-  wt <- FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
-    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
+  return(FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
+    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area))
 }

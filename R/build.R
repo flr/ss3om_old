@@ -351,19 +351,27 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   
   catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
   
-  # CALCULATE total catch.n
+  # CALCULATE total catch.n & catch.wt
   catch.n <- FLQuant(0, dimnames=dmns, units="1000")
-  for (i in seq(length(fleets)))
+  catch.wt <- FLQuant(0, dimnames=dmns, units="kg")
+  
+  for (i in seq(length(fleets))) {
     catch.n <- catch.n %++% catches[[i]]$catch.n
+
+    # ADD wt * n by fleet
+    catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
+  }
   
-  # AVERAGE catch.wt weighted by catch.n
-  catch.wt <-  FLCore::expand(Reduce("+", lapply(catches,
-    function(x) x$catch.n %*% x$catch.wt)) %/% catch.n,
-    year=dmns$year, area=dmns$area)
-  
-  catch.wt[is.na(catch.wt)] <- (Reduce("+",
-    lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
-  
+  # COMPUTE no. of fleets per area
+  wtsbyarea <- c(table(unlist(lapply(catches, function(x) dimnames(x$catch.wt)$area))))
+
+  # DIVIDE by total catch
+  catch.wt <- catch.wt / (catch.n + FLQuant(rep(1e-3 * wtsbyarea,
+    each=prod(dim(catch.n)[-5])), dimnames=dmns, units="1000"))
+
+  # RESET units(catch.wt)
+  units(catch.wt) <- "kg"
+
   # DISCARDS
   if(!is.na(out["discard"])) {
     
@@ -442,12 +450,14 @@ buildFLSRss3 <- function(out, ...) {
   out <- out[c("parameters", "recruit", "derived_quants",
     "likelihoods_used", "SRRtype", "spawnseas", "CoVar", "nsexes")]
 
-  recruit <- data.table(out$recruit)[!era %in% "Forecast",]
+  # EXTRACT elements
+  recruit <- data.table(out$recruit)[era %in% c("Fixed", "Main"),]
   parameters <- data.table(out$parameters)
   dquants <- data.table(out$derived_quants)
   lkhds <- out$likelihoods_used
-
   yrs <- recruit$Yr
+
+  # SET deviates and observed recruitment
   recruit[, deviates := exp(dev)]
   recruit[, obs_rec := rowSums(.SD, na.rm=TRUE), .SDcols=c("pred_recr", "deviates")]
 
