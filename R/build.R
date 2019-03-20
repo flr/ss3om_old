@@ -438,7 +438,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
-
+  
   return(stock)
 
 } # }}}

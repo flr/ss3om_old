@@ -44,7 +44,7 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 # loadOMS - list(stock, sr, indices, results, refpts) {{{
 loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, combine=TRUE, ...) {
+  progress=TRUE, combine=TRUE, simplify=NULL, ...) {
 
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
@@ -56,6 +56,10 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     # OUPUT list with FLStock and iter number
     run <- readOMSss3(subdirs[i], ...)
 
+    # SIMPLIFY
+    if(!is.null(simplify))
+      run$stock <- simplify(run$stock, dims=simplify)
+
     # CONVERT stock to data.table
     run$stock <- data.table(as.data.frame(run$stock, units=TRUE))
     run$stock[, iter := NULL]
@@ -66,7 +70,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   
   if(progress)
     cat("[combining now ...]\n", sep="")
-  
+
   # COMBINE
   if(combine)
     stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
@@ -81,9 +85,20 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   results <- rbindlist(lapply(out, function(x) x$results),
     use.names=TRUE, fill=TRUE, idcol="iter")
   
+  # EXTRACT yr range per fleet
+  fleetyrs <- lapply(out, function(x) lapply(x$indices, function(y)
+    range(as.numeric(dimnames(index(y))$year))))
+
+  yrs <- setNames(lapply(names(fleetyrs[[1]]), function(x)
+    range(Reduce(c, lapply(fleetyrs, "[[", x)))), names(fleetyrs[[1]]))
+
+  # LOAD indices, expanding to yrs
   indices <- lapply(names(out[[1]]$indices), function(x) {
-    Reduce(combine, lapply(out, function(y) y$indices[[x]]))
+    Reduce(combine, lapply(out, function(y)
+      expand(y$indices[[x]], year=do.call(seq, as.list(yrs[[x]])))))
   })
+
+  names(indices) <- names(out[[1]]$indices)
 
   return(list(stock=stock, sr=sr, refpts=refpts, results=results, indices=indices))
 
@@ -91,11 +106,11 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 # loadFLS - stock {{{
 loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, combine=TRUE, ...) {
+  progress=TRUE, combine=TRUE, convert=TRUE, iters=seq(length(subdirs)), ...) {
 
 	# LOOP over subdirs
-  out <- foreach(i=seq(length(subdirs)),
-    .inorder=TRUE, .errorhandling="remove") %dopar% {
+  out <- foreach(i=iters, .inorder=TRUE,
+    .errorhandling="remove") %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
@@ -106,22 +121,23 @@ loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     # CONVERT stock to data.table
     stock <- data.table(as.data.frame(run, units=TRUE))
     stock[, iter := NULL]
-    stock[, iter := i]
 
     stock
   }
-  
-  # COMBINE
-  if(progress)
-     cat("[combining now ...]\n", sep="")
 
+  names(out) <- iters
+
+  # COMBINE
   if(combine) {
-    stock <- as(rbindlist(out), 'FLStock')
+    out <- rbindlist(out, idcol="iter")
+      if(convert)
+        out <- as(out, "FLStock")
   } else {
-    stock <- FLStocks(lapply(out, as, "FLStock"))
+    if(convert)
+      out <- FLStocks(lapply(out, as, "FLStock"))
   }
   
-  return(stock)
+  return(out)
 
 } # }}}
 

@@ -121,7 +121,7 @@ ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
 
   # CHANGE names & SORT
   names(selex) <- c("qname", "year", "season", "unit", "age", "data")
-  selex[, age:=as.numeric(age)]
+  selex[, age:=as.numeric(as.character(age))]
   setorder(selex, qname, age, year, unit, season)
 
   # CONVERT to FLQuants
