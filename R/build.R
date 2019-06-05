@@ -489,11 +489,6 @@ buildFLSRss3 <- function(out, ...) {
     attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   }
 
-  # TODO calculate sratio from stock.n
-  # SET sratio if 2 sex model
-  if(out$nsexes == 2)
-    params <- rbind(params, FLPar(sratio=0.5, units=""))
-
   # TODO SETUP for multiple recruit season/units
 
   # rec

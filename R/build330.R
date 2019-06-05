@@ -199,18 +199,20 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
 } # }}}
 
+# ss3wt30 {{{
 
 ss3wt30 <- function(endgrowth, dmns, birthseas) {
   
   # EXTRACT
   # BUG Mid or Beg
-  wt <- endgrowth[, list(Sex, Seas, BirthSeas, int_Age, Wt_Mid)]
+  wt <- endgrowth[, list(Sex, Seas, BirthSeas, int_Age, Wt_Beg)]
 
   # CREATE unit from Sex + BirthSeas
   wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
   wt[, unit:=paste0(uSex, uBirthSeas)]
-  wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
+  wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique",
+    paste0(uSex, uBirthSeas))]
   wt[, c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
   # RENAME
@@ -219,4 +221,4 @@ ss3wt30 <- function(endgrowth, dmns, birthseas) {
   # EXPAND by year, unit & season
   return(FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
     year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area))
-}
+} # }}}
