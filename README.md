@@ -11,7 +11,22 @@ Tools for conditioning of Operating Models based on SS3 by considering structura
 
 To install this package, start R and enter:
 
-	devtools::install_github("iagomosqueira/ss3om")
+  # INSTALL FLR pkgs and depedencies
+  source("http://flr-project.org/R/instFLR.R")
+
+  # and then select mse, ggplotFL and FLFishery
+
+  # INSTALL devtools
+  install.packages("devtools")
+
+  # INSTALL recent r4ss
+  devtools::install_github('r4ss/r4ss')
+
+  # DISABLE install_github turning warnings into errors
+  Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)
+
+  # INSTALL ss3om
+  devtools::install_github('iagomosqueira/ss3om')
 
 ## Usage
 
