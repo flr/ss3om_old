@@ -354,19 +354,23 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CALCULATE total catch.n & catch.wt
   catch.n <- FLQuant(0, dimnames=dmns, units="1000")
   catch.wt <- FLQuant(0, dimnames=dmns, units="kg")
+  catch.den <- FLQuant(0, dimnames=dmns, units="kg")
   
   for (i in seq(length(fleets))) {
     catch.n <- catch.n %++% catches[[i]]$catch.n
 
-    # ADD wt * n by fleet
-    catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
+    # DROP NAs from discards fleets
+    if(!all(is.na(catches[[i]]$catch.wt))) {
+      catch.den <- catch.n %++% catches[[i]]$catch.n
+      catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
+    }
   }
   
   # COMPUTE no. of fleets per area
   wtsbyarea <- c(table(unlist(lapply(catches, function(x) dimnames(x$catch.wt)$area))))
 
   # DIVIDE by total catch
-  catch.wt <- catch.wt / (catch.n + FLQuant(rep(1e-3 * wtsbyarea,
+  catch.wt <- catch.wt / (catch.den + FLQuant(rep(1e-3 * wtsbyarea,
     each=prod(dim(catch.n)[-5])), dimnames=dmns, units="1000"))
 
   # RESET units(catch.wt)
@@ -514,8 +518,10 @@ buildFLSRss3 <- function(out, ...) {
   else if(dim(estpar)[1] > 1) {
     # TODO
     CoVar <- data.table(out$CoVar)
-    vcov <- CoVar[label.i %in% estpar$Label & label.j %in% estpar$Label,]
-    vcov <- array(numeric(0))
+    if(sum(dim(CoVar)) > 0)
+      vcov <- CoVar[label.i %in% estpar$Label & label.j %in% estpar$Label,]
+    else
+      vcov <- array(numeric(0))
   }
 
   res <- FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,

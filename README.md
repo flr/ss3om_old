@@ -1,6 +1,6 @@
 # ss3om
-- Version: 0.3.4
-- Date: 2019-06-05
+- Version: 0.3.5
+- Date: 2019-11-26
 - Author: Iago Mosqueira, EC JRC
 - Maintainer: Iago Mosqueira <iago.mosqueira@ec.europa.eu>
 - Repository: <https://github.com/iagomosqueira/ss3om/>
