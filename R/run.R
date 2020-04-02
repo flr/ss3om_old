@@ -8,7 +8,7 @@
 
 # runss3grid {{{
 runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
-  logfile=paste0(dir, '/run_grid_log'), options="", pack=FALSE) {
+  logfile=file.path(dir, 'run_grid_log'), options="", pack=FALSE) {
 	
 	cat("START: ", date(), "\n", file=logfile)
 
@@ -35,9 +35,9 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
   path <- paste0(ss3path, sep, Sys.getenv("PATH"))
   Sys.setenv(PATH=path)
 
-	foreach (i=grid$number, .errorhandling = "remove") %dopar% {
+	foreach (i=grid$iter, .errorhandling = "remove") %dopar% {
     
-    row <- which(grid$number == i)
+    row <- which(grid$iter == i)
 		dirname <- paste(dir, grid[row, "id"], sep="/")
 		
     cat("[", i, "]\n")
