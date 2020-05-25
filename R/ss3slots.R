@@ -1,8 +1,8 @@
 # ss3slots.R - DESC
 # ss3om/R/ss3slots.R
 
-# Copyright European Union, 2018
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -155,7 +155,6 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
   # CREATE unit from Sex + BirthSeas
   wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
   wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  wt[, unit:=paste0(uSex, uBirthSeas)]
   wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
   wt[, c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
 
@@ -178,23 +177,26 @@ ss3mat <- function(endgrowth, dmns, birthseas, option=3) {
     # Mat_Numbers
     list(BirthSeas, Sex, Seas, Age, Age_Mat, `Mat*Fecund`, Wt_Beg)]
 
-  # TODO CHECK maturity_option 2, 4, 5
   # IF maturity_option == 3, mat = mat / wt
   if(all(mat[, Age_Mat] %in% c(0,1)))
-    mat[, `Mat*Fecund`:= `Mat*Fecund` / Wt_Beg]
+    mat[, mat:= `Mat*Fecund` / Wt_Beg]
   
   # maturity option 3: mat=Age_Mat
   if(option == 3)
-    mat[, `Mat*Fecund`:= Age_Mat]
+    mat[, mat:= Age_Mat]
 
-  mat[ ,`:=`(Age_Mat = NULL, Wt_Beg = NULL)]
+  # maturity option 6: mat=Mat*Fecund / max(Mat*Fecund)
+  if(option == 6)
+    mat[, mat:= `Mat*Fecund` / max(`Mat*Fecund`), by=.(Sex, Seas, BirthSeas)]
+
+  # DELETE columns
+  mat[ ,`:=`(Age_Mat = NULL, `Mat*Fecund` = NULL, Wt_Beg = NULL)]
 
   # RENAME
   names(mat) <- c("BirthSeas", "Sex", "season", "age", "data")
 
-  # TURN -1 to 0
-  # TODO CHECK M values == 0
-  # TODO TURN !birthseas to 0
+  # TURN -1/NaN to 0
+  mat[, data:=ifelse(is.nan(data), 0, data)]
   mat[, data:=ifelse(data==-1, 0, data)]
 
   # SWT unit from Sex and BirthSeas
@@ -285,6 +287,7 @@ ss3n <- function(n, dmns, birthseas) {
 ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
 
   # RECONSTRUCT BirthSeas from Morph & Sex
+  # DEBUG
   catage[, BirthSeas := Morph - max(Seas) * (Gender - 1)]
   catage <- catage[BirthSeas %in% birthseas,]
   

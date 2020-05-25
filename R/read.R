@@ -1,8 +1,8 @@
 # readSS3.R - DESC
 # ioalbmse/R/readSS3.R
 
-# Copyright European Union, 2015-2017
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -197,6 +197,8 @@ readFLoemss3 <- function(dir, fleets, ...) {
 
   # FLIB
   idx <- buildFLIBss3(out, fleets=fleets)
+
+  # TODO FLS
   
   oem <- FLoem(observations=list(idx=idx))
 

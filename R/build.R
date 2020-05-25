@@ -1,8 +1,8 @@
 # build.R - Function to build FLR objects from the list returned by SS_output
 # ioalbmse/R/build.R
 
-# Copyright European Union, 2015-2017
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -621,4 +621,3 @@ buildRESss3 <- function(out, ...) {
 
   return(data.table(res))
 } # }}}
-

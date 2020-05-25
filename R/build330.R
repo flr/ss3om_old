@@ -1,8 +1,8 @@
 # build330.R - DESC
 # /build330.R
 
-# Copyright European Union, 2018
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -58,65 +58,68 @@ buildRESss330 <- function(out, ...) {
 
 buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
-  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet])) {
+  fleets=setNames(nm=out$fleet_ID[out$IsFishFleet])) {
+
+  # DIMENSIONS
+  dims <- dimss3(out)
   
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
-    "discard", "catch")]
+    "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
+    "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age")]
 
-  # TODO: call spread()
-  
   # GET range from catage
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
   dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 
-  # EXTRACT from out
+  # ENDGROWTH
   if(out$nsexes == 1) {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Settlement", "int_Age"))
+    endgrowth <- data.table(out$endgrowth,
+      key=c("Seas", "Platoon", "Settlement", "int_Age"))
   } else {
     endgrowth <- data.table(out$endgrowth,
-      key=c("Seas", "Sex", "Settlement", "int_Age"))
+      key=c("Seas", "Sex", "Platoon", "Settlement", "int_Age"))
   }
 
-  # BUG ADD Age, BirthSeas to endgrowth
+  # SET Age and unit
   endgrowth[, Age:=int_Age]
-  endgrowth[, BirthSeas:=Platoon]
+  endgrowth[, unit:=codeUnit(Sex, Platoon)]
 
   # NATAGE
   natage <- data.table(out$natage)
+  natage[, unit:=codeUnit(Sex, Platoon)]
   
   # CATCH.N
   catage <- data.table(out$catage)
-  setkey(catage, "Area", "Fleet", "Sex", "Morph", "Yr", "Seas", "Era")
+  catage[, unit:=codeUnit(Sex)]
+  setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
 
-  # BUG Sex to Gender
-  catage[, Gender:=Sex]
+  # WT
+  wtatage <- endgrowth[,
+    c("Seas", "unit", "Age", paste0("RetWt:_", fleets)), with=FALSE]
 
   # STOCK.WT
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
   # MAT
-  mat <- ss3mat(endgrowth, dmns, birthseas)
+  mat <- ss3mat30(endgrowth, dmns, birthseas, option=out$Maturity_option)
 
   # M
-  m <- ss3m(endgrowth, dmns, birthseas)
+  m <- ss3m30(endgrowth, dmns, birthseas)
   
   # STOCK.N
-  n <- ss3n(natage, dmns, birthseas)
+  n <- ss3n30(natage, dmns, birthseas)
 
-  # CATCH.WT, assumes _mat_option == 3
-  wtatage <- endgrowth[BirthSeas %in% birthseas,
-    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
-  
-  catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
-  
+  # CATCH 
+  catches <- ss3catch30(catage, wtatage, dmns, birthseas, fleets)
+
   # CALCULATE total catch.n
   catch.n <- FLQuant(0, dimnames=dmns, units="1000")
-
+  
   for (i in seq(length(fleets)))
     catch.n <- catch.n %++% catches[[i]]$catch.n
   
@@ -130,7 +133,12 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   
   # DISCARDS
   if(!is.na(out["discard"])) {
+  
+    datage <- data.table(out$discard_at_age)
+    datage[, unit:=codeUnit(Sex)]
+    setkey(datage, "Area", "Fleet", "unit", "Yr", "Seas", "Era", "Type")
     
+    # DEBUG
     ageselex <- data.table(out$ageselex)
     lastyr <- unique(ageselex[Factor=="sel_nums", Yr])
     
@@ -189,36 +197,12 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   stock(stock) <- computeStock(stock)
 
   # ASSIGN harvest.spwn and m.spwn in birthseas
-  harvest.spwn(stock)[,,,birthseas] <- 0
-  m.spwn(stock)[,,,birthseas] <- 0
+  harvest.spwn(stock)[,,,out$spawnseas] <- 0
+  m.spwn(stock)[,,,out$spawnseas] <- 0
 
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
 
   return(stock)
 
-} # }}}
-
-# ss3wt30 {{{
-
-ss3wt30 <- function(endgrowth, dmns, birthseas) {
-  
-  # EXTRACT
-  # BUG Mid or Beg
-  wt <- endgrowth[, list(Sex, Seas, BirthSeas, int_Age, Wt_Beg)]
-
-  # CREATE unit from Sex + BirthSeas
-  wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
-  wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  wt[, unit:=paste0(uSex, uBirthSeas)]
-  wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique",
-    paste0(uSex, uBirthSeas))]
-  wt[, c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
-
-  # RENAME
-  names(wt) <- c("season", "age", "data", "unit")
-  
-  # EXPAND by year, unit & season
-  return(FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
-    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area))
 } # }}}

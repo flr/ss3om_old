@@ -11,21 +11,21 @@ registerDoParallel(3)
 
 # FLStock
 
-fls <- loadFLS(dir="swo",
+fls <- loadFLS(dir="3.24/swo",
   repfile="Report.sso.gz", compfile = "CompReport.sso.gz")
 
 # FLStocks
 
-flss <- loadFLS(dir="swo", combine=FALSE,
+flss <- loadFLS(dir="3.24/swo", combine=FALSE,
   repfile="Report.sso.gz", compfile = "CompReport.sso.gz")
 
 # data.table
 
-dt <- loadFLS(dir="swo", combine=TRUE, convert=FALSE,
+dt <- loadFLS(dir="3.24/swo", combine=TRUE, convert=FALSE,
   repfile="Report.sso.gz", compfile = "CompReport.sso.gz")
 
 # data.table
 
-dts <- loadFLS(dir="swo", combine=FALSE, convert=FALSE,
+dts <- loadFLS(dir="3.24/swo", combine=FALSE, convert=FALSE,
   repfile="Report.sso.gz", compfile = "CompReport.sso.gz")
 

@@ -8,19 +8,19 @@
 
 # SMA: 2 units (sex)
 
-out <- r4ss::SS_output("sma", repfile="Report.sso.bz2",
+out <- r4ss::SS_output("3.24/sma", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
 # BET: 4 seasons, 4 units (birth seasons)
 
-out <- r4ss::SS_output("bet", repfile="Report.sso.bz2",
+out <- r4ss::SS_output("3.24/bet", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 
 # --- ALB: 4 seasons, 2 units (sex)
 
-out <- r4ss::SS_output("alb", repfile="Report.sso.bz2",
+out <- r4ss::SS_output("3.24/ioalb", repfile="Report.sso.bz2",
   compfile="CompReport.sso.bz2", covarfile="covar.sso.bz2",
   warn=FALSE, verbose=FALSE, printstats=FALSE, hidewarn=TRUE)
 

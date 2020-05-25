@@ -1,8 +1,8 @@
 # global.R - DESC
 # /global.R
 
-# Copyright European Union, 2017
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -22,6 +22,7 @@ utils::globalVariables(c(
   "F.Fmsy", 
   "Factor", 
   "Fleet",
+  "Fleet_name",
   "Gender",
   "Label",
   "M",
@@ -29,6 +30,7 @@ utils::globalVariables(c(
   "Morph",
   "Name",
   "Obs",
+  "Platoon",
   "Res",
   "Seas",
   "Sex",
@@ -40,13 +42,16 @@ utils::globalVariables(c(
   "age", 
   "birthseas", 
   "data", 
+  "derived_quants",
   "dev", 
   "deviates",
+  "discard",
   "era",
   "factor", 
   "fleet", 
   "gender",
   "i",
+  "int_Age",
   "label.i",
   "label.j",
   "morph",

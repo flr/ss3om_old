@@ -1,8 +1,8 @@
 # utilities.R - DESC
 # /utilities.R
 
-# Copyright European Union, 2017
-# Author: Iago Mosqueira (EC JRC) <iago.mosqueira@ec.europa.eu>
+# Copyright European Union, 2015-2019; WMR, 2020.
+# Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
@@ -69,9 +69,6 @@ getRange <- function(x) {
   # year range from catage
 	range[c("minyear", "maxyear")] <- range(x$Yr[x$Era == "TIME"])
 
-  # set plusgroup to max age
-	range["plusgroup"] <- range["maxyear"]
-	
   return(range)
 } # }}}
 
@@ -103,3 +100,47 @@ packss3run <- function(dir=getwd(),
 
   invisible(0)
 } # }}}
+
+# codeUnit {{{
+codeUnit <- function(Sex, Platoon="missing") {
+
+    # SEX as "F" / "M"
+    Sex <- if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}
+    
+    # Platoon
+    if(!missing(Platoon))
+      Platoon <- if(length(unique(Platoon)) == 1){""} else {Platoon}
+    else
+      Platoon <- ""
+  
+    unit <- ifelse(paste0(Sex, Platoon) == "", "unique", paste0(Sex, Platoon))
+
+    return(unit)
+  } # }}}
+
+dimss3 <- function(out) {
+
+  range <- getRange(out$catage)
+
+  return(list(
+    age = length(seq(range["min"], range["max"])),
+    year   = length(seq(range["minyear"], range["maxyear"])),
+    sex = out$nsexes,
+    biop = out$N_bio_patterns,
+    gpatterns = out$ngpatterns,
+    platoon = out$N_platoons,
+    # unit = sex * platoon
+    unit = out$nsexes * out$N_platoons,
+    season = out$nseasons,
+    spwn = (out$Spawn_seas - 1) * (1 / out$nseasons) +
+      out$Spawn_timing_in_season * (1 / out$nseasons),
+    subseason = out$N_sub_seasons,
+    area = out$nareas,
+    fleet = sum(out$IsFishFleet),
+    index = sum(!out$IsFishFleet),
+    M_option = out$NatMort_option,
+    growth_option = out$GrowthModel_option,
+    mat_option = out$Maturity_option,
+    fec_option = out$Fecundity_option
+  ))
+}
