@@ -221,7 +221,7 @@ ss3m30 <- function(endgrowth, dmns, birthseas) {
   m <- endgrowth[, .(Age, unit, Seas, M)]
 
   # TODO SPLIT M across seasons
-  # m[, M:=M/length(dmns$season)]
+  m[, M:=M/length(dmns$season)]
 
   # RENAME
 	names(m) <- c("age", "unit", "season", "data")
@@ -237,7 +237,7 @@ ss3m30 <- function(endgrowth, dmns, birthseas) {
 #' @rdname ss3slot
 #' @aliases ss3n
 #' @param n A data frame obtained from SS_output$natage.
-#' @details - `ss3m` returns the `m` slot.
+#' @details - `ss3n30` returns the `stock.n` slot.
 
 ss3n30 <- function(n, dmns, birthseas) {
   

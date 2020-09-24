@@ -303,7 +303,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
 # buildFLSss3 - FLStock {{{
 
 buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
-  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
+  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "), range="missing",
   fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet])) {
   
   # SUBSET out
@@ -314,9 +314,9 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # TODO: call spread()
 
-  # GET range from catage
-  range <- getRange(out$catage)
-  ages <- ac(seq(range['min'], range['max']))
+  # GET ages from catage
+  ages <- getRange(out$catage)
+  ages <- ac(seq(ages['min'], ages['max']))
   dmns <- getDimnames(out, birthseas=birthseas)
   dim <- unlist(lapply(dmns, length))
 
@@ -443,6 +443,10 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
   
+  # range
+  if(!missing(range))
+    range(stock) <- range
+
   return(stock)
 
 } # }}}

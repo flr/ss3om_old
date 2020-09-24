@@ -40,10 +40,27 @@
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
+readOutputss3 <- function(dir, repfile = "Report.sso",
+  compfile = "CompReport.sso", compress="gz") {
+
+  # Possibly compressed files
+  cfiles <- c(repfile = repfile, compfile = compfile)
+
+  # CHECK compressed files
+  idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
+  cfiles[idx] <- paste(cfiles, compress, sep = ".")
 
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, repfile=repfile, compfile=compfile)
+    printstats=FALSE, covar=FALSE, forecast=FALSE,
+    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
+ 
+  return(out) 
+}
+
+
+readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
+
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
   
   if(out$SS_versionNumeric > 3.24)
     buildFLSss330(out, ...)
@@ -77,14 +94,12 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...
 readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  buildFLIBss3(out, fleets=fleets, birthseas=out$birthseas)
-
+    buildFLIBss330(out, fleets=fleets, birthseas=out$birthseas, ...)
+  else
+    buildFLIBss3(out, fleets=fleets, birthseas=out$birthseas, ...)
 } # }}}
 
 # readFLSRss3 {{{
@@ -113,10 +128,9 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
-  buildFLSRss3(out, birthseas=out$birthseas)
+  buildFLSRss3(out, birthseas=out$birthseas, ...)
 
 } # }}}
 
@@ -124,13 +138,12 @@ readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
 readFLRPss3 <- function(dir, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  buildFLRPss3(out)
+    buildFLRPss330(out, ...)
+  else
+   buildFLRPss3(out, ...)
 
 } # }}}
 
@@ -138,14 +151,12 @@ readFLRPss3 <- function(dir, ...) {
 readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE,
-    repfile=repfile, compfile=compfile, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
-    buildRESss330(out)
+    buildRESss330(out, ...)
   else
-    buildRESss3(out)
+    buildRESss3(out, ...)
 
 } # }}}
 
@@ -153,13 +164,12 @@ readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...
 readKobess3 <- function(dir, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
 
-  buildKobess3(out)
+  buildKobess3(out, ...)
 
 } # }}}
 
@@ -167,14 +177,13 @@ readKobess3 <- function(dir, ...) {
 readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas)
+  stk <- buildFLSss3(out, birthseas=birthseas, ...)
 
   # FLSR
   srr <- buildFLSRss3(out)
@@ -189,8 +198,7 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 readFLoemss3 <- function(dir, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
@@ -209,14 +217,13 @@ readFLoemss3 <- function(dir, fleets, ...) {
 readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas)
+  stk <- buildFLSss3(out, birthseas=birthseas, ...)
 
   # FLSR
   srr <- buildFLSRss3(out)
@@ -242,14 +249,13 @@ readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas)
+  stk <- buildFLSss3(out, birthseas=birthseas, ...)
 
   # FLSR
   srr <- buildFLSRss3(out)
@@ -270,8 +276,7 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 readSRIss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
@@ -289,8 +294,7 @@ readSRIss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 readRESIDss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 
   # LOAD SS_output list
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE, ...)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
@@ -302,4 +306,19 @@ readRESIDss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   idx <- lapply(buildFLIBss3(out, fleets=fleets), index.var)
   
   return(list(sr=srr, indices=idx))
+} # }}}
+
+# readCDss3 {{{
+readCDss3 <- function(dir, name) {
+
+  # SET ctl, dat full paths
+  ctlf <- file.path(dir, paste0(name, ".ctl"))
+  datf <- file.path(dir, paste0(name, ".dat"))
+ 	
+  # READ source files
+  dat <- SS_readdat(datf, verbose=FALSE)
+  ctl <- SS_readctl(file=ctlf, use_datlist=T, datlist=dat,
+    verbose=FALSE)
+
+  list(ctl=ctl, dat=dat)
 } # }}}

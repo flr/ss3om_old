@@ -6,6 +6,24 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+# readOutputss3 {{{
+readOutputss3 <- function(dir, repfile = "Report.sso",
+  compfile = "CompReport.sso", compress="gz") {
+
+  # Possibly compressed files
+  cfiles <- c(repfile = repfile, compfile = compfile)
+
+  # CHECK compressed files
+  idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
+  cfiles[idx] <- paste(cfiles, compress, sep = ".")
+
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE,
+    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
+ 
+  return(out) 
+} # }}}
+
 # %++% {{{
 
 # x <- catch.n(ple4)[, 1:15]
@@ -76,10 +94,8 @@ getRange <- function(x) {
 packss3run <- function(dir=getwd(),
   gzfiles=c("Report.sso", "covar.sso", "wtatage.ss_new", "CompReport.sso"),
   keepfiles=c("warning.sso", "Forecast-report.sso", "starter.ss", "forecast.ss",
-    "ss3.par"),
-  inputfiles=list.files(dir, pattern="*.ctl|dat$")
-  
-  ) {
+    "ss3.par", "ss.par", "ss.cor"),
+  inputfiles=c("control.ss", "data.ss", list.files(dir, pattern="*.ctl|dat$"))) {
 
   # CHECK if already compressed
   if(file.exists(file.path(dir, paste0(gzfiles[1], ".gz")))) {
@@ -90,7 +106,7 @@ packss3run <- function(dir=getwd(),
   # REMOVE unneeded files
   allfiles <- list.files(dir)
   filemat <- match(c(gzfiles, keepfiles, inputfiles), allfiles)
-  rmfiles <- allfiles[-filemat[!is.na(filemat)]]
+  rmfiles <- c(allfiles[-filemat[!is.na(filemat)]], "gradient.dat")
   res <-  file.remove(file.path(dir, rmfiles))
 
   # gzip files
@@ -118,6 +134,7 @@ codeUnit <- function(Sex, Platoon="missing") {
     return(unit)
   } # }}}
 
+# dimss3 {{{
 dimss3 <- function(out) {
 
   range <- getRange(out$catage)
@@ -143,4 +160,33 @@ dimss3 <- function(out) {
     mat_option = out$Maturity_option,
     fec_option = out$Fecundity_option
   ))
-}
+} # }}}
+
+# runtime {{{
+
+runtime <- function(dir) {
+
+  out <- readLines(file.path(dir, "Report.sso"), n = 12)
+
+  sta <- as.POSIXlt(gsub("StartTime: ", "", out[grep("StartTime", out)]),
+      format="%a %b %d %H:%M:%S %Y")
+  
+  end <- as.POSIXlt(gsub("EndTime: ", "", out[grep("EndTime", out)]),
+      format="%a %b %d %H:%M:%S %Y")
+
+  return(end - sta)
+
+} # }}}
+
+# convergencelevel {{{
+convergencelevel <- function(dir) {
+
+  if(basename(dir) == "Report.sso")
+    file <- dir
+  else
+    file <- file.path(dir, "Report.sso")
+
+  out <- readLines(file, n = 15)
+
+  return(as.numeric(strsplit(out[grep("Convergence_Level", out)], " ")[[1]][2]))
+} # }}}
