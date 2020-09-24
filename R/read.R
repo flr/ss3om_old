@@ -40,24 +40,6 @@
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readOutputss3 <- function(dir, repfile = "Report.sso",
-  compfile = "CompReport.sso", compress="gz") {
-
-  # Possibly compressed files
-  cfiles <- c(repfile = repfile, compfile = compfile)
-
-  # CHECK compressed files
-  idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
-  cfiles[idx] <- paste(cfiles, compress, sep = ".")
-
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE,
-    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
- 
-  return(out) 
-}
-
-
 readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
