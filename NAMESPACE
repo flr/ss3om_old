@@ -12,13 +12,16 @@ export(
   "buildFLBFss3",
   "buildFLIBss3",
   "buildFLSss3",
+  "buildFLSss330",
   "buildFLSRss3",
   "buildFLSss3",
   "buildFLRPss3",
+  "buildFLRPss330",
   "buildKobess3",
   "buildRESss3",
   "buildRESss330",
   "checkFLSss3",
+  "convergencelevel",
   "loadOM",
   "loadOMS",
   "loadFLQs",
@@ -28,6 +31,7 @@ export(
   "loadRPs",
   "nameGrid",
   "packss3run",
+  "readCDss3",
   "readFLIBss3",
   "readKobess3",
   "readFLRPss3",
@@ -35,10 +39,12 @@ export(
   "readFLSRss3",
   "readFLSss3",
   "readSRIss3",
+  "readOutputss3",
   "readRESss3",
   "readRESIDss3",
   "readOMSss3",
-  "runss3grid"
+  "runss3grid",
+  "runtime"
 )
 
 exportMethods(
