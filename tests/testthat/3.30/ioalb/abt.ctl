@@ -455,10 +455,10 @@
 # 1 19 1 0 1
 # 1 20 1 0 1
 
-## northwest CPUE indices
- 1 12 1 1 1
+## switch off northern CPUE indices
+ 1 12 1 0 1
  1 13 1 0 1
- 1 14 1 0 1
+ 1 14 1 1 1
 ## switch off SE CPUE indices
  1 15 1 0 1
 ## switch off early CPUE indices
