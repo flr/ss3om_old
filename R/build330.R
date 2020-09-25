@@ -68,7 +68,8 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
     "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
-    "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age")]
+    "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age",
+    "mean_body_wt")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
@@ -101,8 +102,8 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
 
   # WT
-  wtatage <- endgrowth[,
-    c("Seas", "unit", "Age", paste0("RetWt:_", fleets)), with=FALSE]
+  wtatage <- endgrowth[, c("Seas", "unit", "Age", paste0("RetWt:_", fleets)),
+    with=FALSE]
 
   # STOCK.WT
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)

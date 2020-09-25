@@ -30,4 +30,4 @@ License: EUPL
 LazyData: false
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
