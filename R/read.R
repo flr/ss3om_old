@@ -40,7 +40,8 @@
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
+readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
+  ...) {
 
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
   
@@ -73,7 +74,8 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
+readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -107,7 +109,8 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas, ...) {
 #' @seealso \link{FLComp}
 #' @keywords classes
 
-readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
+readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
+  compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -117,15 +120,15 @@ readFLSRss3 <- function(dir, birthseas=out$birthseas, ...) {
 } # }}}
 
 # readFLRPss3 {{{
-readFLRPss3 <- function(dir, ...) {
+readFLRPss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
   if(out$SS_versionNumeric > 3.24)
-    buildFLRPss330(out, ...)
+    buildFLRPss330(out)
   else
-   buildFLRPss3(out, ...)
+   buildFLRPss3(out)
 
 } # }}}
 
@@ -143,7 +146,7 @@ readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...
 } # }}}
 
 # readKobess3 {{{
-readKobess3 <- function(dir, ...) {
+readKobess3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -151,12 +154,13 @@ readKobess3 <- function(dir, ...) {
   if(out$SS_versionNumeric > 3.24)
     stop("ss3om currently only supports SS3 <= 3.24")
 
-  buildKobess3(out, ...)
+  buildKobess3(out)
 
 } # }}}
 
 # readFLomss3 {{{
-readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -177,7 +181,8 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 } # }}}
 
 # readFLoemss3 {{{
-readFLoemss3 <- function(dir, fleets, ...) {
+readFLoemss3 <- function(dir, fleets, repfile="Report.sso",
+  compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -196,7 +201,8 @@ readFLoemss3 <- function(dir, fleets, ...) {
 } # }}}
 
 # readFLomess3 {{{
-readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -228,7 +234,8 @@ readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 } # }}}
 
 # readOMSss3 {{{
-readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -255,7 +262,8 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
 } # }}}
 
 # readOMSss3 {{{
-readSRIss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+readSRIss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
@@ -272,8 +280,9 @@ readSRIss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
   return(list(sr=srr, indices=idx))
 } # }}}
 
-# readOMSss3 {{{
-readRESIDss3 <- function(dir, birthseas=out$birthseas, fleets, ...) {
+# readRESIDss3 {{{
+readRESIDss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)

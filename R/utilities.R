@@ -179,12 +179,14 @@ runtime <- function(dir) {
 } # }}}
 
 # convergencelevel {{{
-convergencelevel <- function(dir) {
+convergencelevel <- function(dir, compress="gz") {
 
-  if(basename(dir) == "Report.sso")
+  if(grepl("Report.sso", basename(dir))) {
     file <- dir
-  else
-    file <- file.path(dir, "Report.sso")
+  } else {
+    fls <- list.files(dir)
+    file <- file.path(dir, fls[grep("^Report.sso", fls)])
+  }
 
   out <- readLines(file, n = 15)
 

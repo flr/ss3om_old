@@ -72,8 +72,11 @@ runss3grid <- function(grid, dir=paste0('grid', format(Sys.time(), "%Y%m%d")),
 
 nameGrid <- function(df, dir, from=1) {
 	df$iter <- seq(from=from, length=nrow(df))
-	df$id <- paste(df$iter, apply(df, 1, function(x)
-		paste0(gsub(" ", "", paste0(names(x), as.character(x))), collapse="_")), sep="-")
+  dgs <- nchar(max(df$iter))
+  dfo <- paste0("%0", dgs, "i")
+	df$id <- paste(sprintf(dfo, df$iter), apply(df, 1, function(x)
+		paste0(gsub(" ", "", paste0(names(x), as.character(x))),
+      collapse="_")), sep="-")
 	return(df)
 }
 # }}}
