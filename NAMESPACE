@@ -11,6 +11,7 @@ export(
   "%++%",
   "buildFLBFss3",
   "buildFLIBss3",
+  "buildFLIBss330",
   "buildFLSss3",
   "buildFLSss330",
   "buildFLSRss3",
