@@ -4,7 +4,13 @@
 \alias{readFLSRss3}
 \title{A function to read the stock-recruit relationships from an SS3 run into an \code{FLSR} object}
 \usage{
-readFLSRss3(dir, birthseas = out$birthseas, ...)
+readFLSRss3(
+  dir,
+  birthseas = out$birthseas,
+  repfile = "Report.sso",
+  compfile = "CompReport.sso",
+  ...
+)
 }
 \arguments{
 \item{dir}{Directory containing the SS3 output files}

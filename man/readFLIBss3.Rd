@@ -4,7 +4,14 @@
 \alias{readFLIBss3}
 \title{A function to read the CPUE series from an SS3 run into an \code{FLIndex} object}
 \usage{
-readFLIBss3(dir, fleets, birthseas = out$birthseas, ...)
+readFLIBss3(
+  dir,
+  fleets,
+  birthseas = out$birthseas,
+  repfile = "Report.sso",
+  compfile = "CompReport.sso",
+  ...
+)
 }
 \arguments{
 \item{dir}{Directory containing the SS3 output files}

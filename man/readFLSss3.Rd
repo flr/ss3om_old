@@ -4,8 +4,7 @@
 \alias{readFLSss3}
 \title{A function to read SS3 results as an FLStock object}
 \usage{
-readFLSss3(dir, repfile = "Report.sso", compfile = "CompReport.sso",
-  ...)
+readFLSss3(dir, repfile = "Report.sso", compfile = "CompReport.sso", ...)
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
@@ -19,7 +18,7 @@ readFLSss3(dir, repfile = "Report.sso", compfile = "CompReport.sso",
 \item{desc}{Description of the output object to fill the desc slot}
 }
 \value{
-An object of class \code{\link{FLStock}}
+An object of class \verb{\link{FLStock}}
 }
 \description{
 Results of a run of the Stock Synthesis sofware, SS3 (Methot & Wetzel, 2013),
