@@ -6,165 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-#' Functions to convert SS3 output into FLQuant(s)
-#'
-#' A series of auxiliary functions that convert one or more elements, typically
-#' of class `data.frame`. in the list returned by `r4ss::SS_output` into particular
-#' FLQuant or FLQuants objects.
-#'
-#' @return An FLQuant or FLQuants object, depending on the converted data structure
-#'
-#' @name ss3slot
-#' @rdname ss3slot
-#'
-#' @author Iago Mosqueira, EC JRC D02
-#' @seealso \code{\link{FLQuant}} \code{\link{readFLSss3}}
-#' @keywords classes
-
-#' @rdname ss3slot
-#' @aliases ss3index
-#' @param cpue A data frame obtained from SS_output$cpue.
-#' @param fleets A named list of vector of the fleets to be extracted.
-#' @details - `ss3index` returns the `index` slot of each survey/CPUE fleet.
-
-ss3index <- function(cpue, fleets) {
-  
-  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Exp")]
-
-  # CHANGE names and SORT
-  names(index) <- c("qname", "year", "season", "data")
-  setorder(index, year, season, qname)
-  index[, age:='all']
-
-  # CONVERT to FLQuants
-  return(as(index, "FLQuants"))
-}
-
-#' @rdname ss3slot
-#' @aliases ss3index.res
-#' @details - `ss3index.res` returns the `index.res` slot of each survey/CPUE fleet.
-
-ss3index.res <- function(cpue, fleets) {
- 
-  # DEBUG Dev vs. Obs-Exp 
-  cpue[, Res := Obs-Exp]
-  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Dev")]
-
-  # CHANGE names and SORT
-  names(index) <- c("qname", "year", "season", "data")
-  setorder(index, year, season, qname)
-  index[, age:='all']
-
-  # CONVERT to FLQuants
-  return(as(index, "FLQuants"))
-}
-
-#' @rdname ss3slot
-#' @aliases ss3index.var
-#' @details - `ss3index.var` returns the `index.var` slot of each survey/CPUE fleet.
-
-ss3index.var <- function(cpue, fleets) {
-
-  index.var <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "SE")]
-
-  # CHANGE names and SORT
-  names(index.var) <- c("qname", "year", "season", "data")
-  setorder(index.var, year, season, qname)
-  index.var[, age:='all']
-
-  # CONVERT to FLQuants
-  index.var <- as(index.var, "FLQuants")
-
-  # units = SE
-  index.var <- lapply(index.var, "units<-", "se")
-
-  return(index.var)
-}
-
-#' @rdname ss3slot
-#' @aliases ss3index.q
-#' @details - `ss3index.q` returns the `index.q` slot of each survey/CPUE fleet.
-
-ss3index.q <- function(cpue, fleets) {
-
-  index.q <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Calc_Q")]
-
-  # CHANGE names and SORT
-  names(index.q) <- c("qname", "year", "season", "data")
-  setorder(index.q, year, season, qname)
-  index.q[, age:='all']
-
-  # CONVERT to FLQuants
-  return(as(index.q, "FLQuants"))
-}
-
-#' @rdname ss3slot
-#' @aliases ss3sel.pattern
-#' @param selex A data frame obtained from SS_output$ageselex.
-#' @param years Vector of years for which the index applies
-#' @param fleets Named vector of fleets (numeric) codes
-#' @param morphs Vector of morphs to use
-#' @details - `ss3sel.pattern` returns the `sel.pattern` slot of each survey/CPUE fleet.
-
-ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
-
-  setkey(selex, "Factor", Fleet, Yr, Morph)
-
-  # SUBSET Asel2, fleets, cpue years for Morph
-  selex <- selex[CJ(factor, fleets, years, morphs)]
-  selex[, c("Factor", "Morph", "Label") := NULL]
-
-  # RESHAPE to long
-  selex <- melt(selex, id.vars=c("Fleet", "Yr", "Seas", "Sex"),
-    variable.name="age", value.name="data")
-
-  # CHANGE names & SORT
-  names(selex) <- c("qname", "year", "season", "unit", "age", "data")
-  selex[, age:=as.numeric(as.character(age))]
-  setorder(selex, qname, age, year, unit, season)
-
-  # CONVERT to FLQuants
-  sel.pattern <- as(as.data.frame(selex), 'FLQuants')
-  
-  # ASSIGN names
-  names(sel.pattern) <- names(fleets)
-  
-  # SET units
-  sel.pattern <- lapply(sel.pattern, function(x) {
-    units(x) <- ""
-    return(x)
-  })
-
-  return(sel.pattern)
-}
-
-#' @rdname ss3slot
-#' @aliases ss3wt
-#' @param endgrowth A data frame obtained from SS_output$endgrowth.
-#' @param dmns dimnames of the output object, usually obatined using `getDimnames`.
-#' @param birthseas The birthseasons for this stock as a numeric vector.
-#' @details - `ss3wt` returns the `stock.wt` slot.
-
-ss3wt <- function(endgrowth, dmns, birthseas) {
-  
-  # EXTRACT stock.wt - Wt_mid @ endgrowth[, Seas, BirthSeas, Age, M]
-  wt <- endgrowth[BirthSeas %in% birthseas,
-    list(BirthSeas, Sex, Seas, Age, Wt_Beg)]
-
-  # CREATE unit from Sex + BirthSeas
-  wt[, uSex:={if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}}]
-  wt[, uBirthSeas:={if(length(unique(BirthSeas)) == 1){""} else {BirthSeas}}]
-  wt[, unit:=ifelse(paste0(uSex, uBirthSeas) == "", "unique", paste0(uSex, uBirthSeas))]
-  wt[, c("Sex","uSex","BirthSeas","uBirthSeas") := NULL]
-
-  # RENAME
-  names(wt) <- c("season", "age", "data", "unit")
-  
-  # EXPAND by year, unit & season
-  return(FLCore::expand(as.FLQuant(wt[, .(season, age, data, unit)], units="kg"),
-    year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area))
-}
-
 #' @rdname ss3slot
 #' @aliases ss3mat30
 #' @details - `ss3mat30` returns the `mat` slot.
@@ -172,7 +13,8 @@ ss3wt <- function(endgrowth, dmns, birthseas) {
 ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
   
   # EXTRACT mat - endgrowth
-  mat <- endgrowth[, .(unit, Seas, Age, Age_Mat, `Mat*Fecund`, Wt_Beg)]
+  mat <- endgrowth[, .(unit, Seas, Age, Age_Mat, `Mat*Fecund`, Wt_Beg,
+    Mat_F_wtatage, Mat_F_Natage)]
 
   # maturity option 6: mat=Mat*Fecund / max(Mat*Fecund)
   if(option == 6)
@@ -182,20 +24,21 @@ ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
   if(option == 3)
     mat[, mat:= Age_Mat]
 
-  # maturity option 1: mat=Age_Mat
+  # maturity option 1: mat=Mat*Fecund / Wt_Beg
   if(option == 1)
     mat[, mat:= `Mat*Fecund` / Wt_Beg]
 
   # DEBUG
-  if(!option %in% c(3, 6, 1))
+  if(option == 2)
+    mat[, mat:= Age_Mat]
+  
+  # DEBUG
+  if(!option %in% c(3, 6, 1, 2))
     stop(paste0("maturity option not covered yet, option: ", option))
 
-  # IF maturity_option == 3, mat = mat / wt
-  # if(all(mat[, Age_Mat] %in% c(0,1)))
-  #   mat[, mat:= `Mat*Fecund` / Wt_Beg]
-  
   # DELETE columns
-  mat[ ,`:=`(Age_Mat = NULL, `Mat*Fecund` = NULL, Wt_Beg = NULL)]
+  mat[ ,`:=`(Age_Mat = NULL, `Mat*Fecund` = NULL, Wt_Beg = NULL,
+    Mat_F_wtatage = NULL, Mat_F_Natage = NULL)]
 
   # RENAME
   names(mat) <- c("unit", "season", "age", "data")

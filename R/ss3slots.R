@@ -108,7 +108,7 @@ ss3index.q <- function(cpue, fleets) {
 
 # ss3sel.pattern
 ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
-
+  
   setkey(selex, "Factor", Fleet, Yr, Morph)
 
   # SUBSET Asel2, fleets, cpue years for Morph

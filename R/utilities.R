@@ -94,7 +94,7 @@ getRange <- function(x) {
 packss3run <- function(dir=getwd(),
   gzfiles=c("Report.sso", "covar.sso", "wtatage.ss_new", "CompReport.sso"),
   keepfiles=c("warning.sso", "Forecast-report.sso", "starter.ss", "forecast.ss",
-    "ss3.par", "ss.par", "ss.cor"),
+    "ss3.par", "ss.par", "ss.cor", "watatage.ss"),
   inputfiles=c("control.ss", "data.ss", list.files(dir, pattern="*.ctl|dat$"))) {
 
   # CHECK if already compressed
