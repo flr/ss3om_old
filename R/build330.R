@@ -69,7 +69,7 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
     "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
     "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age",
-    "mean_body_wt")]
+    "mean_body_wt", "Spawn_timing_in_season")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
@@ -109,6 +109,7 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
   # MAT
+  # option = 2, expect mat FLQuant
   mat <- ss3mat30(endgrowth, dmns, birthseas, option=out$Maturity_option)
 
   # M
@@ -136,6 +137,8 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   
   # DISCARDS
   if(!is.na(out["discard"])) {
+
+    stop("PROBLEM with discards")
   
     datage <- data.table(out$discard_at_age)
     datage[, unit:=codeUnit(Sex)]
@@ -143,7 +146,7 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     
     # DEBUG
     ageselex <- data.table(out$ageselex)
-    lastyr <- unique(ageselex[Factor=="sel_nums", Yr])
+    lastyr <- unique(ageselex[Factor=="Asel2", Yr])
     
     # TOTAL selex (catch$kill_nums)
     seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
@@ -199,9 +202,9 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   catch(stock) <- computeCatch(stock, slot='all')
   stock(stock) <- computeStock(stock)
 
-  # ASSIGN harvest.spwn and m.spwn in birthseas
-  harvest.spwn(stock)[,,,out$spawnseas] <- 0
-  m.spwn(stock)[,,,out$spawnseas] <- 0
+  # ASSIGN harvest.spwn and m.spwn
+  harvest.spwn(stock) <- out$Spawn_timing_in_season
+  m.spwn(stock) <- out$Spawn_timing_in_season
 
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
