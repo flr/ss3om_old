@@ -46,9 +46,51 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
   
   if(out$SS_versionNumeric > 3.24)
-    buildFLSss330(out, ...)
+    res <- buildFLSss330(out, ...)
   else
-    buildFLSss3(out, ...)
+    res <- buildFLSss3(out, ...)
+ 
+  # CHANGE mat and *.wt if wtatage file being used 
+  if(out$wtatage_switch) {
+
+    # FIND wtatage.ss_new
+    waafile <- list.files(dir)[grep("wtatage.ss_new", list.files(dir))]
+
+    # LOAD wtatage.ss_new
+    waa <- data.table(SS_readwtatage(file.path(dir, waafile)))
+
+    # SET year, unit and season
+    waa[, year:=Yr]
+    waa[, unit:=Sex]
+    waa[, season:=Seas]
+
+    # SUBSET FLStock years
+    waa <- waa[year %in% dimnames(res)$year,]
+
+    # SPLIT weights by fleet
+    was <- split(waa, by="Fleet")
+
+    # CRAETE FLQuants
+    wasq <- lapply(was, function(x)
+    as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
+      measure=ac(0:20), variable.name = "age", value.name = "data")))
+
+    # stock.wt, Fleet = 0
+    stock.wt(res)[] <- wasq[["0"]]
+
+    # mat, Fleet = -2
+    nmat <- wasq[["-2"]] / wasq[["0"]]
+    mat(res)[] <- nmat %/% apply(nmat, 2, max)
+
+    # catch.wt DEBUG weighted average
+    catch.wt(res)[] <- Reduce("+", wasq[!names(wasq) %in% c("0", "-1", "-2")]) /
+      (length(wasq) - 3)
+    landings.wt(res) <- catch.wt(res)
+    discards.wt(res) <- catch.wt(res)
+  }
+
+  return(res)
+
 } # }}}
 
 # readFLIBss3 {{{
