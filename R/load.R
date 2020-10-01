@@ -120,21 +120,24 @@ loadFLS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
     # CONVERT stock to data.table
     stock <- data.table(as.data.frame(run, units=TRUE))
+    # iter is factor, need to DROP
     stock[, iter := NULL]
+    stock[, iter := as.numeric(i)]
 
     stock
   }
 
-  names(out) <- iters
-
   # COMBINE
   if(combine) {
-    out <- rbindlist(out, idcol="iter")
+    out <- rbindlist(out)
       if(convert)
         out <- as(out, "FLStock")
   } else {
-    if(convert)
-      out <- FLStocks(lapply(out, as, "FLStock"))
+    if(convert) {
+      # SET returned iters as names
+      nms <- unlist(lapply(out, function(x) x$iter[1]))
+      out <- FLStocks(lapply(setNames(out, nms), as, "FLStock"))
+    }
   }
   
   return(out)
@@ -177,6 +180,7 @@ loadFLQs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 } # }}}
 
 # loadRES {{{
+# TODO SET to work with compress
 loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, repfile="Report.sso", compfile="CompReport.sso",
   covarfile="covar.sso", grid=NULL, ...) {
@@ -188,7 +192,7 @@ loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	# Loop over dirs
 	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
     .inorder=TRUE) %dopar% {
-		
+
     if(progress)
 			cat(paste0('[', i, ']\n'))
     
@@ -298,3 +302,25 @@ loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 } # }}}
 
 # loadFLIBs
+
+# loadOUT {{{
+# TODO SET to work with compress
+loadOUT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, repfile="Report.sso", compfile="CompReport.sso", ...) {
+
+  # ASSEMBLE paths
+  if(!missing(subdirs) & !missing(dir))
+    subdirs <- file.path(dir, subdirs)
+	
+  # Loop over dirs
+	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
+    .inorder=TRUE) %dopar% {
+
+    if(progress)
+			cat(paste0('[', i, ']\n'))
+    
+		readOutputss3(subdirs[i], repfile=repfile, compfile=compfile)
+	}
+  
+  return(out)
+} # }}}
