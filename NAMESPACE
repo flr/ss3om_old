@@ -30,6 +30,7 @@ export(
   "loadOMS",
   "loadFLQs",
   "loadFLS",
+  "loadOUT",
   "loadRESIDs",
   "loadRES",
   "loadRPs",
