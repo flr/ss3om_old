@@ -185,7 +185,7 @@ convergencelevel <- function(dir, compress="gz") {
     file <- dir
   } else {
     fls <- list.files(dir)
-    file <- file.path(dir, fls[grep("^Report.sso", fls)])
+    file <- file.path(dir, fls[grep("^Report.sso", fls)])[1]
   }
 
   out <- readLines(file, n = 15)

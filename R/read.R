@@ -70,7 +70,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     # SPLIT weights by fleet
     was <- split(waa, by="Fleet")
 
-    # CRAETE FLQuants
+    # CREATE FLQuants
     wasq <- lapply(was, function(x)
     as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
       measure=ac(0:20), variable.name = "age", value.name = "data")))
@@ -78,15 +78,23 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     # stock.wt, Fleet = 0
     stock.wt(res)[] <- wasq[["0"]]
 
-    # mat, Fleet = -2
+    # mat, Fleet = -2 / wt
     nmat <- wasq[["-2"]] / wasq[["0"]]
-    mat(res)[] <- nmat %/% apply(nmat, 2, max)
+    mat(res)[] <- nmat
 
-    # catch.wt DEBUG weighted average
-    catch.wt(res)[] <- Reduce("+", wasq[!names(wasq) %in% c("0", "-1", "-2")]) /
-      (length(wasq) - 3)
+    # IDENTIFY catch fleets
+    idx <- names(wasq)[!names(wasq) %in% c("0", "-1", "-2")][out$fleet_type == 1]
+
+    # COMPUTE catch.wt DEBUG weighted average
+    catch.wt(res)[] <- Reduce("+", wasq[idx]) /
+      (length(idx))
     landings.wt(res) <- catch.wt(res)
     discards.wt(res) <- catch.wt(res)
+
+    catch(res) <- computeCatch(res)
+    landings(res) <- computeLandings(res)
+    discards(res) <- computeDiscards(res)
+    stock(res) <- computeStock(res)
   }
 
   return(res)
