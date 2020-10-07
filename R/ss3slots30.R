@@ -18,7 +18,8 @@ ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
 
   # maturity option 6: mat=Mat*Fecund / max(Mat*Fecund)
   if(option == 6)
-    mat[, mat:= `Mat*Fecund` / max(`Mat*Fecund`), by=.(unit, Seas)]
+    #mat[, mat:= `Mat*Fecund` / max(`Mat*Fecund`), by=.(unit, Seas)]
+    mat[, mat:= `Mat*Fecund`]
   
   # maturity option 3: mat=Age_Mat
   if(option == 3)

@@ -109,8 +109,11 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
   # MAT
-  # option = 2, expect mat FLQuant
   mat <- ss3mat30(endgrowth, dmns, birthseas, option=out$Maturity_option)
+
+  # CORRECT Mat*Fecund to by unit body weight
+  if(out$Maturity_option == 6)
+    mat <- mat / wt
 
   # M
   m <- ss3m30(endgrowth, dmns, birthseas)
@@ -182,8 +185,7 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     discards.wt <- catch.wt
 
   } else {
-    discards.n <- catch.n
-    discards.n[] <- 0
+    discards.n <- catch.n * 0
     discards.wt <- catch.wt
   }
 

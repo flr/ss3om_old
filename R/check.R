@@ -6,51 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# TODO checkFLSss3 {{{
-
-checkFLSss3 <- function(object, dir, ...) {
-
-  out <- readOutputss3(dir)
-
-  spread(lapply(out[c("derived_quants", "discard", "Kobe")], data.table))
-
-  # SSB: derived_quants$SSB_ ~ ssb(object)[,,, spawnseas] - 1%
-
-  ssb3 <- derived_quants[Label %in% paste0("SSB_", seq(out$startyr, out$endyr)), Value]
-
-  ssbo <- c(unitSums(ssb(object)[,,,out$spawnseas]))
-
-  # unitSums(ssb(object)[,,,out$spawnseas])
-  # unitSums(quantSums(stock.n(object)[,,,4] * stock.wt(object)[,,,4] * mat(object)[,,,1]))
-
-  if(any(1 - (ssbo / ssb3) > 0.01))
-    warning("SSB in one or more years differs by more than 1%")
-
-  # REC
-  fs <- derived_quants[Label %in% paste0("F_", seq(out$startyr, out$endyr)), Value]
-
-  # F
-  
-  # DISCARDS
- if(!is.na(discard)) {
-    dis3 <- discard[, .(Fleet, Yr, Exp_cat)]
-    setnames(dis3, c("qname", "year", "data"))
-    dis3 <- as(dis3, "FLQuants")
-    dis3 <- lapply(mcf(dis3), function(x) {x[is.na(x)] <- 0; x})
-    dis3 <- Reduce("+", dis3)
-  
-
-    # FROM discards.n
-    unitSums(discards(object))
-    window(unitSums(quantSums(discards.n(object) * discards.wt(object))), start=1986)
-  }
-
-  window(unitSums(quantSums(catch.n * catch.wt)), start=1986)
-
-  return(TRUE)
-
-} # }}}
-
 # extractSS {{{
 
 #' Extracts derived quantities from SS output
