@@ -52,51 +52,6 @@ test_that("Calculated annual Z at age matches that in Report.sso", {
 )
 # }}}
 
-# --- simple_with_discard {{{
-
-path <- file.path("3.30", "simple_with_discard")
-
-sid <- readOutputss3(path)
-sids <- readFLSss3(path, range = c(minfbar=10, maxfbar=15))
-
-# CHECK SS_output & FLStock load
-
-test_that("SS_output and FLStock load", {
-
-  expect_true(validObject(sims))
-
-  }
-)
-
-# CHECK SSB matches
-
-test_that("Calculated SSB matches that in Report.sso", {
-  expect_comparable(
-    unitSums(ssb(sims)),
-    extractSSB(sim))
-  }
-)
-
-# CHECK Fbar matches
-
-test_that("Calculated annual Fbar matches that in Report.sso", {
-  expect_comparable(
-    unitMeans(fbar(sims))[, -1],
-    extractFbar(sim))
-  }
-)
-
-# CHECK harvest
-
-test_that("Calculated annual Z at age matches that in Report.sso", {
-  expect_comparable(
-    # LAST age not returned in Report.sso$Z_at_age
-    z(sims)[dimnames(sims)$age[-dims(sims)$age],],
-    extractZatage(sim))
-  }
-)
-# }}}
-
 # --- albio {{{
 
 path <- file.path("3.30", "albio")
@@ -113,7 +68,7 @@ test_that("Calculated SSB matches that in Report.sso", {
   }
 )
 
-# DEBUG CHECK Fbar matches
+# CHECK Fbar matches
 
 test_that("Calculated annual Fbar matches that in Report.sso", {
   expect_comparable(
