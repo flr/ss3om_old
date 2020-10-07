@@ -21,7 +21,6 @@ export(
   "buildKobess3",
   "buildRESss3",
   "buildRESss330",
-  "checkFLSss3",
   "convergencelevel",
   "extractFbar",
   "extractSSB",
