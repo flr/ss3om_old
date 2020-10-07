@@ -26,6 +26,7 @@ export(
   "extractFbar",
   "extractSSB",
   "extractRec",
+  "extractZatage",
   "loadOM",
   "loadOMS",
   "loadFLQs",
