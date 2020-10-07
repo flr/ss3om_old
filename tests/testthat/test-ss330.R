@@ -52,6 +52,51 @@ test_that("Calculated annual Z at age matches that in Report.sso", {
 )
 # }}}
 
+# --- simple_with_discard {{{
+
+path <- file.path("3.30", "simple_with_discard")
+
+sid <- readOutputss3(path)
+sids <- readFLSss3(path, range = c(minfbar=10, maxfbar=15))
+
+# CHECK SS_output & FLStock load
+
+test_that("SS_output and FLStock load", {
+
+  expect_true(validObject(sims))
+
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(sims)),
+    extractSSB(sim))
+  }
+)
+
+# CHECK Fbar matches
+
+test_that("Calculated annual Fbar matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(sims))[, -1],
+    extractFbar(sim))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(sims)[dimnames(sims)$age[-dims(sims)$age],],
+    extractZatage(sim))
+  }
+)
+# }}}
+
 # --- albio {{{
 
 path <- file.path("3.30", "albio")
@@ -59,7 +104,7 @@ path <- file.path("3.30", "albio")
 alb <- readOutputss3(path)
 albs <- readFLSss3(path, range = c(minfbar=1, maxfbar=12))
 
-# DEBUG CHECK SSB matches
+# CHECK SSB matches
 
 test_that("Calculated SSB matches that in Report.sso", {
   expect_comparable(
@@ -127,6 +172,49 @@ test_that("Calculated annual Z at age matches that in Report.sso", {
     # LAST age not returned in Report.sso$Z_at_age
     z(fevs)[ac(0:10),],
     extractZatage(fev)[ac(0:10),])
+  }
+)
+# }}}
+
+# --- herring {{{
+
+path <- file.path("3.30", "herring")
+
+her <- readOutputss3(path)
+hers <- readFLSss3(path, range = c(minfbar=3, maxfbar=7))
+
+# CHECK SS_output & FLStock load
+
+test_that("SS_output and FLStock load", {
+  expect_true(validObject(hers))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(hers)),
+    extractSSB(her))
+  }
+)
+  
+# CHECK Fbar matches
+
+test_that("Calculated annual Fbar matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(hers))[, -1],
+    extractFbar(her))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(hers)[ac(0:18),],
+    extractZatage(her)[ac(0:18),])
   }
 )
 # }}}
