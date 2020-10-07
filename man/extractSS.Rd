@@ -30,6 +30,7 @@ in the \emph{derived_quants} data.frame:
 \item \emph{extractSSB}: \code{SSB_y} for y between \code{startyr} and \code{endyr}.
 \item \emph{extractRec}: \code{Recr_y} for y between \code{startyr} and \code{endyr}.
 \item \emph{extractFbar}: \code{F_y} for y between \code{startyr} and \code{endyr}.
+\item \emph{extractZatage}: \code{Z_ay} for y between \code{startyr} and \code{endyr} and ages but last.
 }
 
 For 2 sex models (\code{nsexes}), \emph{extractRec} will return a two-unit \emph{FLQuant},
@@ -41,8 +42,7 @@ and the value in \code{derived_quants} is corrected according to \code{F_report_
 for models where F reporting basis is F/FMSY.
 }
 \examples{
-out <- readOutputss3(system.file("ext-data", "alb", package="ss3om"),
-  compress="bz2")
+out <- readOutputss3(system.file("ext-data", "herring", package="ss3om"))
 
 extractSSB(out)
 

@@ -38,18 +38,6 @@ ss3n(n, dmns, birthseas)
 
 ss3catch(catage, wtatage, dmns, birthseas, idx)
 
-ss3index(cpue, fleets)
-
-ss3index.res(cpue, fleets)
-
-ss3index.var(cpue, fleets)
-
-ss3index.q(cpue, fleets)
-
-ss3sel.pattern(selex, years, fleets, morphs, factor = "Asel2")
-
-ss3wt(endgrowth, dmns, birthseas)
-
 ss3mat30(endgrowth, dmns, birthseas, option = 3)
 
 ss3m30(endgrowth, dmns, birthseas)
@@ -85,14 +73,8 @@ ss3catch30(catage, wtatage, dmns, birthseas, idx)
 }
 \value{
 An FLQuant or FLQuants object, depending on the converted data structure
-
-An FLQuant or FLQuants object, depending on the converted data structure
 }
 \description{
-A series of auxiliary functions that convert one or more elements, typically
-of class \code{data.frame}. in the list returned by \code{r4ss::SS_output} into particular
-FLQuant or FLQuants objects.
-
 A series of auxiliary functions that convert one or more elements, typically
 of class \code{data.frame}. in the list returned by \code{r4ss::SS_output} into particular
 FLQuant or FLQuants objects.
@@ -139,30 +121,6 @@ FLQuant or FLQuants objects.
 }
 
 \itemize{
-\item \code{ss3index} returns the \code{index} slot of each survey/CPUE fleet.
-}
-
-\itemize{
-\item \code{ss3index.res} returns the \code{index.res} slot of each survey/CPUE fleet.
-}
-
-\itemize{
-\item \code{ss3index.var} returns the \code{index.var} slot of each survey/CPUE fleet.
-}
-
-\itemize{
-\item \code{ss3index.q} returns the \code{index.q} slot of each survey/CPUE fleet.
-}
-
-\itemize{
-\item \code{ss3sel.pattern} returns the \code{sel.pattern} slot of each survey/CPUE fleet.
-}
-
-\itemize{
-\item \code{ss3wt} returns the \code{stock.wt} slot.
-}
-
-\itemize{
 \item \code{ss3mat30} returns the \code{mat} slot.
 }
 
@@ -180,12 +138,8 @@ FLQuant or FLQuants objects.
 }
 \seealso{
 \code{\link{FLQuant}} \code{\link{readFLSss3}}
-
-\code{\link{FLQuant}} \code{\link{readFLSss3}}
 }
 \author{
-Iago Mosqueira, EC JRC D02
-
 Iago Mosqueira, EC JRC D02
 }
 \keyword{classes}
