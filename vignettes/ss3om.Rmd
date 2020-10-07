@@ -26,23 +26,13 @@ library(ss3om)
 ```
 
 ```{r setpwd}
-dir <- system.file("ext-data/alb", package="ss3om")
+dir <- system.file("ext-data/herring", package="ss3om")
 ```
 
 ## *FLStock*
 
 ```{r readfls}
-simp324 <- readFLSss3(dir, name="alb",
-  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
-```
-
-```{r ssout}
-out <- r4ss::SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-  printstats=FALSE, covar=FALSE, forecast=FALSE,
-  repfile="Report.sso.bz2", compfile="CompReport.sso.bz2")
-  
-format(object.size(out), units='Mb')
-
+simp324 <- readFLSss3(dir, name="herring")
 ```
 
 # Loading a full OM grid using `load`
