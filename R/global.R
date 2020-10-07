@@ -8,6 +8,7 @@
 
 utils::globalVariables(c(
   ".", 
+  "0",
   "Active_Cnt",
   "Age", 
   "Age_Mat", 
@@ -27,6 +28,8 @@ utils::globalVariables(c(
   "Label",
   "M",
   "Mat*Fecund",
+  "Mat_F_Natage",
+  "Mat_F_wtatage",
   "Morph",
   "Name",
   "Obs",

@@ -40,7 +40,7 @@ buildRESss330 <- function(out, ...) {
     `SSB_MSY`=out$derived_quants["SSB_MSY", "Value"],
     
     # Fstd_MSY
-    `Fstd_MSY`=out$derived_quants["Fstd_MSY", "Value"],
+    `Fstd_MSY`=out$derived_quants["annF_MSY", "Value"],
     
     # TotYield_MSY
     # `TotYield_MSY`=out$derived_quants["TotYield_MSY", "Value"],

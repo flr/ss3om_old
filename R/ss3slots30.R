@@ -33,7 +33,11 @@ ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
     mat[, mat:= Age_Mat]
   
   # DEBUG
-  if(!option %in% c(3, 6, 1, 2))
+  if(option == 5)
+    mat[, mat:= 0]
+  
+  # DEBUG
+  if(!option %in% c(3, 6, 1, 2, 5))
     stop(paste0("maturity option not covered yet, option: ", option))
 
   # DELETE columns

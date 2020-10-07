@@ -64,6 +64,9 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     waa[, unit:=Sex]
     waa[, season:=Seas]
 
+    # GET ages
+    ages <- dimnames(res)$age
+
     # SUBSET FLStock years
     waa <- waa[year %in% dimnames(res)$year,]
 
@@ -73,7 +76,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     # CREATE FLQuants
     wasq <- lapply(was, function(x)
     as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
-      measure=ac(0:20), variable.name = "age", value.name = "data")))
+      measure=ages, variable.name = "age", value.name = "data")))
 
     # stock.wt, Fleet = 0
     stock.wt(res)[] <- wasq[["0"]]

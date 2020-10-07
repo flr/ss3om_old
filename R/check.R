@@ -64,6 +64,7 @@ checkFLSss3 <- function(object, dir, ...) {
 #' - *extractSSB*: `SSB_y` for y between `startyr` and `endyr`.
 #' - *extractRec*: `Recr_y` for y between `startyr` and `endyr`.
 #' - *extractFbar*: `F_y` for y between `startyr` and `endyr`.
+#' - *extractZatage*: `Z_ay` for y between `startyr` and `endyr` and ages but last.
 #'
 #' For 2 sex models (`nsexes`), *extractRec* will return a two-unit *FLQuant*,
 #' with the `Recr_y` values split according to the recruitment sex ratio. This
@@ -79,8 +80,7 @@ checkFLSss3 <- function(object, dir, ...) {
 #' @rdname extractSS
 #'
 #' @examples
-#' out <- readOutputss3(system.file("ext-data", "alb", package="ss3om"),
-#'   compress="bz2")
+#' out <- readOutputss3(system.file("ext-data", "herring", package="ss3om"))
 #'
 #' extractSSB(out)
 #'
@@ -108,22 +108,60 @@ extractRec <- function(out) {
 
 #' @rdname extractSS
 extractFbar <- function(out) {
+  
   fbar <- data.table(out$derived_quants)[Label %in% paste0("F_",
-    seq(out$startyr, out$endyr)), Value]
-
+    seq(out$startyr + 1, out$endyr)), ]
+  
   if(grepl("3.24", out$SS_version, fixed = TRUE))
     row <- "Fstd_MSY"
   else
     row <- "annF_MSY"
 
-  # F_report_basis F/Fmsy
+  # F_report_basis F/Fmsy (2)
   if(grepl("(F)/(Fmsy)", out$F_report_basis, fixed=TRUE)) {
-    fbar <- fbar * out$derived_quants[row, "Value"]
+    fbar <- fbar$Value * out$derived_quants[row, "Value"]
+
+  # F_report_basis abs_F (5)
+  } else if(grepl("abs_F", out$F_report_basis, fixed=TRUE)) {
+    fbar <- fbar$Value
+
+  # 
   } else {
     warning(paste("Returned F is relative to", out$F_report_basis))
   }
-
-  return(FLQuant(fbar, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
-    unit=list("unique")), units="f"))
+  return(FLQuant(fbar, dimnames=list(age="all",
+    year=seq(out$startyr + 1, out$endyr), unit="unique"), units="f"))
 }
+
+extractZatage <- function(out) {
+
+  # OUTPUT years
+  yrs <- seq(out$startyr, out$endyr)
+
+  # REFORMAT Z_at_age
+  Zmat <- out$Z_at_age[out$Z_at_age$Yr %in% yrs,]
+
+  # SET matrix from ages columns
+  Z <- as.matrix(Zmat[, -seq(1,3,)])
+  # DROP last age (NA)
+  Z <- Z[, -dim(Z)[2]]
+
+  # SPLIT if 2 sex
+  if(out$nsexes == 2) {
+    ZF <- Z[Zmat$Sex == 1,]
+    ZM <- Z[Zmat$Sex == 2,]
+
+    z <- FLQuant(NA, dimnames=list(age=colnames(ZF),
+      year=yrs, unit=c("F", "M")), units="z")
+    z[,,"F",] <- t(ZF)
+    z[,,"M",] <- t(ZM)
+  } else {
+    z <- FLQuant(NA, dimnames=list(age=colnames(Z),
+      year=yrs), units="z")
+    z[] <- t(Z)
+  }
+  return(z)
+}
+
+
 # }}}
