@@ -1,0 +1,10 @@
+#V3.30.16.00;_2020_09_03;_safe;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.2
+#Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
+#Foreign copyrights may apply. See copyright.txt for more information.
+Wed Oct  7 16:49:02 2020
+
+fishing fleet: 1 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+ Early recdev biasadj is >2 times ratio of rmse to sigmaR
+ warning: poor convergence in Fmsy, final dy/dy2= -0.132032
+ Fmsy is close to max allowed; check for convergence 
+ N warnings: 4

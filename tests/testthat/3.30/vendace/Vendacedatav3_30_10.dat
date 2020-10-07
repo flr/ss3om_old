@@ -1,0 +1,334 @@
+#V3.30.10.00-trans;_2018_01_09;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_11.6
+#_user_support_available_at:NMFS.Stock.Synthesis@noaa.gov
+#_user_info_available_at:https://vlab.ncep.noaa.gov/group/stock-synthesis
+#_Start_time: Mon May 21 17:52:14 2018
+#_Number_of_datafiles: 2
+#C data file for vendace SD 30
+#_observed data: 
+#V3.30.10.00-trans;_2018_01_09;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_11.6
+
+1991 #_StartYr
+2019 #_EndYr
+1 #_Nseas
+ 12 #_months/season
+2 #_Nsubseasons (even number, minimum is 2) #orig. none
+1 #_spawn_month
+1 #_Ngenders
+12 #_Nages=accumulator age #should this not be the plus group?
+1 #_Nareas
+3 #_Nfleets (including surveys)
+
+#_fleet_type: 1=catch fleet; 2=bycatch only fleet; 3=survey; 4=ignore 
+#_survey_timing: -1=for use of catch-at-age to override the month value associated with a datum 
+#_fleet_area:  area the fleet/survey operates in 
+#_units of catch:  1=bio; 2=num (ignored for surveys; their units read later)
+#_catch_mult: 0=no; 1=yes
+#_rows are fleets
+#_fleet_type timing area units need_catch_mult fleetname
+ 1 1010 1 1 0 Fleet  # 1
+ 1  -1  1 1 0 Seals  # 2
+# 3 1010 1 2 0 CPUE  # 3
+ 3 1009 1 2 0 Acoustic1  # 4
+
+#Bycatch_fleet_input_goes_next
+#a:  fleet index
+#b:  1=include dead bycatch in total dead catch for F0.1 and MSY optimizations and forecast ABC; 2=omit from total catch for these purposes (but still include the mortality)
+#c:  1=Fmult scales with other fleets; 2=bycatch F constant at input value; 3=bycatch F from range of years
+#d:  F or first year of range
+#e:  last year of range
+#f:  not used
+# a   b   c   d   e   f 
+
+#_Catch data: yr, seas, fleet, catch, catch_se
+#_catch_se:  standard error of log(catch)
+#_NOTE:  catch data is ignored for survey fleets
+-999	1	1	550	0.1
+1991	1	1	826	0.05
+1992	1	1	1096	0.05
+1993	1	1	861	0.05
+1994	1	1	648	0.05
+1995	1	1	515	0.05
+1996	1	1	477	0.05
+1997	1	1	553	0.05
+1998	1	1	239	0.05
+1999	1	1	245	0.05
+2000	1	1	458	0.05
+2001	1	1	534	0.05
+2002	1	1	789	0.05
+2003	1	1	1318	0.05
+2004	1	1	1418	0.05
+2005	1	1	1194	0.05
+2006	1	1	874	0.05
+2007	1	1	791	0.05
+2008	1	1	583	0.05
+2009	1	1	778	0.05
+2010	1	1	813	0.05
+2011	1	1	1008	0.05
+2012	1	1	1185	0.05
+2013	1	1	1173	0.05
+2014	1	1	1553	0.05
+2015	1	1	1553	0.05
+2016	1	1	1457	0.05
+2017	1	1	841	0.05
+2018	1	1	962	0.05
+2019	1	1	684	0.05
+
+#seal data			
+-999	1	2	837	0.1
+1991	1	2	881	0.05
+1992	1	2	1081	0.05
+1993	1	2	1021	0.05
+1994	1	2	859	0.05
+1995	1	2	840	0.05
+1996	1	2	844	0.05
+1997	1	2	1079	0.05
+1998	1	2	665	0.05
+1999	1	2	721	0.05
+2000	1	2	1204	0.05
+2001	1	2	1389	0.05
+2002	1	2	1757	0.05
+2003	1	2	2235	0.05
+2004	1	2	2358	0.05
+2005	1	2	2312	0.05
+2006	1	2	2235	0.05
+2007	1	2	2265	0.05
+2008	1	2	2102	0.05
+2009	1	2	2518	0.05
+2010	1	2	2462	0.05
+2011	1	2	2958	0.05
+2012	1	2	3258	0.05
+2013	1	2	3373	0.05
+2014	1	2	3941	0.05
+2015	1	2	3959	0.05
+2016	1	2	4121	0.05
+2017	1	2	3354	0.05
+2018	1	2	3576	0.05
+2019	1	2	3278	0.05
+-9999	0	0	0	0
+
+
+#
+#_CPUE_and_surveyabundance_observations
+#_Units:  0=numbers; 1=biomass; 2=F; >=30 for special types
+#_Errtype:  -1=normal; 0=lognormal; >0=T
+#_SD_Report: 0=no sdreport; 1=enable sdreport
+#_Fleet Units Errtype SD_Report
+1 1 0 0 # Fleet
+2 1 0 0 # Seal
+#3 0 0 0 # CPUE
+3 0 0 0 # Acoustic1
+
+#_yr month fleet obs stderr
+#2007 10 3 203.2 0.1 #_ CPUE
+#2008 10 3 133.4 0.1 #_ CPUE
+#2009 10 3 251.4 0.1 #_ CPUE
+#2010 10 3 282.4 0.1 #_ CPUE
+#2011 10 3 350.2 0.1 #_ CPUE
+#2012 10 3 346.2 0.1 #_ CPUE
+#2013 10 3 467.4 0.1 #_ CPUE
+#2014 10 3 732.6 0.1 #_ CPUE
+#2015 10 3 499.3 0.1 #_ CPUE
+#2016 10 3 363.5 0.1 #_ CPUE 
+#2017 10 3 190.0 0.1 #_ CPUE
+#2018 10 3 239.7 0.1 #_ CPUE
+
+2009 9.3 3 79 0.2 #_ Acoustic1 #changed all from biomass to numbers
+2010 9.3 3 136 0.2 #_ Acoustic1
+2011 9.3 3 222 0.2 #_ Acoustic1
+2012 9.3 3 149 0.2 #_ Acoustic1
+
+2013 11.0 3 1029 0.2 #_ Acoustic1
+2014 11.0 3 290 0.2 #_ Acoustic1
+
+2015 10.4 3 601 0.1 #_ Acoustic1
+2016 10.4 3 519 0.1 #_ Acoustic1
+2017 10.4 3 201 0.1 #_ Acoustic1
+2018 10.4 3 255 0.1 #_ Acoustic1
+2019 10.4 3 217 0.1 #_ Acoustic1
+-9999 1 1 1 1 # terminator for survey observations 
+
+#
+0 #_N_fleets_with_discard
+#_discard_units (1=same_as_catchunits(bio/num); 2=fraction; 3=numbers)
+#_discard_errtype:  >0 for DF of T-dist(read CV below); 0 for normal with CV; -1 for normal with se; -2 for lognormal; -3 for trunc normal with CV
+# note, only have units and errtype for fleets with discard 
+#_Fleet units errtype
+# -9999 0 0 0.0 0.0 # terminator for discard data 
+#
+0 #_use meanbodysize_data (0/1)
+#_COND_30 #_DF_for_meanbodysize_T-distribution_like # do we need to put 30 here?
+# note:  use positive partition value for mean body wt, negative partition for mean body length 
+#_yr month fleet part obs stderr
+#  -9999 0 0 0 0 0 # terminator for mean body size data 
+#
+
+# set up population length bin structure (note - irrelevant if not using size data and using empirical wtatage
+2 # length bin method: 1=use databins; 2=generate from binwidth,min,max below; 3=read vector
+2 # binwidth for population size comp 
+2 # minimum size in the population (lower edge of first bin and size at age 0.00) 
+40 # maximum size in the population (lower edge of last bin) 
+
+1 # use length composition data (0/1)
+#_mintailcomp: upper and lower distribution for females and males separately are accumulated until exceeding this level.
+#_addtocomp:  after accumulation of tails; this value added to all bins
+#_males and females treated as combined gender below this bin number 
+#_compressbins: accumulate upper tail by this number of bins; acts simultaneous with mintailcomp; set=0 for no forced accumulation
+#_Comp_Error:  0=multinomial, 1=dirichlet
+#_Comp_Error2:  parm number  for dirichlet
+#_minsamplesize: minimum sample size; set to 1 to match 3.24, minimum value is 0.001
+#_mintailcomp addtocomp combM+F CompressBins CompError ParmSelect minsamplesize
+0 1e-07 0 0 0 0 0.01 #_fleet:1_Fleet # if using the dirichlet multinomial change to 1 and add line according to hake example in the control file
+0 1e-07 0 0 0 0 0.01 #_fleet:2_seals
+#0 1e-07 0 0 0 0 0.01 #_fleet:3_CPUE
+0 1e-07 0 0 0 0 0.01 #_fleet:4_Acoustic1
+
+# sex codes:  0=combined; 1=use female only; 2=use male only; 3=use both as joint sexxlength distribution
+# partition codes:  (0=combined; 1=discard; 2=retained
+
+2 #_N_LengthBins; then enter lower edge of each length bin
+5 30
+
+#_yr month fleet sex part Nsamp datavector(female-male)
+-9999 0 0 0 0 0 0 0 
+
+#
+9 #_N_age_bins
+ 0 1 2 3 4 5 6 7 8
+
+1 #_N_ageerror_definitions
+ 0.5 	1.5 	2.5 	3.5 	4.5 	5.5 	6.5 	7.5 	8.5 	9.5 	10.5 	11.5 	12.5 	
+ 0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	0.001 	
+
+#_mintailcomp: upper and lower distribution for females and males separately are accumulated until exceeding this level.
+#_addtocomp:  after accumulation of tails; this value added to all bins
+#_males and females treated as combined gender below this bin number 
+#_compressbins: accumulate upper tail by this number of bins; acts simultaneous with mintailcomp; set=0 for no forced accumulation
+#_Comp_Error:  0=multinomial, 1=dirichlet
+#_Comp_Error2:  parm number  for dirichlet
+#_minsamplesize: minimum sample size; set to 1 to match 3.24, minimum value is 0.001
+#_mintailcomp addtocomp combM+F CompressBins CompError ParmSelect minsamplesize
+0 1e-07 0 0 0 0 0.01 #_fleet:1_Fleet # if using the dirichlet multinomial change to 1 and add line according to hake example in the control file
+0 1e-07 0 0 0 0 0.01 #_fleet:2_seals
+#0 1e-07 0 0 0 0 0.01 #_fleet:3_CPUE
+0 1e-07 0 0 0 0 0.01 #_fleet:4_Acoustic1
+
+1 #_Lbin_method_for_Age_Data: 1=poplenbins; 2=datalenbins; 3=lengths
+# sex codes:  0=combined; 1=use female only; 2=use male only; 3=use both as joint sexxlength distribution
+# partition codes:  (0=combined; 1=discard; 2=retained
+
+#Catch data ages
+#_yr 	month fleet 	sex 	part 	ageerr Lbin_lo Lbin_hi 	Nsamp 	AGE0	AGE1	AGE2	AGE3	AGE4	AGE5	AGE6	AGE7    AGE8
+1991	10	1	0	0	1	-1	-1	100	21196	17932	16302	8122	812	1630	0	0	0
+1992	10	1	0	0	1	-1	-1	100	402	11320	24187	14323	2162	676	0	0	0
+1993	10	1	0	0	1	-1	-1	100	10220	1131	6829	9949	6829	2713	0	0	0
+1994	10	1	0	0	1	-1	-1	100	12847	6406	1416	3979	2262	2128	0	0	0
+1995	10	1	0	0	1	-1	-1	100	10823	9292	6168	1262	1171	1093	0	0	0
+1996	10	1	0	0	1	-1	-1	100	2897	16238	4227	1449	1147	483	0	0	0
+1997	10	1	0	0	1	-1	-1	100	9100	4620	8240	4220	840	210	0	0	0
+1998	10	1	0	0	1	-1	-1	100	3428	2722	3327	2084	602	336	0	0	0
+1999	10	1	0	0	1	-1	-1	100	6993	1178	2242	2687	810	442	0	0	0
+2000	10	1	0	0	1	-1	-1	100	2638	12239	2926	1646	701	183	0	0	0
+2001	10	1	0	0	1	-1	-1	100	10962	7224	11262	1333	889	444	0	0	0
+2002	10	1	0	0	1	-1	-1	100	19792	28897	2119	2162	341	284	0	0	0
+2003	10	1	0	0	1	-1	-1	100	33435	39170	19866	3008	262	81	0	0	0
+2004	10	1	0	0	1	-1	-1	100	2122	48228	30711	6977	813	1247	0	0	0
+2005	10	1	0	0	1	-1	-1	100	2468	4224	46089	7474	2382	194	0	0	0
+2006	10	1	0	0	1	-1	-1	100	4383	12928	10363	18810	3987	1738	0	0	0
+2007	10	1	0	0	1	-1	-1	100	7299	7771	13347	2900	8431	3082	0	0	0
+2008	10	1	0	0	1	-1	-1	100	10902	10878	8129	4020	3414	1982	0	0	0
+2009	10	1	0	0	1	-1	-1	100	16174	20072	8732	3627	2124	2224	0	0	0
+2010	10	1	0	0	1	-1	-1	100	11679	29972	10237	2724	1292	1041	0	0	0
+2011	10	1	0	0	1	-1	-1	100	14194	31993	16703	4922	1020	288	0	0	0
+2012	10	1	0	0	1	-1	-1	100	2672	46466	24644	9326	1888	984	0	0	0
+2013	10	1	0	0	1	-1	-1	100	16421	8025	27732	12463	3720	1200	0	0	0
+2014	10	1	0	0	1	-1	-1	100	4865	54952	13425	12191	5327	1808	0	0	0
+2015	10	1	0	0	1	-1	-1	100	5717	20515	53723	7700	4320	1299	0	0	0
+2016	10	1	0	0	1	-1	-1	100	4279	24371	24807	25213	3005	1917	0	0	0
+2017	10	1	0	0	1	-1	-1	100	5156	8643	13090	9637	7768	857	0	0	0
+2018	10	1	0	0	1	-1	-1	100	12331	11996	8315	7509	3537	5136	0	0	0
+2019	10	1	0	0	1	-1	-1	100	8645	10032	7881	2786	2665	2026	0	0	0
+
+
+#Seal data ages
+#_yr	month	fleet	sex	part	ageerr	Lbin_lo	Lbin_hi	Nsamp	AGE0	AGE1	AGE2	AGE3	AGE4	AGE5	AGE6	AGE7	AGE8
+1991	7	2	0	0	1	-1	-1	100	32578	27132	11897	6467	308	2616	0	0	0
+1992	7	2	0	0	1	-1	-1	100	566	15681	16160	10441	752	993	0	0	0
+1993	7	2	0	0	1	-1	-1	100	19511	2126	6190	9839	3221	5408	0	0	0
+1994	7	2	0	0	1	-1	-1	100	28536	14007	1493	4578	1241	4936	0	0	0
+1995	7	2	0	0	1	-1	-1	100	27797	23493	7522	1679	743	2931	0	0	0
+1996	7	2	0	0	1	-1	-1	100	7617	42030	5277	1974	745	1326	0	0	0
+1997	7	2	0	0	1	-1	-1	100	26844	13416	11541	6449	612	647	0	0	0
+1998	7	2	0	0	1	-1	-1	100	14078	11005	6488	4434	611	1441	0	0	0
+1999	7	2	0	0	1	-1	-1	100	31191	5173	4748	6209	893	2059	0	0	0
+2000	7	2	0	0	1	-1	-1	100	12157	55524	6402	3929	798	881	0	0	0
+2001	7	2	0	0	1	-1	-1	100	41107	26668	20052	2589	824	1739	0	0	0
+2002	7	2	0	0	1	-1	-1	100	79852	114772	4059	4519	340	1196	0	0	0
+2003	7	2	0	0	1	-1	-1	100	86599	99875	24432	4036	168	220	0	0	0
+2004	7	2	0	0	1	-1	-1	100	4858	108686	33381	8274	460	2981	0	0	0
+2005	7	2	0	0	1	-1	-1	100	6624	11160	58731	10391	1580	543	0	0	0
+2006	7	2	0	0	1	-1	-1	100	15900	46171	17850	35349	3574	6585	0	0	0
+2007	7	2	0	0	1	-1	-1	100	31848	33380	27652	6556	9089	14044	0	0	0
+2008	7	2	0	0	1	-1	-1	100	59403	58350	21031	11347	4596	11277	0	0	0
+2009	7	2	0	0	1	-1	-1	100	82390	100653	21120	9571	2673	11830	0	0	0
+2010	7	2	0	0	1	-1	-1	100	51122	129155	21277	6176	1397	4758	0	0	0
+2011	7	2	0	0	1	-1	-1	100	59679	132424	33345	10721	1060	1264	0	0	0
+2012	7	2	0	0	1	-1	-1	100	11364	194540	49765	20547	1984	4371	0	0	0
+2013	7	2	0	0	1	-1	-1	100	67323	32389	53985	26469	3768	5138	0	0	0
+2014	7	2	0	0	1	-1	-1	100	17587	195557	23043	22829	4758	6825	0	0	0
+2015	7	2	0	0	1	-1	-1	100	32101	66529	127515	15479	7900	2575	0	0	0
+2016	7	2	0	0	1	-1	-1	100	26679	87760	65381	56284	6101	4218	0	0	0
+2017	7	2	0	0	1	-1	-1	100	45126	43692	48430	30200	22142	2647	0	0	0
+2018	7	2	0	0	1	-1	-1	100	100867	56675	28753	21993	9423	15028	0	0	0
+2019	7	2	0	0	1	-1	-1	100	89520	66989	37567	10577	9776	7826	0	0	0
+
+
+#CPUE data in numbers per trawl hour
+#2007	10	3	0	0	1	-1	-1	100	21.6	94.1	57.8	18.6	7.5	3.7	0	0	0				
+#2008	10	3	0	0	1	-1	-1	100	11.5	61.6	40.3	12.8	5.3	2	0	0	0				
+#2009	10	3	0	0	1	-1	-1	100	23.1	116.2	74.6	23.7	9.7	4	0	0	0				
+#2010	10	3	0	0	1	-1	-1	100	26.3	130.6	83.5	26.6	10.9	4.5	0	0	0				
+#2011	10	3	0	0	1	-1	-1	100	79.8	177.1	61.5	16.4	8	7.3	0	0	0				
+#2012	10	3	0	0	1	-1	-1	100	22.3	181.5	95.5	35.8	7.2	3.9	0	0	0				
+#2013	10	3	0	0	1	-1	-1	100	47.8	216.4	134.5	43.1	17.4	8.2	0	0	0				
+#2014	10	3	0	0	1	-1	-1	100	38.2	435.7	104.6	97	42.3	14.8	0	0	0				
+#2015	10	3	0	0	1	-1	-1	100	30.7	109.8	287.6	41.2	23.1	6.9	0	0	0				
+#2016	10	3	0	0	1	-1	-1	100	17.3	102.9	108.8	111.8	14.2	8.5	0	0	0	
+#2017	10	3	0	0	1	-1	-1	100	21.7	36.4	55.1	40.6	32.7	3.6	0	0	0
+#2018	10	3	0	0	1	-1	-1	100	40.4	89.7	49.3	28.3	14	17.9	0	0	0
+
+#Acoustic in numbers 
+2009	9.3	3	0	0	1	-1	-1	100	13.177	33.198	15.868	5.87	5.113	3.412	1.363	0.522	0.105
+2010	9.3	3	0	0	1	-1	-1	100	9.423	61.617	35.289	13.162	7.493	5.469	1.726	0.965	0.537
+2011	9.3	3	0	0	1	-1	-1	100	23.893	81.262	74.618	23.984	9.785	5.081	2.241	0.829	0.203
+2012	9.3	3	0	0	1	-1	-1	100	10.639	77.154	33.853	17.317	5.573	1.064	1.996	1.187	0.385
+2013	11.0	3	0	0	1	-1	-1	100	732.479	75.696	153.827	48.973	15.097	2.443	0	0	0
+2014	11.0	3	0	0	1	-1	-1	100	58.069	162.296	40.52	23.024	4.99	1.5	0	0	0
+2015	10.4	3	0	0	1	-1	-1	100	29.374	136.721	350.803	48.548	27.514	4.269	2.846	1.044	0
+2016	10.4	3	0	0	1	-1	-1	100	81.414	147.065	128.28	155.509	4.24	1.983	0.182	0.182	0
+2017	10.4	3	0	0	1	-1	-1	100	29.9978	39.7381	51.9608	44.023	29.65	4.5996	0.7362	0	0
+2018	10.4	3	0	0	1	-1	-1	100	75.8756	60.2082	44.4662	27.4011	20.4538	22.2821	3.5539	0.7127	0
+2019	10.4	3	0	0	1	-1	-1	100	55.7011	82.7237	46.1747	16.5481	8.0222	4.8383	2.7446	0.1132	0.1918
+
+
+-9999  	0 	0 	0 	0 	0 	0 	0 	0 	   0  	0 	0 	0 	0 	0 	0 	0 	0
+
+#
+0 #_Use_MeanSize-at-Age_obs (0/1)
+#
+0 #_N_environ_variables
+#Yr Variable Value
+#
+0 # N sizefreq methods to read 
+#
+0 # do tags (0/1)
+#
+0 #    morphcomp data(0/1) 
+#  Nobs, Nmorphs, mincomp
+#  yr, seas, type, partition, Nsamp, datavector_by_Nmorphs
+#
+0  #  Do dataread for selectivity priors(0/1)
+# Yr, Seas, Fleet,  Age/Size,  Bin,  selex_prior,  prior_sd
+# feature not yet implemented
+#
+999
+

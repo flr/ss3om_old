@@ -1,7 +1,7 @@
-#V3.30.15.00-safe;_2020_03_26;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.0
+#V3.30.16.00;_2020_09_03;_safe;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.2
 #Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
 #Foreign copyrights may apply. See copyright.txt for more information.
-Wed Apr  1 18:38:23 2020
+Wed Oct  7 15:30:38 2020
 
-You have just one settlement event; recommend changing to recr_dist_method 4 which takes no recr_dist parameters
+This model has just one settlement event; recommend changing to recr_dist_method 4 which takes no recr_dist parameters
  N warnings: 1
