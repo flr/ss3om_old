@@ -8,7 +8,6 @@ import("r4ss")
 importFrom("stats", "optimize", "setNames")
 
 export(
-  "%++%",
   "buildFLBFss3",
   "buildFLIBss3",
   "buildFLIBss330",
