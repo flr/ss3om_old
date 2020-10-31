@@ -1,5 +1,5 @@
 # utilities.R - DESC
-# /utilities.R
+# ss3om/R/utilities.R
 
 # Copyright European Union, 2015-2019; WMR, 2020.
 # Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
@@ -22,24 +22,6 @@ readOutputss3 <- function(dir, repfile = "Report.sso",
     repfile=cfiles["repfile"], compfile=cfiles["compfile"])
  
   return(out) 
-} # }}}
-
-# %++% {{{
-
-# x <- catch.n(ple4)[, 1:15]
-# y <- catch.n(ple4)[, 4:15] * 100
-# x %++% y
-
-"%++%" <- function(x, y) {
-  
-  dy <- dimnames(y)
-
-  names(dy) <- c("i", "j", "k", "l", "m", "n")
-
-  value <- do.call("[", c(list(x=x), dy)) + y
-  res <- do.call("[<-", c(list(x=x, value=value), dy))
-
-  return(res)
 } # }}}
 
 # getDimnames {{{

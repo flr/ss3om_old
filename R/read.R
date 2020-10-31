@@ -104,6 +104,39 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
 
 } # }}}
 
+# readFLSRss3 {{{
+
+#' A function to read the stock-recruit relationships from an SS3 run into an `FLSR` object
+#'
+#' @references
+#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
+#' framework for fish stock assessment and fishery management.
+#' Fisheries Research 142: 86-99.
+#'
+#' @param dir Directory containing the SS3 output files
+#' @param birthseas The birthseasons for this stock as a numeric vector.
+#' @param ... Any other argument to be passed to `r4ss::SS_output`
+#'
+#' @return An object of class [FLStock][FLCore::FLStock]
+#'
+#' @name readFLSRss3
+#' @rdname readFLSRss3
+#' @aliases readFLSRss3
+#'
+#' @author Iago Mosqueira, EC JRC
+#' @seealso \link{FLComp}
+#' @keywords classes
+
+readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
+  compfile="CompReport.sso", ...) {
+
+  # LOAD SS_output list
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
+
+  buildFLSRss3(out, birthseas=out$birthseas, ...)
+
+} # }}}
+
 # readFLIBss3 {{{
 
 #' A function to read the CPUE series from an SS3 run into an `FLIndex` object
@@ -139,37 +172,26 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas,
     buildFLIBss3(out, fleets=fleets, birthseas=out$birthseas, ...)
 } # }}}
 
-# readFLSRss3 {{{
-
-#' A function to read the stock-recruit relationships from an SS3 run into an `FLSR` object
-#'
-#' @references
-#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
-#' framework for fish stock assessment and fishery management.
-#' Fisheries Research 142: 86-99.
-#'
-#' @param dir Directory containing the SS3 output files
-#' @param birthseas The birthseasons for this stock as a numeric vector.
-#' @param ... Any other argument to be passed to `r4ss::SS_output`
-#'
-#' @return An object of class [FLStock][FLCore::FLStock]
-#'
-#' @name readFLSRss3
-#' @rdname readFLSRss3
-#' @aliases readFLSRss3
-#'
-#' @author Iago Mosqueira, EC JRC
-#' @seealso \link{FLComp}
-#' @keywords classes
-
-readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
-  compfile="CompReport.sso", ...) {
+# readFLomss3 {{{
+readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
+  repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
+  
+  # FLS
+  if(out$SS_versionNumeric == 3.24)
+    stk <- buildFLSss3(out, birthseas=birthseas, ...)
+  else
+    stk <- buildFLSss330(out, birthseas=birthseas, ...)
 
-  buildFLSRss3(out, birthseas=out$birthseas, ...)
+  # FLSR
+  srr <- buildFLSRss3(out)
 
+  # RPs
+  rps <- buildFLRPss3(out)
+
+  return(FLom(stock=stk, sr=srr, refpts=rps))
 } # }}}
 
 # readFLRPss3 {{{
@@ -211,27 +233,6 @@ readKobess3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
 } # }}}
 
-# readFLomss3 {{{
-readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
-  repfile="Report.sso", compfile="CompReport.sso", ...) {
-
-  # LOAD SS_output list
-  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
-
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas, ...)
-
-  # FLSR
-  srr <- buildFLSRss3(out)
-
-  # RPs
-  rps <- buildFLRPss3(out)
-
-  return(FLom(stock=stk, sr=srr, brp=rps))
-} # }}}
 
 # readFLoemss3 {{{
 readFLoemss3 <- function(dir, fleets, repfile="Report.sso",
@@ -293,28 +294,35 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
 
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
+  if(out$SS_versionNumeric == 3.24) {
 
-  # FLS
-  stk <- buildFLSss3(out, birthseas=birthseas, ...)
+    # FLStock
+    stk <- buildFLSss3(out, birthseas=birthseas, ...)
+    # FLIndexBiomass
+    idx <- buildFLIBss3(out, fleets=fleets)
+    # refpts
+    rps <- buildFLRPss3(out)
+    # results
+    res <- buildRESss3(out)
+  } else{ 
+    
+    # FLStock
+    stk <- buildFLSss330(out, birthseas=birthseas, ...)
+    # FLIndexBiomass
+    idx <- buildFLIBss330(out, fleets=fleets)
+    # refpts
+    rps <- buildFLRPss330(out)
+    # results
+    res <- buildRESss330(out)
+  }
 
-  # FLSR
-  srr <- buildFLSRss3(out)
-
-  # FLIB
-  idx <- buildFLIBss3(out, fleets=fleets)
-
-  # RPs
-  rps <- buildFLRPss3(out)
-
-  # Results
-  res <- buildRESss3(out)
+    # FLSR
+    srr <- buildFLSRss3(out)
 
   return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res))
 } # }}}
 
-# readOMSss3 {{{
+# readSRIss3 {{{
 readSRIss3 <- function(dir, birthseas=out$birthseas, fleets,
   repfile="Report.sso", compfile="CompReport.sso", ...) {
 
