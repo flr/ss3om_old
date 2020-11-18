@@ -1,3 +1,9 @@
+# CHANGES IN ss3om VERSION 0.4.8
+
+## BUG FIXES
+
+- watatage file is now processed by readFLSss3 and wts and mat updated.
+
 # CHANGES IN ss3om VERSION 0.3.5
 
 ## BUG FIXES
