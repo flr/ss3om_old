@@ -6,23 +6,6 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
-# readOutputss3 {{{
-readOutputss3 <- function(dir, repfile = "Report.sso",
-  compfile = "CompReport.sso", compress="gz") {
-
-  # Possibly compressed files
-  cfiles <- c(repfile = repfile, compfile = compfile)
-
-  # CHECK compressed files
-  idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
-  cfiles[idx] <- paste(cfiles, compress, sep = ".")
-
-  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE,
-    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
- 
-  return(out) 
-} # }}}
 
 # getDimnames {{{
 getDimnames <- function(out, birthseas) {

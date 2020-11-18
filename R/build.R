@@ -88,6 +88,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     
     ageselex <- data.table(out$ageselex)
     lastyr <- unique(ageselex[Factor=="sel_nums", Yr])
+    lastyr <- unique(ageselex[Factor=="Asel2", Yr])
     
     # TOTAL selex (catch$kill_nums)
     seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),

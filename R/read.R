@@ -7,136 +7,6 @@
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
 
-# readFLSss3 {{{
-
-#' A function to read SS3 results as an FLStock object
-#'
-#' Results of a run of the Stock Synthesis sofware, SS3 (Methot & Wetzel, 2013),
-#' can be loaded into an object of class \code{\link{FLStock}}. The code makes
-#' use of the r4ss::SS_output function to obtain a list from Report.sso. The
-#' following elements of that list are used to generate the necessary information
-#' for the slots in \code{\link{FLStock}}: "catage", "natage", "ageselex",
-#' "endgrowth", "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet",
-#' "fleet_ID", "FleetNames", "spawnseas", "inputs" and "SS_version".
-#'
-#' @references
-#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
-#' framework for fish stock assessment and fishery management.
-#' Fisheries Research 142: 86-99.
-#'
-#' @param dir Directory holding the SS3 output files
-#' @param birthseas Birth seasons for this stock, defaults to spawnseas
-#' @param name Name of the output object to fil the name slot
-#' @param desc Description of the output object to fill the desc slot
-#' @param ... Any other argument to be passed to `r4ss::SS_output`
-#'
-#' @return An object of class `\link{FLStock}`
-#'
-#' @name readFLSss3
-#' @rdname readFLSss3
-#' @aliases readFLSss3
-#'
-#' @author The FLR Team
-#' @seealso \link{FLComp}
-#' @keywords classes
-
-readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
-  ...) {
-
-  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
-  
-  if(out$SS_versionNumeric > 3.24)
-    res <- buildFLSss330(out, ...)
-  else
-    res <- buildFLSss3(out, ...)
- 
-  # CHANGE mat and *.wt if wtatage file being used 
-  if(out$wtatage_switch) {
-
-    # FIND wtatage.ss_new
-    waafile <- list.files(dir)[grep("wtatage.ss_new", list.files(dir))]
-
-    # LOAD wtatage.ss_new
-    waa <- data.table(SS_readwtatage(file.path(dir, waafile)))
-
-    # SET year, unit and season
-    waa[, year:=Yr]
-    waa[, unit:=Sex]
-    waa[, season:=Seas]
-
-    # GET ages
-    ages <- dimnames(res)$age
-
-    # SUBSET FLStock years
-    waa <- waa[year %in% dimnames(res)$year,]
-
-    # SPLIT weights by fleet
-    was <- split(waa, by="Fleet")
-
-    # CREATE FLQuants
-    wasq <- lapply(was, function(x)
-    as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
-      measure=ages, variable.name = "age", value.name = "data")))
-
-    # stock.wt, Fleet = 0
-    stock.wt(res)[] <- wasq[["0"]]
-
-    # mat, Fleet = -2 / wt
-    nmat <- wasq[["-2"]] / wasq[["0"]]
-    mat(res)[] <- nmat
-
-    # IDENTIFY catch fleets
-    idx <- names(wasq)[!names(wasq) %in% c("0", "-1", "-2")][out$fleet_type == 1]
-
-    # COMPUTE catch.wt DEBUG weighted average
-    catch.wt(res)[] <- Reduce("+", wasq[idx]) /
-      (length(idx))
-    landings.wt(res) <- catch.wt(res)
-    discards.wt(res) <- catch.wt(res)
-
-    catch(res) <- computeCatch(res)
-    landings(res) <- computeLandings(res)
-    discards(res) <- computeDiscards(res)
-    stock(res) <- computeStock(res)
-  }
-
-  return(res)
-
-} # }}}
-
-# readFLSRss3 {{{
-
-#' A function to read the stock-recruit relationships from an SS3 run into an `FLSR` object
-#'
-#' @references
-#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
-#' framework for fish stock assessment and fishery management.
-#' Fisheries Research 142: 86-99.
-#'
-#' @param dir Directory containing the SS3 output files
-#' @param birthseas The birthseasons for this stock as a numeric vector.
-#' @param ... Any other argument to be passed to `r4ss::SS_output`
-#'
-#' @return An object of class [FLStock][FLCore::FLStock]
-#'
-#' @name readFLSRss3
-#' @rdname readFLSRss3
-#' @aliases readFLSRss3
-#'
-#' @author Iago Mosqueira, EC JRC
-#' @seealso \link{FLComp}
-#' @keywords classes
-
-readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
-  compfile="CompReport.sso", ...) {
-
-  # LOAD SS_output list
-  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
-
-  buildFLSRss3(out, birthseas=out$birthseas, ...)
-
-} # }}}
-
 # readFLIBss3 {{{
 
 #' A function to read the CPUE series from an SS3 run into an `FLIndex` object
@@ -194,6 +64,24 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
   return(FLom(stock=stk, sr=srr, refpts=rps))
 } # }}}
 
+# readOutputss3 {{{
+readOutputss3 <- function(dir, repfile = "Report.sso",
+  compfile = "CompReport.sso", compress="gz") {
+
+  # Possibly compressed files
+  cfiles <- c(repfile = repfile, compfile = compfile)
+
+  # CHECK compressed files
+  idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
+  cfiles[idx] <- paste(cfiles, compress, sep = ".")
+
+  out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
+    printstats=FALSE, covar=FALSE, forecast=FALSE,
+    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
+ 
+  return(out) 
+} # }}}
+
 # readFLRPss3 {{{
 readFLRPss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
@@ -206,6 +94,144 @@ readFLRPss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
    buildFLRPss3(out)
 
 } # }}}
+
+# readFLSRss3 {{{
+
+#' A function to read the stock-recruit relationships from an SS3 run into an `FLSR` object
+#'
+#' @references
+#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
+#' framework for fish stock assessment and fishery management.
+#' Fisheries Research 142: 86-99.
+#'
+#' @param dir Directory containing the SS3 output files
+#' @param birthseas The birthseasons for this stock as a numeric vector.
+#' @param ... Any other argument to be passed to `r4ss::SS_output`
+#'
+#' @return An object of class [FLStock][FLCore::FLStock]
+#'
+#' @name readFLSRss3
+#' @rdname readFLSRss3
+#' @aliases readFLSRss3
+#'
+#' @author Iago Mosqueira, EC JRC
+#' @seealso \link{FLComp}
+#' @keywords classes
+
+readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
+  compfile="CompReport.sso", ...) {
+
+  # LOAD SS_output list
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
+
+  buildFLSRss3(out, birthseas=out$birthseas, ...)
+
+} # }}}
+
+# readFLSss3 {{{
+
+#' A function to read SS3 results as an FLStock object
+#'
+#' Results of a run of the Stock Synthesis sofware, SS3 (Methot & Wetzel, 2013),
+#' can be loaded into an object of class \code{\link{FLStock}}. The code makes
+#' use of the r4ss::SS_output function to obtain a list from Report.sso. The
+#' following elements of that list are used to generate the necessary information
+#' for the slots in \code{\link{FLStock}}: "catage", "natage", "ageselex",
+#' "endgrowth", "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet",
+#' "fleet_ID", "FleetNames", "spawnseas", "inputs" and "SS_version".
+#'
+#' @references
+#' Methot RD Jr, Wetzel CR (2013) Stock Synthesis: A biological and statistical
+#' framework for fish stock assessment and fishery management.
+#' Fisheries Research 142: 86-99.
+#'
+#' @param dir Directory holding the SS3 output files
+#' @param birthseas Birth seasons for this stock, defaults to spawnseas
+#' @param name Name of the output object to fil the name slot
+#' @param desc Description of the output object to fill the desc slot
+#' @param ... Any other argument to be passed to `r4ss::SS_output`
+#'
+#' @return An object of class `\link{FLStock}`
+#'
+#' @name readFLSss3
+#' @rdname readFLSss3
+#' @aliases readFLSss3
+#'
+#' @author The FLR Team
+#' @seealso \link{FLComp}
+#' @keywords classes
+
+readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
+  ...) {
+
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
+  
+  if(out$SS_versionNumeric > 3.24)
+    res <- buildFLSss330(out, ...)
+  else
+    res <- buildFLSss3(out, ...)
+ 
+  # CHANGE mat and *.wt if wtatage file being used 
+  if(out$wtatage_switch) {
+
+    # FIND wtatage.ss_new
+    waafile <- list.files(dir)[grep("wtatage.ss_new", list.files(dir))]
+
+    # LOAD wtatage.ss_new
+    waa <- data.table(SS_readwtatage(file.path(dir, waafile)))
+
+    # SET year, unit and season
+    waa[, year:=abs(Yr)]
+    waa[, unit:=Sex]
+    waa[, season:=Seas]
+
+    # GET ages
+    ages <- dimnames(res)$age
+
+    # SUBSET FLStock years
+    waa <- waa[year %in% dimnames(res)$year,]
+
+    # SPLIT weights by fleet
+    was <- split(waa, by="Fleet")
+
+    # CREATE FLQuants
+    wasq <- lapply(was, function(x)
+    as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
+      measure=ages, variable.name = "age", value.name = "data")))
+
+    # stock.wt, Fleet = 0
+    stock.wt(res)[] <- wasq[["0"]]
+
+    # mat, Fleet = -2 / wt
+    nmat <- wasq[["-2"]] / wasq[["0"]]
+    mat(res)[] <- nmat
+
+    # IDENTIFY catch fleets
+    if(is.null(out$fleet_type)) {
+      out$fleet_type <- rep(3, out$nfleets)
+      out$fleet_type[out$fleet_ID %in% unique(out$catch$Fleet)] <- 1
+    }
+
+    idx <- names(wasq)[!names(wasq) %in% c("0", "-1", "-2")][out$fleet_type == 1]
+
+    # COMPUTE catch.wt DEBUG weighted average
+    catch.wt(res)[] <- Reduce("+", wasq[idx]) /
+      (length(idx))
+    landings.wt(res) <- catch.wt(res)
+    discards.wt(res) <- catch.wt(res)
+
+    catch(res) <- computeCatch(res)
+    landings(res) <- computeLandings(res)
+    discards(res) <- computeDiscards(res)
+    stock(res) <- computeStock(res)
+  }
+
+  return(res)
+
+} # }}}
+
+# readFLFss3
+
 
 # readRESss3 {{{
 readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
@@ -233,6 +259,7 @@ readKobess3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
 } # }}}
 
+# ---
 
 # readFLoemss3 {{{
 readFLoemss3 <- function(dir, fleets, repfile="Report.sso",
