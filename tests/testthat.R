@@ -22,8 +22,8 @@ expect_comparable <- function(object, expected, ..., label = NULL,
   # 2. Call expect()
   act$diff <- c((object - expected) / abs(expected))
   expect(
-    all(abs(act$diff) < 0.01),
-    sprintf("relative difference between objects larger than 1%%.")
+    all(abs(act$diff) < 0.02),
+    sprintf("relative difference between objects larger than 2%%.")
   )
 
   # 3. Invisibly return the value

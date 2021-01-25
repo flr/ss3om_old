@@ -271,5 +271,3 @@ test_that("Calculated simple_realF annual Z at age matches that in Report.sso", 
 # }}}
 
 # -- discards
-
-# --

@@ -7,7 +7,27 @@
 - Bug reports: <https://github.com/iagomosqueira/ss3om/issues>
 
 ## Overview
+
 Tools for conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions, jackknifing of models and use of McMC output. A grid of SS3 runs is created and results are loaded on various FLR objects using functions from the [r4ss](https://github.com/r4ss/r4ss) package.
+
+### readFL
+
+- readFLIBss3 -- FLIndexBiomass
+- readFLomss3 -- FLom
+- readFLRPss3 -- FLpar (refpts)
+- readFLSss3  -- FLStock
+- readFLSRss3 -- FLSR
+- readKobess3 -- data.frame (kobe)
+- readRESss3  -- data.table (results)
+- readRESIDss3-- FLQuants (residuals)
+- readCDss3   -- lists (ctl, dat)
+- readOutputss3 -- list (SS_output)
+
+### load
+
+
+
+## Installation
 
 To install this package, start R and enter:
 
@@ -29,6 +49,33 @@ To install this package, start R and enter:
   devtools::install_github('iagomosqueira/ss3om')
 
 ## Usage
+
+### Loading an SS3 run as an FLStock
+
+Provide to `readFLSss3` the path to the folder containing the files. The fbar
+range can be specified in the call.
+
+```{r}
+her <- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
+  range = c(minfbar = 1, maxfbar = 5))
+```
+
+### Loading the estimated reference points
+
+### Loading the stock-recruitment relationship
+
+### Extract yearly time series from r4ss SS_output
+
+```{r}
+her <- readOutputss3(system.file("ext-data", "herring", package="ss3om"))
+```
+
+
+```{r}
+herSSB <- 
+```
+
+
 
 ## Build Status
 [![Travis Build Status](https://travis-ci.org/iagomosqueira/ss3om.svg?branch=master)](https://travis-ci.org/iagomosqueira/ss3om)
