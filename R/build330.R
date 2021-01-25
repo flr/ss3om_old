@@ -330,6 +330,9 @@ buildRESss330 <- function(out, ...) {
     # LIKELIHOOD
     data.frame(setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)))
 
+    # RETURN F_endyr as actual F
+    res$F_endyr <- res$F_endyr * res$Fstd_MSY
+
   return(data.table(res))
 } # }}}
 

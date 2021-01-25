@@ -20,8 +20,6 @@
 #' @author Iago Mosqueira, EC JRC D02
 #' @seealso \code{\link{FLQuant}} \code{\link{readFLSss3}}
 #' @keywords classes
-
-#' @rdname ss3slot
 #' @aliases ss3index
 #' @param cpue A data frame obtained from SS_output$cpue.
 #' @param fleets A named list of vector of the fleets to be extracted.
@@ -46,7 +44,7 @@ ss3index <- function(cpue, fleets) {
 
 ss3index.res <- function(cpue, fleets) {
  
-  # DEBUG Dev vs. Obs-Exp 
+  # DEBUG COMPARE Dev vs. Obs-Exp 
   cpue[, Res := Obs-Exp]
   index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Dev")]
 
@@ -287,7 +285,6 @@ ss3n <- function(n, dmns, birthseas) {
 ss3catch <- function(catage, wtatage, dmns, birthseas, idx) {
 
   # RECONSTRUCT BirthSeas from Morph & Sex
-  # DEBUG
   catage[, BirthSeas := Morph - max(Seas) * (Gender - 1)]
   catage <- catage[BirthSeas %in% birthseas,]
   

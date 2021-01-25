@@ -179,44 +179,30 @@ loadFLQs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 } # }}}
 
-# loadRES {{{
-# TODO SET to work with compress
+# loadRES - data.frame {{{
 loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, repfile="Report.sso", compfile="CompReport.sso",
-  covarfile="covar.sso", grid=NULL, ...) {
+  progress=TRUE, iters=seq(length(subdirs)), grid=NULL, ...) {
 
-  # ASSEMBLE paths
-  if(!missing(subdirs) & !missing(dir))
-    subdirs <- file.path(dir, subdirs)
-
-	# Loop over dirs
-	out <- foreach(i=seq(length(subdirs)), .errorhandling = "remove",
-    .inorder=TRUE) %dopar% {
+	# LOOP over subdirs
+  out <- foreach(i=iters, .inorder=TRUE,
+    .errorhandling="remove") %dopar% {
 
     if(progress)
-			cat(paste0('[', i, ']\n'))
-    
-    # CONVERGED? (covar.sso exists)
-    if(!file.exists(file.path(subdirs[i], covarfile))) {
-      data.frame(iter=i)
-    } else {
-    # READ results
-		cbind(iter=i, readRESss3(subdirs[i], repfile=repfile, compfile=compfile))
-    }
-	}
-  
-  if(progress)
-	  cat(paste0('[assembling now ...]\n'))
-  
-  # rbind 
-  res <- rbindlist(out, use.names=TRUE, fill=TRUE)
-  
-  # RBIND grid
-  if(!is.null(grid)) {
-    grid <- data.table(grid)
-    res <- cbind(grid[, !c("id"), with=FALSE], res[, !c("iter"), with=FALSE])
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    readRESss3(subdirs[i], ...)
   }
-  return(res)
+
+  out <- rbindlist(out)
+
+  if(!is.null(grid)) {
+    out <- cbind(data.table(grid), out)
+    out[, iter := iters]
+  }
+
+  return(out)
+
 } # }}}
 
 # loadRPs {{{
@@ -301,8 +287,6 @@ loadRESIDs <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 } # }}}
 
-# loadFLIBs
-
 # loadOUT {{{
 # TODO SET to work with compress
 loadOUT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
@@ -324,3 +308,5 @@ loadOUT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   
   return(out)
 } # }}}
+
+# loadFLIBs

@@ -232,7 +232,6 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
 
 # readFLFss3
 
-
 # readRESss3 {{{
 readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
@@ -258,8 +257,6 @@ readKobess3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
   buildKobess3(out)
 
 } # }}}
-
-# ---
 
 # readFLoemss3 {{{
 readFLoemss3 <- function(dir, fleets, repfile="Report.sso",
