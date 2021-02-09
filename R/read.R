@@ -250,11 +250,11 @@ readKobess3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso") {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
-
-  if(out$SS_versionNumeric > 3.24)
-    stop("ss3om currently only supports SS3 <= 3.24")
-
-  buildKobess3(out)
+  
+  if(out$SS_versionNumeric <= 3.24)
+    buildKobess3(out)
+  else
+    buildKobess330(out)
 
 } # }}}
 

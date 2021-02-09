@@ -157,3 +157,29 @@ convergencelevel <- function(dir, compress="gz") {
 
   return(as.numeric(strsplit(out[grep("Convergence_Level", out)], " ")[[1]][2]))
 } # }}}
+
+# prepareRetro {{{
+
+prepareRetro <- function(path, starter="starter.ss", years=5) {
+
+  # CREATE "retro" folder
+  dir.create(file.path(path, "retro"), showWarnings = FALSE)
+
+  for(i in seq(years)) {
+    rdir <- file.path(path, "retro", 
+      paste0("retro_", sprintf(paste0("%0", 2, "i"), i)))
+
+    dir.create(rdir)
+
+    file.copy(file.path(path, list.files(path, include.dirs = FALSE)), rdir)
+
+    sta <- SS_readstarter(file.path(rdir, starter), verbose=FALSE)
+
+    sta$retro_yr <- paste0("-", i)
+
+    SS_writestarter(sta, dir=rdir, file=starter, overwrite=TRUE,
+      verbose=FALSE, warn=FALSE)
+  }
+
+  invisible(TRUE)
+} # }}}

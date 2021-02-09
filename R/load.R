@@ -44,10 +44,11 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 # loadOMS - list(stock, sr, indices, results, refpts) {{{
 loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
-  progress=TRUE, combine=TRUE, simplify=NULL, ...) {
+  progress=TRUE, combine=TRUE, simplify=NULL, grid=NULL, ...) {
 
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
+    .final = function(x) setNames(x, seq(length(subdirs))),
     .inorder=TRUE, .errorhandling="remove") %dopar% {
 
     if(progress)
@@ -67,24 +68,33 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
     run
   }
-  
+
   if(progress)
     cat("[combining now ...]\n", sep="")
 
   # COMBINE
-  if(combine)
+  if(combine) {
     stock <- as(rbindlist(lapply(out, function(x) x$stock)), 'FLStock')
-  else {
+  } else {
     stock <- FLStocks(lapply(out, function(x) as(x$stock, "FLStock")))
   }
- 
+  
   sr <- Reduce(combine, lapply(out, function(x) x$sr))
   
   refpts <- Reduce(cbind, lapply(out, function(x) x$refpts))
   
   results <- rbindlist(lapply(out, function(x) x$results),
     use.names=TRUE, fill=TRUE, idcol="iter")
-  
+  results[, iter:=as.numeric(iter)]
+
+  if(!is.null(grid)) {
+    results <- merge(data.table(grid), results, by="iter")
+  }
+
+  # ADD var(residuals(sr)) to res
+  results[, sigma_Rec:=c(apply(residuals(sr), 6, function(x)
+    sqrt(var(c(x), na.rm=TRUE))))]
+
   # EXTRACT yr range per fleet
   fleetyrs <- lapply(out, function(x) lapply(x$indices, function(y)
     range(as.numeric(dimnames(index(y))$year))))

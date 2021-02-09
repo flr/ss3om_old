@@ -82,13 +82,36 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   for (i in seq(length(fleets)))
     catch.n <- catch.n %++% catches[[i]]$catch.n
   
-  # AVERAGE catch.wt weighted by catch.n
-  catch.wt <-  FLCore::expand(Reduce("+", lapply(catches,
-    function(x) x$catch.n %*% x$catch.wt)) %/% catch.n,
-    year=dmns$year, area=dmns$area)
+  # TABLE of areas and fleets
+  map <- unique(catage[, .(Area, Fleet)])
   
-  catch.wt[is.na(catch.wt)] <- (Reduce("+",
-    lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
+  # ADD UP product of catch.wt and catch.n by area
+  canwts <- lapply(unique(map$Area), function(x)
+    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+      function(y) (y$catch.n + 1e-8) %*% y$catch.wt)))
+
+  # DEBUG NOT weighted
+  canwts <- lapply(unique(map$Area), function(x)
+    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+      function(y) y$catch.wt)) / length(map[Area == x, Fleet]))
+
+  # BIND into single FLQuant
+  if(length(canwts) > 1)
+    canwt <- do.call(abind, canwts)
+  else
+    canwt <- canwts[[1]]
+
+  catch.wt <- canwt
+
+  # DIVIDE by catch.n for weighted average
+  # catch.wt <- canwt / (catch.n + 1e-8)
+
+  # TODO IS expand (year, area) needed?
+
+  # DEBUG FIX NAs
+  browser()
+  # catch.wt[is.na(catch.wt)] <- (Reduce("+",
+  #  lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
   
   # DISCARDS
   if(!is.na(out["discard"])) {
@@ -153,7 +176,7 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CALCULATE stock, catch, landings & discards
   landings(stock) <- computeLandings(stock)
   discards(stock) <- computeDiscards(stock)
-  catch(stock) <- computeCatch(stock, slot='all')
+  catch(stock) <- computeCatch(stock)
   stock(stock) <- computeStock(stock)
 
   # ASSIGN harvest.spwn and m.spwn
@@ -309,6 +332,9 @@ buildRESss330 <- function(out, ...) {
     # Totbio_Unfished
     `Totbio_unfished`=out$derived_quants["Totbio_unfished", "Value"],
 
+    # SSB_Unfished
+    `SSB_unfished`=out$derived_quants["Totbio_unfished", "Value"],
+
     # SSB_Virgin
     `SSB_Virgin`=out$derived_quants["SSB_Virgin", "Value"],
 
@@ -321,8 +347,8 @@ buildRESss330 <- function(out, ...) {
     # Fstd_MSY
     `Fstd_MSY`=out$derived_quants["annF_MSY", "Value"],
     
-    # TotYield_MSY
-    # `TotYield_MSY`=out$derived_quants["TotYield_MSY", "Value"],
+    # Dead_Catch_MSY
+    `Dead_Catch_MSY`=out$derived_quants["Dead_Catch_MSY", "Value"],
     
     # RetYield_MSY
     # `RetYield_MSY`=out$derived_quants["RetYield_MSY", "Value"],
@@ -352,4 +378,16 @@ buildFLBss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   rec(bio) <- as(srr, "predictModel")
 
   return(bio)
+} # }}}
+
+# buildKobess330 - data.frame {{{
+buildKobess330 <- function(out, ...) {
+
+  yrs <- out$Kobe[,'Yr']
+  res <- FLQuants(
+    B.BMSY=FLQuant(out$Kobe[,'B.Bmsy'], dimnames=list(year=yrs), units=""),
+    F.FMSY=FLQuant(out$Kobe[,'F.Fmsy'], dimnames=list(year=yrs), units=""))
+
+  return(res)
+
 } # }}}
