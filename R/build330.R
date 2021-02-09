@@ -109,7 +109,6 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # TODO IS expand (year, area) needed?
 
   # DEBUG FIX NAs
-  browser()
   # catch.wt[is.na(catch.wt)] <- (Reduce("+",
   #  lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
   
