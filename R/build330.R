@@ -75,36 +75,19 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 
   # CATCH 
   catches <- ss3catch30(catage, wtatage, dmns, birthseas, fleets)
-
-  # CALCULATE total catch.n
-  catch.n <- FLQuant(0, dimnames=dmns, units="1000")
-  
-  for (i in seq(length(fleets)))
-    catch.n <- catch.n %++% catches[[i]]$catch.n
   
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
   
-  # ADD UP product of catch.wt and catch.n by area
-  canwts <- lapply(unique(map$Area), function(x)
+  # CALCULATE total catch.n, add fleets by area
+  catch.n <- abind(lapply(unique(map$Area), function(x)
     Reduce("+", lapply(catches[map[Area == x, Fleet]],
-      function(y) (y$catch.n + 1e-8) %*% y$catch.wt)))
-
-  # DEBUG NOT weighted
-  canwts <- lapply(unique(map$Area), function(x)
+      function(y) y$catch.n))))
+  
+  # MEAN wt, NOT weighted TODO weight by catch.n per fleet
+  catch.wt <- abind(lapply(unique(map$Area), function(x) {
     Reduce("+", lapply(catches[map[Area == x, Fleet]],
-      function(y) y$catch.wt)) / length(map[Area == x, Fleet]))
-
-  # BIND into single FLQuant
-  if(length(canwts) > 1)
-    canwt <- do.call(abind, canwts)
-  else
-    canwt <- canwts[[1]]
-
-  catch.wt <- canwt
-
-  # DIVIDE by catch.n for weighted average
-  # catch.wt <- canwt / (catch.n + 1e-8)
+      function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
 
   # TODO IS expand (year, area) needed?
 

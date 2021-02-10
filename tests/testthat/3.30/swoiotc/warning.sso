@@ -1,0 +1,27 @@
+#V3.30.15.00-safe;_2020_03_26;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.0
+#Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
+#Foreign copyrights may apply. See copyright.txt for more information.
+Tue Feb  9 14:57:19 2021
+
+fishing fleet: 1 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 2 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 3 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 4 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 5 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 6 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 7 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 8 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 9 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 10 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 11 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 12 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 13 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 14 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 15 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+Note that recr_dist_method 3 is simpler and takes 1 parm for each settlement
+setting in starter does not request all priors, and 99 parameters have priors and are not estimated, so their prior not included in obj_fun.
+ Minimum size bin is:_15; which is >10cm, which is large for use as size-at-age 0.0 recruitment
+ Maximum size at age: 274.298; is within 5% of the largest size bin: 270; Add more bins
+Final gradient: 0.000237642 is larger than final_conv: 0.0001
+Reminder: Number of lamdas !=0.0 and !=1.0:  14
+ N warnings: 21

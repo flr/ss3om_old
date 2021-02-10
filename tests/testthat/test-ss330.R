@@ -219,6 +219,51 @@ test_that("Calculated herring annual Z at age matches that in Report.sso", {
 )
 # }}}
 
+# --- swoiotc {{{
+
+path <- file.path("3.30", "swoiotc")
+
+swo <- readOutputss3(path)
+
+swos <- readFLSss3(path)
+swoom <- readFLomss3(path)
+
+# CHECK SS_output & FLStock load
+
+test_that("swo FLStock is valid", {
+  expect_true(validObject(swos))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated swordfish SSB matches that in Report.sso", {
+  expect_comparable(
+    areaSums(unitSums(ssb(swos))),
+    extractSSB(swo))
+  }
+)
+  
+# CHECK annual F matches
+
+test_that("Calculated swordfish annual F matches that in Report.sso", {
+  expect_comparable(
+    areaMeans(unitMeans(fbar(swos)))[, -1],
+    extractFbar(swo))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated swordfish annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    areaMeans(z(swos))[ac(0:29),],
+    extractZatage(swo)[ac(0:29),])
+  }
+)
+# }}}
+
 # -- Annual F option 4
 
 # --- simple_realF {{{
