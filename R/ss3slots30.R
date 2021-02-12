@@ -10,7 +10,7 @@
 #' @aliases ss3mat30
 #' @details - `ss3mat30` returns the `mat` slot.
 
-ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
+ss3mat30 <- function(endgrowth, dmns, spawnseas, option=3) {
   
   # EXTRACT mat - endgrowth
   mat <- endgrowth[, .(unit, Seas, Age, Age_Mat, `Mat*Fecund`, Wt_Beg,
@@ -45,6 +45,9 @@ ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
   mat[ ,`:=`(Age_Mat = NULL, `Mat*Fecund` = NULL, Wt_Beg = NULL,
     Mat_F_wtatage = NULL, Mat_F_Natage = NULL)]
 
+  # SET mat out of Spawn_seas to 0
+  mat[!Seas %in% spawnseas, mat:=0]
+
   # RENAME
   names(mat) <- c("unit", "season", "age", "data")
 
@@ -54,7 +57,8 @@ ss3mat30 <- function(endgrowth, dmns, birthseas, option=3) {
 
   # EXPAND by year & unit & area
   mat <- FLCore::expand(as.FLQuant(mat[, .(season, unit, age, data)],
-    units=""), year=dmns$year, unit=dmns$unit, season=dmns$season, area=dmns$area)
+    units=""), year=dmns$year, unit=dmns$unit, season=dmns$season,
+    area=dmns$area)
 
   return(mat)
 }
@@ -87,19 +91,16 @@ ss3m30 <- function(endgrowth, dmns, birthseas) {
 #' @param n A data frame obtained from SS_output$natage.
 #' @details - `ss3n30` returns the `stock.n` slot.
 
-ss3n30 <- function(n, dmns, birthseas) {
+ss3n30 <- function(n, dmns) {
   
   # SELECT start of season (Beg/Mid == 'B'), Era == 'TIME' & cols
   n <- n[`Beg/Mid` == "B" & Era == 'TIME',
     .SD, .SDcols = c("Area", "unit", "Yr", "Seas", dmns$age)]
 
-  # MELT by Sex, BirthSeas, Yr & Seas
+  # MELT by Sex, unit, Yr & Seas
 	n <- data.table::melt(n, id.vars=c("Area", "unit", "Yr", "Seas"),
     variable.name="age")
   
-  # SUBSET according to birthseas
-  # n <- n[BirthSeas %in% birthseas,]
-
   # RENAME
   names(n) <- c("area", "unit", "year", "season", "age", "data")
   n <- as.FLQuant(n, units="1000")

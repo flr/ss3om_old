@@ -71,7 +71,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
   if(progress)
     cat("[combining now ...]\n", sep="")
-
+  
   # COERCE & COMBINE as FLStock or FLStocks
   if(combine) {
     stock <- as(rbindlist(lapply(out, function(x) x$stock)), "FLStock")
@@ -110,7 +110,11 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
   names(indices) <- names(out[[1]]$indices)
 
-  return(list(stock=stock, sr=sr, refpts=refpts, results=results, indices=indices))
+  # SSoutput
+  outs <- lapply(out, function(x) x$out)
+
+  return(list(stock=stock, sr=sr, refpts=refpts, results=results,
+    indices=indices, output=outs))
 
 } # }}}
 

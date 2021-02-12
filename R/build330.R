@@ -8,7 +8,7 @@
 
 # buildFLSss330 - FLStock {{{
 
-buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
+buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
   fleets=setNames(nm=out$fleet_ID[out$IsFishFleet]), range="missing") {
 
@@ -21,34 +21,34 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
     "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
     "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age",
-    "mean_body_wt", "Spawn_timing_in_season")]
+    "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
   ages <- ac(seq(ages['min'], ages['max']))
-  dmns <- getDimnames(out, birthseas=birthseas)
+  dmns <- getDimnames(out)
   dim <- unlist(lapply(dmns, length))
 
   # ENDGROWTH
   if(out$nsexes == 1) {
     endgrowth <- data.table(out$endgrowth,
-      key=c("Seas", "Platoon", "Settlement", "int_Age"))
+      key=c("Seas", "Morph", "int_Age"))
   } else {
     endgrowth <- data.table(out$endgrowth,
-      key=c("Seas", "Sex", "Platoon", "Settlement", "int_Age"))
+      key=c("Seas", "Sex", "Morph", "int_Age"))
   }
 
   # SET Age and unit
   endgrowth[, Age:=int_Age]
-  endgrowth[, unit:=codeUnit(Sex, Platoon)]
+  endgrowth[, unit:=codeUnit(Sex, Morph)]
 
   # NATAGE
   natage <- data.table(out$natage)
-  natage[, unit:=codeUnit(Sex, Platoon)]
+  natage[, unit:=codeUnit(Sex, Morph)]
   
   # CATCH.N
   catage <- data.table(out$catage)
-  catage[, unit:=codeUnit(Sex)]
+  catage[, unit:=codeUnit(Sex, Morph)]
   # NOTE catage$0 comes out as integer
   catage[, `0` := as.double(`0`)]
   setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
@@ -61,20 +61,21 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
   # MAT
-  mat <- ss3mat30(endgrowth, dmns, birthseas, option=out$Maturity_option)
+  mat <- ss3mat30(endgrowth, dmns, spawnseas=out$Spawn_seas,
+    option=out$Maturity_option)
 
   # CORRECT Mat*Fecund to by unit body weight
   if(out$Maturity_option == 6)
     mat <- mat / wt
 
   # M
-  m <- ss3m30(endgrowth, dmns, birthseas)
+  m <- ss3m30(endgrowth, dmns, morph)
   
   # STOCK.N
-  n <- ss3n30(natage, dmns, birthseas)
+  n <- ss3n30(natage, dmns)
 
   # CATCH 
-  catches <- ss3catch30(catage, wtatage, dmns, birthseas, fleets)
+  catches <- ss3catch30(catage, wtatage, dmns, morph, fleets)
   
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
@@ -98,15 +99,16 @@ buildFLSss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # DISCARDS
   if(!is.na(out["discard"])) {
 
-    stop("PROBLEM with discards")
   
     datage <- data.table(out$discard_at_age)
-    datage[, unit:=codeUnit(Sex)]
+    datage[, unit:=codeUnit(Sex, Morph)]
     setkey(datage, "Area", "Fleet", "unit", "Yr", "Seas", "Era", "Type")
     
     # DEBUG
     ageselex <- data.table(out$ageselex)
     lastyr <- unique(ageselex[Factor=="Asel2", Yr])
+    
+    stop("PROBLEM with discards")
     
     # TOTAL selex (catch$kill_nums)
     seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
@@ -231,7 +233,7 @@ buildFLIBss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
   index.res <- ss3index.res(cpue, fleets)
   
   # --- catch.n
-  #catch <- ss3catch30(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
+  #catch <- ss3catch30(catage, wtatage, dmns=getDimnames(out),
   #  birthseas=birthseas, idx=fleets)
   #catch.n <- lapply(catch, "[[", "landings.n")
   

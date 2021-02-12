@@ -53,7 +53,7 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
   if(out$SS_versionNumeric == 3.24)
     stk <- buildFLSss3(out, birthseas=birthseas, ...)
   else
-    stk <- buildFLSss330(out, birthseas=birthseas, ...)
+    stk <- buildFLSss330(out, ...)
 
   # FLSR
   srr <- buildFLSRss3(out)
@@ -343,7 +343,7 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
     # FLSR
     srr <- buildFLSRss3(out)
 
-  return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res))
+  return(list(stock=stk, sr=srr, indices=idx, refpts=rps, results=res, out=out))
 } # }}}
 
 # readSRIss3 {{{

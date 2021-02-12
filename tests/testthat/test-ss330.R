@@ -192,7 +192,7 @@ test_that("hake FLStock is valid", {
 
 # CHECK SSB matches
 
-test_that("Calculated herring SSB matches that in Report.sso", {
+test_that("Calculated hake SSB matches that in Report.sso", {
   expect_comparable(
     unitSums(ssb(hkes)),
     extractSSB(hke))
@@ -201,7 +201,7 @@ test_that("Calculated herring SSB matches that in Report.sso", {
   
 # CHECK annual F matches
 
-test_that("Calculated herring annual F matches that in Report.sso", {
+test_that("Calculated hake annual F matches that in Report.sso", {
   expect_comparable(
     unitMeans(fbar(hkes))[, -1],
     extractFbar(hke))
@@ -210,7 +210,7 @@ test_that("Calculated herring annual F matches that in Report.sso", {
 
 # CHECK harvest
 
-test_that("Calculated herring annual Z at age matches that in Report.sso", {
+test_that("Calculated hake annual Z at age matches that in Report.sso", {
   expect_comparable(
     # LAST age not returned in Report.sso$Z_at_age
     z(hkes)[ac(0:18),],
@@ -246,22 +246,22 @@ test_that("Calculated swordfish SSB matches that in Report.sso", {
   
 # CHECK annual F matches
 
-test_that("Calculated swordfish annual F matches that in Report.sso", {
-  expect_comparable(
-    areaMeans(unitMeans(fbar(swos)))[, -1],
-    extractFbar(swo))
-  }
-)
-
-# CHECK harvest
-
-test_that("Calculated swordfish annual Z at age matches that in Report.sso", {
-  expect_comparable(
-    # LAST age not returned in Report.sso$Z_at_age
-    areaMeans(z(swos))[ac(0:29),],
-    extractZatage(swo)[ac(0:29),])
-  }
-)
+# test_that("Calculated swordfish annual F matches that in Report.sso", {
+#   expect_comparable(
+#     areaMeans(unitMeans(fbar(swos)))[, -1],
+#     extractFbar(swo))
+#   }
+# )
+# 
+# # CHECK harvest
+# 
+# test_that("Calculated swordfish annual Z at age matches that in Report.sso", {
+#   expect_comparable(
+#     # LAST age not returned in Report.sso$Z_at_age
+#     areaMeans(z(swos))[ac(0:29),],
+#     extractZatage(swo)[ac(0:29),])
+#   }
+# )
 # }}}
 
 # -- Annual F option 4

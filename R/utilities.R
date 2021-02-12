@@ -8,17 +8,26 @@
 
 
 # getDimnames {{{
-getDimnames <- function(out, birthseas) {
+getDimnames <- function(out) {
 
   # GET range
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
+
+  # MORPHS
+  sex <- out$morph_indexing[,'Sex']
+  morphs <- out$morph_indexing[,'Index',]
+
+  if(all.equal(morphs, sex))
+    morphs <- numeric()
+  else
+    morphs <- out$morph_indexing['BirthSeas']
   
   dmns <- list(age=ages,
     year=seq(range['minyear'], range['maxyear']),
     # unit = combinations(Sex, birthseas)
     unit=c(t(outer(switch(out$nsexes, "", c("F", "M")),
-      switch((length(birthseas) > 1) + 1, "", birthseas), paste0))),
+      switch((length(morphs) > 1) + 1, "", morphs), paste0))),
     season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
     area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
     iter=1)
@@ -83,21 +92,28 @@ packss3run <- function(dir=getwd(),
 } # }}}
 
 # codeUnit {{{
-codeUnit <- function(Sex, Platoon="missing") {
+# TODO UGLY!
+codeUnit <- function(Sex, Morph) {
 
-    # SEX as "F" / "M"
-    Sex <- if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}
-    
-    # Platoon
-    if(!missing(Platoon))
-      Platoon <- if(length(unique(Platoon)) == 1){""} else {Platoon}
+  if(length(unique(Sex)) == 1 & length(unique(Morph)) == 1)
+    unit <- rep("unique", length(Sex))
+  else {
+
+    # sex as 'F' or 'M'
+    sex <- if(length(unique(Sex)) == 1){""} else {c("F","M")[Sex]}
+
+    # Morph
+    if(identical(Sex, Morph))
+      unit <- sex
     else
-      Platoon <- ""
-  
-    unit <- ifelse(paste0(Sex, Platoon) == "", "unique", paste0(Sex, Platoon))
+      if(length(unique(sex)) == 1)
+        unit <- Morph
+      else
+        unit <- paste0(sex, ceiling(Morph / 2))
+  }
 
-    return(unit)
-  } # }}}
+  return(unit)
+} # }}}
 
 # dimss3 {{{
 dimss3 <- function(out) {
