@@ -72,7 +72,7 @@ ss3m30 <- function(endgrowth, dmns, birthseas) {
   # EXTRACT m - biol[, Seas, BirthSeas, Age, M]
   m <- endgrowth[, .(Age, unit, Seas, M)]
 
-  # TODO SPLIT M across seasons
+  # SPLIT M across seasons
   m[, M:=M/length(dmns$season)]
 
   # RENAME

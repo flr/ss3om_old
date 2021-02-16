@@ -97,7 +97,8 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   #  lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
   
   # DISCARDS
-  if(!is.na(out["discard"])) {
+  #if(!is.na(out["discard"])) {
+  if(1 == 2) {
 
   
     datage <- data.table(out$discard_at_age)

@@ -15,13 +15,13 @@ getDimnames <- function(out) {
   ages <- ac(seq(range['min'], range['max']))
 
   # MORPHS
-  sex <- out$morph_indexing[,'Sex']
-  morphs <- out$morph_indexing[,'Index',]
+  sex <- unique(out$morph_indexing[,'Sex'])
+  morphs <- unique(out$morph_indexing[,'Index'])
 
-  if(all.equal(morphs, sex))
+  if(identical(morphs, sex))
     morphs <- numeric()
   else
-    morphs <- out$morph_indexing['BirthSeas']
+    morphs <- unique(out$morph_indexing[,'BirthSeas'])
   
   dmns <- list(age=ages,
     year=seq(range['minyear'], range['maxyear']),
