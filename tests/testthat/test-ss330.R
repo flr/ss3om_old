@@ -77,6 +77,10 @@ test_that("Calculated albio annual F matches that in Report.sso", {
   }
 )
 
+plot(FLQuants(
+    fbar(simplify(albs)[, -1]),
+    extractFbar(alb)))
+
 # CHECK harvest
 
 test_that("Calculated albio annual Z at age matches that in Report.sso", {

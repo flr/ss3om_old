@@ -148,7 +148,7 @@ ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
     catch.n <- as.FLQuant(catage[fleet %in% x,][, fleet:=NULL], units="1000")
     catch.wt <- do.call('expand',
       c(list(x=as.FLQuant(wtatage[fleet %in% x,][, fleet:=NULL], units="kg")),
-    dimnames(catch.n)[c("year", "area")]))
+      dimnames(catch.n)[c("year", "area")]))
     return(FLQuants(catch.n=catch.n, catch.wt=catch.wt))
     }
   )

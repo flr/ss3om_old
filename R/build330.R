@@ -75,7 +75,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   n <- ss3n30(natage, dmns)
 
   # CATCH 
-  catches <- ss3catch30(catage, wtatage, dmns, morph, fleets)
+  catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
   
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
@@ -84,66 +84,63 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   catch.n <- abind(lapply(unique(map$Area), function(x)
     Reduce("+", lapply(catches[map[Area == x, Fleet]],
       function(y) y$catch.n))))
-  
-  # MEAN wt, NOT weighted TODO weight by catch.n per fleet
-  catch.wt <- abind(lapply(unique(map$Area), function(x) {
+
+  # Arithmetic MEAN wt
+  mcatch.wt <- abind(lapply(unique(map$Area), function(x) {
     Reduce("+", lapply(catches[map[Area == x, Fleet]],
       function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
+  
+  # Weighted MEAN wt
+  catch.wt <- abind(lapply(unique(map$Area), function(x) {
+    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+    function(y) y$catch.wt * y$catch.n))})) / catch.n
 
-  # TODO IS expand (year, area) needed?
-
-  # DEBUG FIX NAs
-  # catch.wt[is.na(catch.wt)] <- (Reduce("+",
-  #  lapply(catches, '[[', 'catch.wt')) / length(catches))[is.na(catch.wt)]
+  # SUBSTITUTE 0s or NAs with arithmetic mean
+  idx <- is.na(catch.wt) | catch.wt == 0
+  if(any(idx))
+    catch.wt[idx] <- c(mcatch.wt)[c(idx)]
   
   # DISCARDS
-  #if(!is.na(out["discard"])) {
-  if(1 == 2) {
+  if(!is.na(out["discard"])) {
 
-  
+    # EXTRACT datage
     datage <- data.table(out$discard_at_age)
+    setkey(datage, "Area", "Fleet", "Yr", "Seas", "Era", "Type")
+    
+    # SET unit
     datage[, unit:=codeUnit(Sex, Morph)]
-    setkey(datage, "Area", "Fleet", "unit", "Yr", "Seas", "Era", "Type")
-    
-    # DEBUG
-    ageselex <- data.table(out$ageselex)
-    lastyr <- unique(ageselex[Factor=="Asel2", Yr])
-    
-    stop("PROBLEM with discards")
-    
-    # TOTAL selex (catch$kill_nums)
-    seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="sel_nums")
-    
-    # RETAINED selex (catch$ret_num)
-    selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="sel*ret_nums")
-    
-    # DEAD selex (catch$kill_num)
-    seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="dead_nums")
-    
-    # DISCARD selex (dead + alive)
-    seldis <- mapply(function(x, y) x - y, seltot, selret, SIMPLIFY=FALSE)
 
-    discard <- data.table(out$discard)
-    catch <- data.table(out$catch)
+    # FLEETs w/discards
+    idx <- setNames(nm=unique(datage$Fleet))
+   
+    discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
+      idx=idx)
 
-    # F_discards by fleet: catch from last estimation yr
-    Fdiscards <- FLQuants(mapply(function(x, y) x * y, seldis,
-      as.list(catch[Yr == max(Yr) & Fleet %in% fleets, F]), SIMPLIFY=FALSE))
+    # TABLE of areas and fleets for discards
+    map <- unique(datage[, .(Area, Fleet)])
+    map[, Fleet:=as.character(Fleet)]
+  
+    # CALCULATE total catch.n, add fleets by area
+    discards.n <- abind(lapply(unique(map$Area), function(x)
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+        function(y) y$catch.n))
+      ))
 
-    # APPLY Baranov for discards.n
-    discards.n <- Reduce('+', mapply(function(x)
-      FLQuant((x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, units="1000"),
-      Fdiscards, SIMPLIFY=FALSE))
-    dimnames(discards.n) <- dimnames(catch.n)
+    # Arithmetic MEAN wt
+    mdiscards.wt <- abind(lapply(unique(map$Area), function(x) {
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+        function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
+  
+    # Weighted MEAN wt
+    discards.wt <- abind(lapply(unique(map$Area), function(x) {
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+      function(y) y$catch.wt * y$catch.n))})) / discards.n
 
-    # SET discards.n not in discard period as 0
-    discards.n[, !dimnames(discards.n)$year %in% discard$Yr] <- 0
-    
-    discards.wt <- catch.wt
-
+    # SUBSTITUTE 0s or NAs with arithmetic mean
+    idx <- is.na(discards.wt) | discards.wt == 0
+    if(any(idx))
+      discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
+  
   } else {
     discards.n <- catch.n * 0
     discards.wt <- catch.wt
