@@ -9,6 +9,7 @@ importFrom("stats", "optimize", "setNames")
 
 export(
   "buildFLBFss3",
+  "buildFLBFss330",
   "buildFLIBss3",
   "buildFLIBss330",
   "buildFLSss3",

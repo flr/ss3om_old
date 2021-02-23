@@ -331,7 +331,7 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
   } else{ 
     
     # FLStock
-    stk <- buildFLSss330(out, birthseas=birthseas, ...)
+    stk <- buildFLSss330(out, ...)
     # FLIndexBiomass
     idx <- buildFLIBss330(out, fleets=fleets)
     # refpts

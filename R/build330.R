@@ -373,3 +373,158 @@ buildKobess330 <- function(out, ...) {
   return(res)
 
 } # }}}
+
+# buildFLBFss330 - FLStock {{{
+
+buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control_File,
+  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
+  fleets=setNames(nm=out$fleet_ID[out$IsFishFleet]), range="missing") {
+
+  # DIMENSIONS
+  dims <- dimss3(out)
+  
+  # SUBSET out
+  out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
+    "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
+    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort", "parameters",
+    "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
+    "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
+    "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing")]
+
+  # GET ages from catage
+  ages <- getRange(out$catage)
+  ages <- ac(seq(ages['min'], ages['max']))
+  dmns <- getDimnames(out)
+  dim <- unlist(lapply(dmns, length))
+
+  # ENDGROWTH
+  if(out$nsexes == 1) {
+    endgrowth <- data.table(out$endgrowth,
+      key=c("Seas", "Morph", "int_Age"))
+  } else {
+    endgrowth <- data.table(out$endgrowth,
+      key=c("Seas", "Sex", "Morph", "int_Age"))
+  }
+
+  # SET Age and unit
+  endgrowth[, Age:=int_Age]
+  endgrowth[, unit:=codeUnit(Sex, Morph)]
+
+  # NATAGE
+  natage <- data.table(out$natage)
+  natage[, unit:=codeUnit(Sex, Morph)]
+  
+  # CATCH.N
+  catage <- data.table(out$catage)
+  catage[, unit:=codeUnit(Sex, Morph)]
+  # NOTE catage$0 comes out as integer
+  catage[, `0` := as.double(`0`)]
+  setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
+
+  # WT
+  wtatage <- endgrowth[, c("Seas", "unit", "Age", paste0("RetWt:_", fleets)),
+    with=FALSE]
+
+  # STOCK.WT
+  wt <- ss3wt30(endgrowth, dmns, birthseas=1)
+
+  # MAT
+  mat <- ss3mat30(endgrowth, dmns, spawnseas=out$Spawn_seas,
+    option=out$Maturity_option)
+
+  # CORRECT Mat*Fecund to by unit body weight
+  if(out$Maturity_option == 6)
+    mat <- mat / wt
+
+  # M
+  m <- ss3m30(endgrowth, dmns, morph)
+  
+  # STOCK.N
+  n <- ss3n30(natage, dmns)
+
+  # FLBiol
+  biol <- FLBiol(
+    name=name, desc=desc,
+    n=n, wt=wt,
+    m=m, mat=predictModel(FLQuants(mat=mat), model=~mat),
+    rec=predictModel(model=bevholtss3()$model,
+      params=FLPar(s=out$parameters["SR_BH_steep", "Value"],
+        R0=out$derived_quants["Recr_Virgin", "Value"],
+        v=out$derived_quants["SSB_Virgin", "Value"])))
+  
+  spwn(biol) <- out$Spawn_timing_in_season
+
+  # CATCH 
+  
+  catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
+
+  # ageselex
+  ageselex <- data.table(out$ageselex,
+    key=c("Factor", "Fleet", "Yr", "Seas", "Sex", "Morph"))[Factor == "Asel2",]
+  ageselex[, unit:=codeUnit(Sex, Morph)]
+  
+  ageselex <- data.table::melt(ageselex, id.vars=c("Fleet", "Yr", "Seas", "unit"),
+    measure.vars=ages, variable.name="age")
+  names(ageselex) <- c("fleet", "year", "season", "unit", "age", "data")
+
+  selex <- lapply(lapply(fleets, function(x)
+    as.FLQuant(ageselex[fleet %in% x,][, fleet:=NULL], units="NA")),
+    window, start=dmns$year[1])
+  
+  flfs <- Map(function(c, s) {
+    ca <- FLCatch(landings.n=c$catch.n, landings.wt=c$catch.wt, catch.sel=s)
+    discards.n(ca)[] <- 0
+    discards.wt(ca) <- landings.wt(ca)
+    return(FLFishery(
+      effort=FLQuant(0, dimnames=list(effort='all', year=dimnames(c$catch.n)$year)),
+      A=ca))
+    }, c=catches, s=selex)
+ 
+  # TABLE of areas and fleets
+  map <- unique(catage[, .(Area, Fleet)])
+  
+  # DISCARDS
+  if(!is.na(out["discard"])) {
+
+    # EXTRACT datage
+    datage <- data.table(out$discard_at_age)
+    setkey(datage, "Area", "Fleet", "Yr", "Seas", "Era", "Type")
+    
+    # SET unit
+    datage[, unit:=codeUnit(Sex, Morph)]
+
+    # FLEETs w/discards
+    idx <- setNames(nm=unique(datage$Fleet))
+   
+    discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
+      idx=idx)
+
+    # TABLE of areas and fleets for discards
+    map <- unique(datage[, .(Area, Fleet)])
+    map[, Fleet:=as.character(Fleet)]
+  
+    # CALCULATE total catch.n, add fleets by area
+    discards.n <- abind(lapply(unique(map$Area), function(x)
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+        function(y) y$catch.n))
+      ))
+
+    # Arithmetic MEAN wt
+    mdiscards.wt <- abind(lapply(unique(map$Area), function(x) {
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+        function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
+  
+    # Weighted MEAN wt
+    discards.wt <- abind(lapply(unique(map$Area), function(x) {
+      Reduce("+", lapply(discards[map[Area == x, Fleet]],
+      function(y) y$catch.wt * y$catch.n))})) / discards.n
+
+    # SUBSTITUTE 0s or NAs with arithmetic mean
+    idx <- is.na(discards.wt) | discards.wt == 0
+    if(any(idx))
+      discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
+  }
+
+  return(list(biol=biol, fisheries=FLFisheries(flfs)))
+
+} # }}}
