@@ -77,9 +77,9 @@ test_that("Calculated albio annual F matches that in Report.sso", {
   }
 )
 
-plot(FLQuants(
-    fbar(simplify(albs)[, -1]),
-    extractFbar(alb)))
+library(ggplotFL)
+ggplot(FLQuants(FLR=fbar(simplify(albs)[, -1]), SS=extractFbar(alb)),
+  aes(x=year, y=data, colour=qname)) + geom_line()
 
 # CHECK harvest
 
@@ -108,12 +108,12 @@ test_that("vendance SS_output and FLStock load", {
 
 # DEBUG CHECK SSB matches
 
-#test_that("Calculated vendance SSB matches that in Report.sso", {
-#  expect_comparable(
-#    unitSums(ssb(fevs)),
-#    extractSSB(fev))
-#  }
-#)
+test_that("Calculated vendance SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(fevs)),
+    extractSSB(fev))
+  }
+)
 
 # CHECK annual F matches
 
@@ -250,23 +250,112 @@ test_that("Calculated swordfish SSB matches that in Report.sso", {
   
 # CHECK annual F matches
 
-# test_that("Calculated swordfish annual F matches that in Report.sso", {
-#   expect_comparable(
-#     areaMeans(unitMeans(fbar(swos)))[, -1],
-#     extractFbar(swo))
-#   }
-# )
-# 
-# # CHECK harvest
-# 
-# test_that("Calculated swordfish annual Z at age matches that in Report.sso", {
-#   expect_comparable(
-#     # LAST age not returned in Report.sso$Z_at_age
-#     areaMeans(z(swos))[ac(0:29),],
-#     extractZatage(swo)[ac(0:29),])
-#   }
-# )
+ test_that("Calculated swordfish annual F matches that in Report.sso", {
+   expect_comparable(
+     areaMeans(unitMeans(fbar(swos)))[, -1],
+     extractFbar(swo))
+   }
+ )
+ 
+ # CHECK harvest
+ 
+ test_that("Calculated swordfish annual Z at age matches that in Report.sso", {
+   expect_comparable(
+     # LAST age not returned in Report.sso$Z_at_age
+     areaMeans(z(swos))[ac(0:29),],
+     extractZatage(swo)[ac(0:29),])
+   }
+ )
+#  }}}
+
+# --- yftio {{{
+
+path <- file.path("3.30", "yftio")
+
+yft <- readOutputss3(path)
+
+yfts <- readFLSss3(path)
+
+# CHECK SS_output & FLStock load
+
+test_that("yft FLStock is valid", {
+  expect_true(validObject(yfts))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated yellowfin SSB matches that in Report.sso", {
+  expect_comparable(
+    areaSums(unitSums(ssb(yfts)))[,,,1],
+    extractSSB(yft))
+  }
+)
+
+# CHECK annual F matches
+
+ test_that("Calculated yellowfin annual F matches that in Report.sso", {
+   expect_comparable(
+    seasonSums(unitMeans(fbar(yfts)))[, -1],
+    extractFbar(yft))
+   }
+ )
+
+# CHECK harvest
+ 
+ test_that("Calculated yellowfin annual Z at age matches that in Report.sso", {
+   expect_comparable(
+     # LAST age not returned in Report.sso$Z_at_age
+     z(simplify(yfts))[ac(0:9),],
+     extractZatage(yft)[ac(0:9),])
+   }
+ )
 # }}}
+
+# --- skjio {{{
+
+path <- file.path("3.30", "skjio")
+
+skj <- readOutputss3(path)
+
+skjs <- readFLSss3(path)[-1,]
+
+# CHECK SS_output & FLStock load
+
+test_that("skj FLStock is valid", {
+  expect_true(validObject(skjs))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated skipjack SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(skjs))[,,,1],
+    extractSSB(skj))
+  }
+)
+
+# CHECK annual F matches
+
+ test_that("Calculated skipjack annual F matches that in Report.sso", {
+   expect_comparable(
+    seasonSums(unitMeans(fbar(skjs)))[, -1],
+    extractFbar(skj))
+   }
+ )
+
+# CHECK harvest
+ 
+ test_that("Calculated skipjack annual Z at age matches that in Report.sso", {
+   expect_comparable(
+     # LAST age not returned in Report.sso$Z_at_age
+     z(simplify(skjs)),
+     extractZatage(skj))
+   }
+ )
+# }}}
+
 
 # -- Annual F option 4
 

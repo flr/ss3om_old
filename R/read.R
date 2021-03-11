@@ -66,17 +66,17 @@ readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
 
 # readOutputss3 {{{
 readOutputss3 <- function(dir, repfile = "Report.sso",
-  compfile = "CompReport.sso", compress="gz") {
+  compfile = "CompReport.sso", covarfile = "covar.sso", compress="gz") {
 
   # Possibly compressed files
-  cfiles <- c(repfile = repfile, compfile = compfile)
+  cfiles <- c(repfile = repfile, compfile = compfile, covarfile = covarfile)
 
   # CHECK compressed files
   idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
   cfiles[idx] <- paste(cfiles, compress, sep = ".")
 
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
-    printstats=FALSE, covar=FALSE, forecast=FALSE,
+    printstats=FALSE, covarfile=cfiles["covarfile"], forecast=FALSE,
     repfile=cfiles["repfile"], compfile=cfiles["compfile"])
  
   return(out) 
@@ -312,7 +312,7 @@ readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets,
 } # }}}
 
 # readOMSss3 {{{
-readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
+readOMSss3 <- function(dir, fleets,
   repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
@@ -321,14 +321,14 @@ readOMSss3 <- function(dir, birthseas=out$birthseas, fleets,
   if(out$SS_versionNumeric == 3.24) {
 
     # FLStock
-    stk <- buildFLSss3(out, birthseas=birthseas, ...)
+    stk <- buildFLSss3(out, birthseas=out$birthseas, ...)
     # FLIndexBiomass
     idx <- buildFLIBss3(out, fleets=fleets)
     # refpts
     rps <- buildFLRPss3(out)
     # results
     res <- buildRESss3(out)
-  } else{ 
+  } else { 
     
     # FLStock
     stk <- buildFLSss330(out, ...)

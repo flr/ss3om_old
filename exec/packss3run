@@ -1,8 +1,9 @@
+
 #!/bin/bash
 
 GZFILES=("Report.sso" "covar.sso" "wtatage.ss_new" "CompReport.sso")
-KEEPFILES=("warning.sso" "Forecast-report.sso" "starter.ss" "forecast.ss", "ss3.par", "admodel.hes")
-INPUTFILES=`find . \( -name "*.dat" -or -name "*.ctl" \) -exec basename {} ';'`
+KEEPFILES=("warning.sso" "Forecast-report.sso" "starter.ss" "forecast.ss" "ss3.par" "admodel.hes" "ss.par" "ss.cor" "watatage.ss")
+INPUTFILES=("control.ss" "data.ss" `find . \( -name "*.dat" -or -name "*.ctl" \) -exec basename {} ';'`)
 GZEDFILES=("Report.sso.gz" "covar.sso.gz" "wtatage.ss_new.gz" "CompReport.sso.gz")
 EXCEPT=("${INPUTFILES[@]}" "${KEEPFILES[@]}" "${GZEDFILES[@]}")
 

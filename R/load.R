@@ -48,7 +48,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
-    .final = function(x) setNames(x, seq(length(subdirs))),
+    .final = function(x) setNames(x, nm=seq(length(subdirs))),
     .inorder=TRUE, .errorhandling="remove") %dopar% {
 
     if(progress)

@@ -82,6 +82,7 @@ extractFbar <- function(out) {
 
   # 
   } else {
+    fbar <- fbar$Value
     warning(paste("Returned F is relative to", out$F_report_basis))
   }
   return(FLQuant(fbar, dimnames=list(age="all",

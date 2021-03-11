@@ -47,13 +47,13 @@ library(ss3om)
 ```
 
 ```{r setpwd}
-dir <- system.file("ext-data/herring", package="ss3om")
+dir <- system.file("ext-data/albio", package="ss3om")
 ```
 
 ## *FLStock*
 
 ```{r readfls}
-simp324 <- readFLSss3(dir, name="herring")
+albio <- readFLSss3(dir, name="herring")
 ```
 
 
@@ -88,5 +88,4 @@ folder -----------> list ---------> FL*
 - convergencelevel,
 - extractFbar, extractSSB, extractRec, extractZatage
 - packss3run
-
 
