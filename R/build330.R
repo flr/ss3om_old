@@ -296,7 +296,6 @@ buildRESss330 <- function(out, ...) {
 
   lkels <- c("TOTAL", "Catch", "Survey", "Length_comp", "Recruitment")
   lknms <- c("LIKELIHOOD", "Catch", "Survey", "Length_comp", "Recruitment")
-  # setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)
   
   res <- cbind(data.frame(
   
@@ -339,10 +338,31 @@ buildRESss330 <- function(out, ...) {
     # LIKELIHOOD
     data.frame(setNames(as.list(out$likelihoods_used[lkels, "values"]), lknms)))
 
-    # RETURN F_endyr as actual F
-    res$F_endyr <- res$F_endyr * res$Fstd_MSY
+  res <- data.table(res)
 
-  return(data.table(res))
+  # RETURN F_endyr as actual F
+  res[, F_status := F_endyr]
+  res[, F_endyr:=F_endyr * Fstd_MSY]
+
+  # COMPUTE stock status
+  res[, SSB_status := SSB_endyr / SSB_MSY]
+  res[, SSB_depletion := SSB_endyr / SSB_Virgin]
+
+  # COMPUTE production function parameters
+  res[, K := SSB_unfished]
+  res[, shape := SSB_MSY / SSB_unfished]
+
+  foo <- function(shape, Dead_Catch_MSY, SSB_MSY){
+    optimise(function(x, y) (y-(1 / (1 + x)) ^ (1 / x)) ^ 2,
+      c(-0.9999,  10), y=shape)$minimum
+  }
+
+  res[, p:= unlist(lapply(seq(dim(res)[1]), function(x)
+    do.call(foo, as.list(res[x, .(shape, Dead_Catch_MSY, SSB_MSY)]))))]
+
+  res[, r := (1 + p) * (Dead_Catch_MSY / SSB_MSY)]
+
+  return(res)
 } # }}}
 
 # buildFLBss330 {{{
