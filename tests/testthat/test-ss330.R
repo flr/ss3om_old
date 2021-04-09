@@ -77,10 +77,6 @@ test_that("Calculated albio annual F matches that in Report.sso", {
   }
 )
 
-library(ggplotFL)
-ggplot(FLQuants(FLR=fbar(simplify(albs)[, -1]), SS=extractFbar(alb)),
-  aes(x=year, y=data, colour=qname)) + geom_line()
-
 # CHECK harvest
 
 test_that("Calculated albio annual Z at age matches that in Report.sso", {
@@ -98,6 +94,50 @@ path <- file.path("3.30", "vendace")
 
 fev <- readOutputss3(path)
 fevs <- readFLSss3(path, range = c(minfbar=1, maxfbar=3))
+
+# CHECK SS_output & FLStock load
+
+test_that("vendance SS_output and FLStock load", {
+  expect_true(validObject(fevs))
+  }
+)
+
+# DEBUG CHECK SSB matches
+
+test_that("Calculated vendance SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(fevs)),
+    extractSSB(fev))
+  }
+)
+
+# CHECK annual F matches
+
+test_that("Calculated vendance annual F matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(fevs))[, -1],
+    extractFbar(fev))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated vendance annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(fevs)[ac(0:10), ],
+    extractZatage(fev)[ac(0:10), ])
+  }
+)
+# }}}
+
+# --- cod {{{
+
+path <- file.path("3.30", "cod")
+
+cod <- readOutputss3(path)
+cods <- readFLSss3(path, range = c(minfbar=2, maxfbar=30))
+codi <- readFLIss3(path, range = c(minfbar=2, maxfbar=30))
 
 # CHECK SS_output & FLStock load
 
@@ -307,6 +347,7 @@ test_that("Calculated yellowfin SSB matches that in Report.sso", {
    expect_comparable(
      # LAST age not returned in Report.sso$Z_at_age
      z(simplify(yfts))[ac(0:9),],
+#     seasonSums(unitMeans(z(yfts)[ac(0:9),])),
      extractZatage(yft)[ac(0:9),])
    }
  )
@@ -356,6 +397,49 @@ test_that("Calculated skipjack SSB matches that in Report.sso", {
  )
 # }}}
 
+# --- nhke {{{
+
+path <- file.path("3.30", "nhke")
+
+hke <- readOutputss3(path)
+
+hkes <- readFLSss3(path, range = c(minfbar=1, maxfbar=4))
+
+# CHECK SS_output & FLStock load
+
+test_that("hake FLStock is valid", {
+  expect_true(validObject(hkes))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated hake SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(hkes)),
+    extractSSB(hke))
+  }
+)
+  
+# CHECK annual F matches
+
+test_that("Calculated hake annual F matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(hkes))[, -1],
+    extractFbar(hke))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated hake annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(hkes)[ac(0:18),],
+    extractZatage(hke)[ac(0:18),])
+  }
+)
+# }}}
 
 # -- Annual F option 4
 

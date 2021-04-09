@@ -13,7 +13,7 @@ library(ss3om)
 # expect_comparable {{{
 
 expect_comparable <- function(object, expected, ..., label = NULL,
-  expected.label = NULL) {
+  expected.label = NULL, diff = 0.05) {
 
   # 1. Capture object and label
   act <- quasi_label(rlang::enquo(object), label, arg = "object")
@@ -22,8 +22,9 @@ expect_comparable <- function(object, expected, ..., label = NULL,
   # 2. Call expect()
   act$diff <- c((object - expected) / abs(expected))
   expect(
-    all(abs(act$diff) < 0.02),
-    sprintf("some relative differences larger than 2%%, mean = %.2f", mean(act$diff))
+    all(abs(act$diff) < diff),
+    sprintf("some relative differences larger than %.2f%%, mean = %.2f",
+      diff * 100, mean(act$diff))
   )
 
   # 3. Invisibly return the value
