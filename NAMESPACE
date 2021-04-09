@@ -23,6 +23,7 @@ export(
   "buildRESss3",
   "buildRESss330",
   "convergencelevel",
+  "extractDevs",
   "extractFbar",
   "extractSSB",
   "extractRec",

@@ -38,11 +38,11 @@ ss3n(n, dmns, birthseas)
 
 ss3catch(catage, wtatage, dmns, birthseas, idx)
 
-ss3mat30(endgrowth, dmns, birthseas, option = 3)
+ss3mat30(endgrowth, dmns, spawnseas, option = 3)
 
 ss3m30(endgrowth, dmns, birthseas)
 
-ss3n30(n, dmns, birthseas)
+ss3n30(n, dmns)
 
 ss3catch30(catage, wtatage, dmns, birthseas, idx)
 }
