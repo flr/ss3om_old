@@ -73,11 +73,11 @@ readOutputss3 <- function(dir, repfile = "Report.sso",
 
   # CHECK compressed files
   idx <- file.exists(file.path(dir, paste(cfiles, compress, sep = ".")))
-  cfiles[idx] <- paste(cfiles, compress, sep = ".")
+  cfiles[idx] <- paste(cfiles[idx], compress, sep = ".")
 
   out <- SS_output(dir, verbose=FALSE, hidewarn=TRUE, warn=FALSE,
     printstats=FALSE, covarfile=cfiles["covarfile"], forecast=FALSE,
-    repfile=cfiles["repfile"], compfile=cfiles["compfile"])
+    repfile=cfiles["repfile"], compfile=cfiles["compfile"], covar=idx[3])
  
   return(out) 
 } # }}}
@@ -236,7 +236,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
 readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
-  out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile, covar=FALSE)
 
   if(out$SS_versionNumeric > 3.24)
     buildRESss330(out, ...)

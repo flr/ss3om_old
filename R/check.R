@@ -51,6 +51,7 @@ extractSSB <- function(out) {
 }
 
 #' @rdname extractSS
+
 extractRec <- function(out) {
   
   rec <- data.table(out$derived_quants)[Label %in% paste0("Recr_",
@@ -89,6 +90,8 @@ extractFbar <- function(out) {
     year=seq(out$startyr + 1, out$endyr), unit="unique"), units="f"))
 }
 
+#' @rdname extractSS
+
 extractZatage <- function(out) {
 
   # OUTPUT years
@@ -119,5 +122,14 @@ extractZatage <- function(out) {
   return(z)
 }
 
+#' @rdname extractSS
 
+extractDevs <- function(out) {
+
+  dev <- data.table(out$recruit)[era == "Main", .(Yr, dev)]
+
+  dms <- getRange(out$catage)
+
+  return(FLQuant(dev$dev, dimnames=list(age=dms['min'], year=dev$Yr), units=""))
+}
 # }}}

@@ -128,6 +128,8 @@ ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
   catage[, Area := if(length(unique(Area)) == 1) "unique" else Area]
 
   # MELT by Sex, BirthSeas, Yr & Seas
+  catage[, (dmns$age) := lapply(.SD, as.double), .SDcols = dmns$age]
+
 	catage <- data.table::melt(catage, id.vars=c("Area", "Fleet", "Yr", "Seas", "unit"),
     measure.vars=dmns$age, variable.name="age")
   names(catage) <- c("area", "fleet", "year", "season", "unit", "age", "data")

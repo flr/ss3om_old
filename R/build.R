@@ -24,7 +24,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # GET ages from catage
   ages <- getRange(out$catage)
   ages <- ac(seq(ages['min'], ages['max']))
-  dmns <- getDimnames(out, birthseas=birthseas)
+  dmns <- getDimnames(out)
   dim <- unlist(lapply(dmns, length))
 
   # EXTRACT from out
@@ -173,10 +173,6 @@ buildFLSRss3 <- function(out, ...) {
   lkhds <- out$likelihoods_used
   yrs <- recruit$Yr
 
-  # SET deviates and observed recruitment
-  recruit[, deviates := exp(dev)]
-  recruit[, obs_rec := rowSums(.SD, na.rm=TRUE), .SDcols=c("pred_recr", "deviates")]
-
   # logLik
   logLik <- lkhds[rownames(lkhds) == "Recruitment", "values"]
   class(logLik) <- "logLik"
@@ -190,6 +186,7 @@ buildFLSRss3 <- function(out, ...) {
       s=rawp[Label == "SR_BH_steep", Value],
       R0=exp(rawp[Label == "SR_LN(R0)", Value]),
       v=dquants[Label == "SSB_Virgin", Value],
+      sratio=1 / out$nsexes,
       units=c("", "1000", "t"))
     model <- "bevholtss3"
     attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
@@ -206,19 +203,18 @@ buildFLSRss3 <- function(out, ...) {
   }
 
   # TODO SETUP for multiple recruit season/units
+  
+  # LOAD FLQuants
+  dms <- list(year=yrs, season=out$spawnseas)
 
   # rec
-  rec <- FLQuant(recruit$obs_rec, dimnames=list(year=yrs, season=out$spawnseas),
-    units="1000")
+  rec <- FLQuant(recruit$pred_rec, dimnames=c(age=0, dms), units="1000")
   # ssb
-  ssb <- FLQuant(recruit$SpawnBio, dimnames=list(year=yrs, season=out$spawnseas),
-    units="t")
+  ssb <- FLQuant(recruit$SpawnBio, dimnames=c(age="all", dms), units="t")
   # fitted
-  fitted <- FLQuant(recruit$pred_recr, dimnames=list(year=yrs, season=out$spawnseas),
-    units="1000")
+  fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), units="1000")
   # residuals
-  residuals <- FLQuant(recruit$dev, dimnames=list(year=yrs, season=out$spawnseas),
-    units="")
+  residuals <- FLQuant(recruit$dev, dimnames=c(age=0, dms), units="")
   
   # vcov
   estpar <- parameters[grepl("SR_", Label),][!is.na(Active_Cnt),]
@@ -228,7 +224,6 @@ buildFLSRss3 <- function(out, ...) {
     vcov <- array((estpar$Parm_StDev)^2, dim=c(1,1,1),
       dimnames=list(estpar$Label, estpar$Label, iter=1))
   else if(dim(estpar)[1] > 1) {
-    # TODO
     CoVar <- data.table(out$CoVar)
     if(sum(dim(CoVar)) > 0)
       vcov <- CoVar[label.i %in% estpar$Label & label.j %in% estpar$Label,]
@@ -296,7 +291,7 @@ buildFLIBss3 <- function(out, fleets, birthseas=out$birthseas, ...) {
   index.res <- ss3index.res(cpue, fleets)
   
   # --- catch.n
-  catch <- ss3catch(catage, wtatage, dmns=getDimnames(out, birthseas=birthseas),
+  catch <- ss3catch(catage, wtatage, dmns=getDimnames(out),
     birthseas=birthseas, idx=fleets)
   catch.n <- lapply(catch, "[[", "landings.n")
   
@@ -431,7 +426,7 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
   ages <- ac(seq(range['min'], range['max']))
 
   # GET dimnames
-  dmns <- getDimnames(out, birthseas=birthseas)
+  dmns <- getDimnames(out)
   dim <- unlist(lapply(dmns, length))
 
   # --- BIOL (endgrowth, natage)

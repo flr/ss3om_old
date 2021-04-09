@@ -49,7 +49,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
     .final = function(x) setNames(x, nm=seq(length(subdirs))),
-    .inorder=TRUE, .errorhandling="remove") %dopar% {
+    .inorder=TRUE, .errorhandling="pass") %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
@@ -68,6 +68,14 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
     run
   }
+
+  # CHECK for errors (NULL)
+  nulls <- unlist(lapply(out, function(x)
+    any(is.null(unlist(lapply(x, is.null))))))
+
+  if(any(nulls))
+    stop(paste("Some iters returned one or more NULL elements:",
+      paste(unname(which(nulls)), collapse=", ")))
 
   if(progress)
     cat("[combining now ...]\n", sep="")
@@ -199,7 +207,7 @@ loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
 	# LOOP over subdirs
   out <- foreach(i=iters, .inorder=TRUE,
-    .errorhandling="remove") %dopar% {
+    .errorhandling="pass") %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
@@ -208,11 +216,17 @@ loadRES <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     readRESss3(subdirs[i], ...)
   }
 
-  out <- rbindlist(out)
+  errs <- !unlist(lapply(out, is, "data.table"))
+
+  if(any(errs)) {
+    warning(paste("Some results could not be loaded:",
+    paste(which(errs), collapse=", ")))
+  }
+
+  out <- rbindlist(out[!errs])
 
   if(!is.null(grid)) {
-    out <- cbind(data.table(grid), out)
-    out[, iter := iters]
+    out <- cbind(data.table(grid)[!errs], out)
   }
 
   return(out)

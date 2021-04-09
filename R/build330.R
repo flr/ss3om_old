@@ -263,6 +263,93 @@ buildFLIBss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
 } # }}}
 
+# buildFLIBss330 - FLIndices(FLIndexBiomass) {{{
+buildFLIss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
+  
+browser()
+  # SUBSET from out
+  out <- out[c("cpue", "ageselex", "endgrowth", "catage", "definitions",
+    "nsexes", "nseasons", "nareas", "birthseas")]
+
+  cpue <- data.table(out[["cpue"]])
+ 
+  # GET cpue fleets 
+  cpuefleets <- setNames(seq(length(unique(cpue$Fleet_name))), unique(cpue$Fleet_name))
+  
+  if(missing(fleets))
+    fleets <- cpuefleets
+  else {
+    if(is.character(fleets))
+      fleets <- cpuefleets[names(cpuefleets) %in% fleets]
+    else if(is.numeric(fleets))
+      fleets <- cpuefleets[fleets]
+    
+    # STOP if wrong fleets
+    if(length(fleets) == 0 | any(is.na(fleets)))
+      stop("selected fleets not found in Report.sso file")
+  }
+
+  selex <- data.table(out[["ageselex"]])
+  endgrowth <- data.table(out[["endgrowth"]])
+
+  # SET Age and unit
+  endgrowth[, Age:=int_Age]
+  endgrowth[, unit:=codeUnit(Sex, Platoon)]
+
+  wtatage <- endgrowth[,
+    c("Seas", "unit", "Age", paste0("RetWt:_", fleets)), with=FALSE]
+  catage <- data.table(out[["catage"]])
+    setkey(catage, "Area", "Fleet", "Sex", "Morph", "Yr", "Seas", "Era")
+  definitions <- data.table(out$definitions)
+
+  # --- index
+  index <- ss3index(cpue, fleets)
+
+  # --- index.q
+  index.q <- ss3index.q(cpue, fleets)
+
+  # --- sel.pattern
+  sel.pattern <- ss3sel.pattern(selex, unique(cpue$Yr), fleets,
+    morphs=unique(selex$Morph))
+
+  # --- index.var (var)
+  index.var <- ss3index.var(cpue, fleets)
+
+  # --- index.res (var)
+  index.res <- ss3index.res(cpue, fleets)
+  
+  # --- catch.n
+  #catch <- ss3catch30(catage, wtatage, dmns=getDimnames(out),
+  #  birthseas=birthseas, idx=fleets)
+  #catch.n <- lapply(catch, "[[", "landings.n")
+  
+  # --- FLIndices
+  cpues <- lapply(names(fleets), function(x) {
+    
+    dmns <- dimnames(index[[x]])
+    
+    selpat <- window(sel.pattern[[x]], start=dims(index[[x]])$minyear,
+        end=dims(index[[x]])$maxyear)
+    
+    FLIndexBiomass(name=x,
+      distribution="lnorm", 
+      index=index[[x]],
+      index.q=index.q[[x]],
+      index.var=index.res[[x]],
+      # TODO How to link each cpue fleet to catch fleets for catch.n
+      # TRIM catch.n to index seasons
+   #   catch.n=unitSums(window(catch.n[[x]], start=dims(index[[x]])$minyear,
+   #     end=dims(index[[x]])$maxyear))[,,,dmns$season],
+      # NORMALIZE sel.pattern
+      sel.pattern=selpat %/% apply(selpat, 2:6, max))[,,,dmns$season]
+    })
+
+  names(cpues) <- names(fleets)
+  
+  return(FLIndices(cpues))
+
+} # }}}
+
 # buildFLRPss330 - FLPar {{{
 buildFLRPss330 <- function(out, ...) {
 
@@ -315,7 +402,7 @@ buildRESss330 <- function(out, ...) {
     `Totbio_unfished`=out$derived_quants["Totbio_unfished", "Value"],
 
     # SSB_Unfished
-    `SSB_unfished`=out$derived_quants["Totbio_unfished", "Value"],
+    `SSB_unfished`=out$derived_quants["SSB_unfished", "Value"],
 
     # SSB_Virgin
     `SSB_Virgin`=out$derived_quants["SSB_Virgin", "Value"],
@@ -365,13 +452,13 @@ buildRESss330 <- function(out, ...) {
   return(res)
 } # }}}
 
-# buildFLBss330 {{{
+# buildFLBss330 - FLBiol {{{
 
-buildFLBss330 <- function(out, birthseas=out$birthseas, name=out$Control_File,
+buildFLBss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - ")) {
 
   # BUILD stk and srr
-  stk <- buildFLSss330(out, birthseas=birthseas, name=name, desc=desc)
+  stk <- buildFLSss330(out, morphs=morphs, name=name, desc=desc)
   srr <- buildFLSRss3(out)
 
   # COERCE to FLBiol
@@ -395,7 +482,7 @@ buildKobess330 <- function(out, ...) {
 
 } # }}}
 
-# buildFLBFss330 - FLStock {{{
+# buildFLBFss330 - FLBiol + FLFisheries {{{
 
 buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control_File,
   desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
@@ -410,7 +497,8 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort", "parameters",
     "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
     "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
-    "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing")]
+    "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing",
+    "exploitation")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
@@ -491,15 +579,25 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   selex <- lapply(lapply(fleets, function(x)
     as.FLQuant(ageselex[fleet %in% x,][, fleet:=NULL], units="NA")),
     window, start=dmns$year[1])
+
+  # effort
+  expl <- data.table(out$exploitation)
+
+  effs <- expl[Seas == 1, c("Yr", out$FleetNames[out$fleet_type == 1]), with=FALSE]
+
+  effqs <- FLQuants(lapply(colnames(fs)[-1], function(x) {
+    y <- fs[, c("Yr", x), with=FALSE]
+    setnames(y, c("year", "data"))
+    y[, effort:="all"]
+    as.FLQuant(y)
+  }))
   
-  flfs <- Map(function(c, s) {
+  flfs <- Map(function(c, s, ef) {
     ca <- FLCatch(landings.n=c$catch.n, landings.wt=c$catch.wt, catch.sel=s)
     discards.n(ca)[] <- 0
     discards.wt(ca) <- landings.wt(ca)
-    return(FLFishery(
-      effort=FLQuant(0, dimnames=list(effort='all', year=dimnames(c$catch.n)$year)),
-      A=ca))
-    }, c=catches, s=selex)
+    return(FLFishery(effort=ef, A=ca))
+    }, c=catches, s=selex, ef=effqs)
  
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
