@@ -263,10 +263,9 @@ buildFLIBss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
 } # }}}
 
-# buildFLIBss330 - FLIndices(FLIndexBiomass) {{{
+# buildFLIss330 - FLIndices(FLIndexBiomass) {{{
 buildFLIss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
   
-browser()
   # SUBSET from out
   out <- out[c("cpue", "ageselex", "endgrowth", "catage", "definitions",
     "nsexes", "nseasons", "nareas", "birthseas")]
@@ -494,9 +493,10 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
-    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort", "parameters",
-    "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
-    "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
+    "FleetNames", "fleet_type", "birthseas", "spawnseas", "inputs",
+    "SS_versionshort", "parameters", "discard", "discard_at_age", "catch",
+    "NatMort_option", "GrowthModel_option", "Maturity_option",
+    "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing",
     "exploitation")]
 
@@ -585,8 +585,8 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
 
   effs <- expl[Seas == 1, c("Yr", out$FleetNames[out$fleet_type == 1]), with=FALSE]
 
-  effqs <- FLQuants(lapply(colnames(fs)[-1], function(x) {
-    y <- fs[, c("Yr", x), with=FALSE]
+  effqs <- FLQuants(lapply(colnames(effs)[-1], function(x) {
+    y <- effs[, c("Yr", x), with=FALSE]
     setnames(y, c("year", "data"))
     y[, effort:="all"]
     as.FLQuant(y)
