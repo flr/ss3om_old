@@ -1,7 +1,7 @@
 Package: ss3om
 Title: Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3
-Version: 0.4.7.9008
-Date: 2021-04-09
+Version: 0.4.7.9009
+Date: 2021-04-23
 Authors@R: person("Iago", "Mosqueira", email = "iago.mosqueira@wur.nl",
   role = c("aut", "cre"))
 Description: Tools for conditioning of Operating Models based on SS3 by considering
