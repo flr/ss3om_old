@@ -131,13 +131,16 @@ test_that("Calculated vendance annual Z at age matches that in Report.sso", {
 )
 # }}}
 
-# --- cod {{{
+# --- sole {{{
 
-path <- file.path("3.30", "cod")
+path <- file.path("3.30", "sole")
 
-cod <- readOutputss3(path)
-cods <- readFLSss3(path, range = c(minfbar=2, maxfbar=30))
-codi <- readFLIss3(path, range = c(minfbar=2, maxfbar=30))
+sole <- readOutputss3(path)
+soles <- readFLSss3(path, range = c(minfbar=2, maxfbar=30))
+
+solei <- readFLIBss3(path)
+
+sold <- SS_readdat(file.path(path, "2019_petrale.dat"))
 
 # CHECK SS_output & FLStock load
 
