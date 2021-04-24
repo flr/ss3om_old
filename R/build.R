@@ -17,7 +17,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
-    "discard", "catch")]
+    "discard", "catch", "morph_indexing")]
 
   # TODO: call spread()
 
