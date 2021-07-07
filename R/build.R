@@ -220,10 +220,10 @@ buildFLSRss3 <- function(out, ...) {
   estpar <- parameters[grepl("SR_", Label),][!is.na(Active_Cnt),]
   
   # CREATE var is only one param estimated
-  if(dim(estpar)[1] == 1)
+  if(dim(estpar)[1] == 1) {
     vcov <- array((estpar$Parm_StDev)^2, dim=c(1,1,1),
       dimnames=list(estpar$Label, estpar$Label, iter=1))
-  else if(dim(estpar)[1] > 1) {
+  } else if(dim(estpar)[1] > 1) {
     CoVar <- data.table(out$CoVar)
     if(sum(dim(CoVar)) > 0)
       vcov <- CoVar[label.i %in% estpar$Label & label.j %in% estpar$Label,]
@@ -232,7 +232,7 @@ buildFLSRss3 <- function(out, ...) {
   }
 
   res <- FLSR(model=model, params=params, rec=rec, ssb=ssb, fitted=fitted,
-    residuals=residuals, vcov=vcov)
+    residuals=residuals)
   
   logLik(res) <- logLik
   distribution(res)[1] <- "lnorm"
