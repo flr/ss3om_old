@@ -1,6 +1,8 @@
 PKGNAME := $(shell sed -n "s/Package: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGVERS := $(shell sed -n "s/Version: *\([^ ]*\)/\1/p" DESCRIPTION)
 PKGDATE := $(shell sed -n "s/Date: *\([^ ]*\)/\1/p" DESCRIPTION)
+PKGDATE := $(shell git log -1 --format=%cd --date=format:'%d-%m-%Y')
+
 PKGSRC  := $(shell basename `pwd`)
 
 GITDATE=$(shell (git log -1 --date=short --pretty=format:"%ad"))
@@ -35,7 +37,10 @@ $(HELP_FILES): $(R_FILES)
 update:
 	sed -i 's/Date: *\([^ ]*\)/Date: $(GITDATE)/' DESCRIPTION
 
-release: build docs
+spell:
+	R -e "spelling::spell_check_package()"
+
+release: spell build docs
 	
 build: README.md NEWS
 	cd ..;\
@@ -43,19 +48,19 @@ build: README.md NEWS
 
 buildNV: README.md NEWS
 	cd ..;\
-	R CMD build $(PKGSRC) --no-build-vignettes
+	R --vanilla CMD build $(PKGSRC) --no-build-vignettes
 
 install: ../$(PKGNAME)_$(PKGVERS).tar.gz
 	cd ..;\
-	R CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
+	R --vanilla CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
 
 checkCRAN: ../$(PKGNAME)_$(PKGVERS).tar.gz
 	cd ..;\
-	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz --as-cran
+	R --vanilla CMD check $(PKGNAME)_$(PKGVERS).tar.gz --as-cran
 
 check: ../$(PKGNAME)_$(PKGVERS).tar.gz
 	cd ..;\
-	R CMD check $(PKGNAME)_$(PKGVERS).tar.gz
+	R --vanilla CMD check $(PKGNAME)_$(PKGVERS).tar.gz
 
 clean:
 	cd ..;\
