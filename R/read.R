@@ -162,7 +162,7 @@ readFLSRss3 <- function(dir, birthseas=out$birthseas, repfile="Report.sso",
 #' @keywords classes
 
 readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
-  ...) {
+  wtatage=out$wtatage_switch, ...) {
 
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
   
@@ -170,9 +170,9 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     res <- buildFLSss330(out, ...)
   else
     res <- buildFLSss3(out, ...)
- 
+  
   # CHANGE mat and *.wt if wtatage file being used 
-  if(out$wtatage_switch) {
+  if(wtatage) {
 
     # FIND wtatage.ss_new
     waafile <- list.files(dir)[grep("wtatage.ss_new", list.files(dir))]
@@ -203,7 +203,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     stock.wt(res)[] <- wasq[["0"]]
 
     # mat, Fleet = -2 / wt
-    nmat <- wasq[["-2"]] / wasq[["0"]]
+    nmat <- wasq[["-2"]] %/% wasq[["-1"]]
     mat(res)[] <- nmat
 
     # IDENTIFY catch fleets
