@@ -4,6 +4,8 @@
 \alias{extractSSB}
 \alias{extractRec}
 \alias{extractFbar}
+\alias{extractZatage}
+\alias{extractDevs}
 \title{Extracts derived quantities from SS output}
 \usage{
 extractSSB(out)
@@ -11,6 +13,10 @@ extractSSB(out)
 extractRec(out)
 
 extractFbar(out)
+
+extractZatage(out)
+
+extractDevs(out)
 }
 \arguments{
 \item{out}{A list as returned by r4ss::SS_output.}
