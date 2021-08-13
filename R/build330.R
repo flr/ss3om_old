@@ -83,17 +83,17 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   
   # CALCULATE total catch.n, add fleets by area
   catch.n <- abind(lapply(unique(map$Area), function(x)
-    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
       function(y) y$catch.n))))
 
   # Arithmetic MEAN wt
   mcatch.wt <- abind(lapply(unique(map$Area), function(x) {
-    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
       function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
   
   # Weighted MEAN wt
   catch.wt <- abind(lapply(unique(map$Area), function(x) {
-    Reduce("+", lapply(catches[map[Area == x, Fleet]],
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
     function(y) y$catch.wt * y$catch.n))})) / catch.n
 
   # SUBSTITUTE 0s or NAs with arithmetic mean
@@ -231,7 +231,7 @@ buildFLIBss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
   # --- index.res (var)
   index.res <- ss3index.res(cpue, fleets)
   
-  # --- catch.n
+  # --- catch.n TODO
   #catch <- ss3catch30(catage, wtatage, dmns=getDimnames(out),
   #  birthseas=birthseas, idx=fleets)
   #catch.n <- lapply(catch, "[[", "landings.n")
@@ -263,7 +263,7 @@ buildFLIBss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
 
 } # }}}
 
-# buildFLIss330 - FLIndices(FLIndexBiomass) {{{
+# buildFLIss330 - FLIndices(FLIndex) {{{
 buildFLIss330 <- function(out, fleets, birthseas=out$birthseas, ...) {
   
   # SUBSET from out

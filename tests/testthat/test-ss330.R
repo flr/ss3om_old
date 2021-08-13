@@ -318,6 +318,7 @@ path <- file.path("3.30", "yftio")
 yft <- readOutputss3(path)
 
 yfts <- readFLSss3(path)
+yftom <- readFLomss3(path)
 
 # CHECK SS_output & FLStock load
 
