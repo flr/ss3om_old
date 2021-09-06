@@ -181,7 +181,7 @@ buildFLSRss3 <- function(out, ...) {
   rawp <- parameters[grepl("SR_", Label),]
   
   # BH
-  if(out$SRRtype == 3) {
+  if(out$SRRtype %in% c(3, 6)) {
     params <- FLPar(
       s=rawp[Label == "SR_BH_steep", Value],
       R0=exp(rawp[Label == "SR_LN(R0)", Value]),
