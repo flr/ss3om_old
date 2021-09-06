@@ -406,6 +406,12 @@ buildRESss330 <- function(out, ...) {
     # SSB_Virgin
     `SSB_Virgin`=out$derived_quants["SSB_Virgin", "Value"],
 
+    # SSB_Initial
+    `SSB_Initial`=out$derived_quants["SSB_Initial", "Value"],
+
+    # SSB_first
+    `SSB_first`=out$derived_quants[paste0("SSB_", out$startyr), "Value"],
+
     # Recr_Virgin
     `Recr_Virgin`=out$derived_quants["Recr_Virgin", "Value"],
 
@@ -498,7 +504,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     "NatMort_option", "GrowthModel_option", "Maturity_option",
     "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing",
-    "exploitation")]
+    "exploitation", "recruitment_dist")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
@@ -537,10 +543,6 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # STOCK.WT
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
-  # MAT
-  mat <- ss3mat30(endgrowth, dmns, spawnseas=out$Spawn_seas,
-    option=out$Maturity_option)
-
   # CORRECT Mat*Fecund to by unit body weight
   if(out$Maturity_option == 6)
     mat <- mat / wt
@@ -551,15 +553,41 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # STOCK.N
   n <- ss3n30(natage, dmns)
 
+  # SRR
+  recdist <- out$recruitment_dist$recruit_dist
+
+  spawnseas <- recdist[, "Settle#"]
+  nspsea <- length(spawnseas)
+
+  if(nspsea == 1) {
+
+    pars <- FLPar(s=out$parameters["SR_BH_steep", "Value"],
+      R0=out$derived_quants["Recr_Virgin", "Value"],
+      v=out$derived_quants["SSB_Virgin", "Value"])
+
+  } else {
+
+    pars <- FLPar(NA, dimnames=list(params=c("s", "R0", "v", "seasp"),
+      unit=spawnseas, season=recdist[, "Seas"], iter=1))
+
+    for(i in spawnseas) {
+      pars[, i, i] <- c(out$parameters["SR_BH_steep", "Value"],
+        out$derived_quants["Recr_Virgin", "Value"],
+        out$derived_quants["SSB_Virgin", "Value"],
+        recdist[i, "Frac/sex"])
+    }
+  }
+
+  # MAT
+  mat <- ss3mat30(endgrowth, dmns, spawnseas=spawnseas,
+    option=out$Maturity_option)
+    
   # FLBiol
   biol <- FLBiol(
     name=name, desc=desc,
     n=n, wt=wt,
     m=m, mat=predictModel(FLQuants(mat=mat), model=~mat),
-    rec=predictModel(model=bevholtss3()$model,
-      params=FLPar(s=out$parameters["SR_BH_steep", "Value"],
-        R0=out$derived_quants["Recr_Virgin", "Value"],
-        v=out$derived_quants["SSB_Virgin", "Value"])))
+    rec=predictModel(model=bevholtss3()$model, params=pars))
   
   spwn(biol) <- out$Spawn_timing_in_season
 
@@ -583,11 +611,15 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # effort
   expl <- data.table(out$exploitation)
 
-  effs <- expl[Seas == 1, c("Yr", out$FleetNames[out$fleet_type == 1]), with=FALSE]
+  # DEBUG effort by season
+  effs <- expl[Yr %in% dmns$year, c("Yr", "Seas",
+    out$FleetNames[out$fleet_type == 1]), with=FALSE]
+  if(length(unique(effs$Seas)) == 1)
+    effs[, Seas:="all"]
 
-  effqs <- FLQuants(lapply(colnames(effs)[-1], function(x) {
-    y <- effs[, c("Yr", x), with=FALSE]
-    setnames(y, c("year", "data"))
+  effqs <- FLQuants(lapply(colnames(effs)[-c(1, 2)], function(x) {
+    y <- effs[, c("Yr", "Seas", x), with=FALSE]
+    setnames(y, c("year", "season", "data"))
     y[, effort:="all"]
     as.FLQuant(y)
   }))
@@ -598,6 +630,8 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     discards.wt(ca) <- landings.wt(ca)
     return(FLFishery(effort=ef, A=ca))
     }, c=catches, s=selex, ef=effqs)
+
+  names(flfs) <- out$FleetNames[out$fleet_type == 1]
  
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
