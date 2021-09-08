@@ -110,7 +110,7 @@ ss3sel.pattern <- function(selex, years, fleets, morphs, factor="Asel2") {
   setkey(selex, "Factor", Fleet, Yr, Morph)
 
   # SUBSET Asel2, fleets, cpue years for Morph
-  selex <- selex[CJ(factor, fleets, years, morphs)]
+  selex <- selex[CJ(Factor=factor, Fleet=fleets, Yr=years, Morph=morphs)]
   selex[, c("Factor", "Morph", "Label") := NULL]
 
   # RESHAPE to long
