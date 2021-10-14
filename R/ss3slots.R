@@ -27,7 +27,8 @@
 
 ss3index <- function(cpue, fleets) {
   
-  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Exp")]
+  # EXTRACT Obs?
+  index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Obs")]
 
   # CHANGE names and SORT
   names(index) <- c("qname", "year", "season", "data")
@@ -85,6 +86,7 @@ ss3index.var <- function(cpue, fleets) {
 
 ss3index.q <- function(cpue, fleets) {
 
+  # SETS SS_ouput$cpue$Calc_Q as index.q
   index.q <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Calc_Q")]
 
   # CHANGE names and SORT

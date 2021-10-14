@@ -49,7 +49,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 	# LOOP over subdirs
   out <- foreach(i=seq(length(subdirs)),
     .final = function(x) setNames(x, nm=seq(length(subdirs))),
-    .inorder=TRUE, .errorhandling="pass") %dopar% {
+    .inorder=TRUE, .errorhandling="stop") %dopar% {
 
     if(progress)
       cat("[", i, "]\n", sep="")
@@ -73,9 +73,10 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   nulls <- unlist(lapply(out, function(x)
     any(is.null(unlist(lapply(x, is.null))))))
 
-  if(any(nulls))
+  if(any(nulls)) {
     stop(paste("Some iters returned one or more NULL elements:",
       paste(unname(which(nulls)), collapse=", ")))
+  }
 
   if(progress)
     cat("[combining now ...]\n", sep="")

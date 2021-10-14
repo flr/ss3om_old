@@ -278,6 +278,7 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
       discards.wt <- catch.wt
     } else {
       warning("Model has discards estimates but discards-at-age could not be built.")
+
       discards.n <- catch.n
       discards.n[] <- 0
       discards.wt <- catch.wt

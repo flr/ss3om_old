@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ss3om</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0.9003</span>
       </span>
     </div>
 
@@ -68,14 +68,14 @@
 
       
 
-      </header><div class="row">
+      </header><script src="ss3om_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Loading your SS3 results into FLR with ss3om</h1>
                         <h4 class="author">Iago Mosqueira (EC JRC) <a href="mailto:iago.mosqueira@ec.europa.eu" class="email">iago.mosqueira@ec.europa.eu</a>
 </h4>
             
-            <h4 class="date">25 May, 2020</h4>
+            <h4 class="date">14 October, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iagomosqueira/ss3om/blob/master/vignettes/ss3om.Rmd"><code>vignettes/ss3om.Rmd</code></a></small>
       <div class="hidden name"><code>ss3om.Rmd</code></div>
@@ -84,6 +84,15 @@
 
     
     
+<p>The <em>ss3om</em> package has been developed to bring the output of the Stock Synthesis (<strong>SS</strong>) integrated stock assessment platform <span class="citation">[@Methot_2013]</span> into the <strong>FLR</strong> framework <span class="citation">[@Kell_2007]</span>. This package allows the use of <strong>SS</strong> model runs to construct Operating Models (OM) for Management Strategy Evaluation (MSE) of candidate Management Procedures (MP). The outputs of model runs are used to construct object of the various classes employed when running evaluation of management procedures using the FLR methods, particularly the <a href="https://flr-project.org/mse"><code>mse</code></a> package. Initial and current work on these code is related to the evaluation of management procedures for some stocks managed by the <a href="https://iotc.org/">Indian Ocean Tuna Commission</a> (IOTC), but has then been extended for other stocks and fora.</p>
+<p>The MPs evaluated using these OMs are generally based on simpler estimators of stock status or trends, so no attempt is made to provide facilities for running <strong>SS</strong> as part of a management procedure. For simulations involving <strong>SS</strong> as a status indicator, please take a look at the <a href="https://github.com/ss3sim/ss3sim">ss3sim</a> package.</p>
+<p>This package has been used on a number of <strong>SS</strong> models (see below), for both versions 3.24 and 3.30. Stock synthesis is a very flexible framework, able to allow construction of a large number of different models. Not all of them can currently be loaded into <strong>FLR</strong> using <em>ss3om</em>. If your model fails to load, or the objects do not quite hold the right information, please do not hesitate contacting us to see if the code could be extended to work on it. However, development is now focused on models coming from <strong>SS</strong> 3.30, including some of the new features it has brought. Nevertheless, interaction with the output and input files is taken care by the <a href="https://github.com/r4ss/r4ss">r4ss</a> package. So as long as <em>r4ss</em> can load your model, there is a good chance we can load it into <strong>FLR</strong>.</p>
+<div id="installation" class="section level1">
+<h1 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h1>
+<p>The package is available from the <strong>FLR</strong> repository, and can be installed, including all its dependencies, by calling</p>
+<p>You can also install the development version directly from the <a href="https://github.com/flr/ss3om">github repository</a></p>
+</div>
 <div id="using-read-functions-to-load-ss3-results" class="section level1">
 <h1 class="hasAnchor">
 <a href="#using-read-functions-to-load-ss3-results" class="anchor"></a>Using <code>read</code> functions to load SS3 results</h1>
@@ -91,7 +100,32 @@
 <h2 class="hasAnchor">
 <a href="#flstock" class="anchor"></a><em>FLStock</em>
 </h2>
-<pre><code>## [1] "25 Mb"</code></pre>
+<table class="table">
+<thead><tr class="header">
+<th>FLR class</th>
+<th>From folder</th>
+<th>From list</th>
+<th></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>FLStock</td>
+<td>readFLSss3</td>
+<td>buildFLSss3</td>
+<td>buildFLSss330</td>
+</tr>
+<tr class="even">
+<td>FLSR</td>
+<td>readFLSRss3</td>
+<td>buildFLSss3</td>
+<td>buildFLSss330</td>
+</tr>
+</tbody>
+</table>
+<pre><code>        SS_output         buildFL*
+folder -----------&gt; list ---------&gt; FL*
+       `----------- readFL --------&gt;|
+</code></pre>
 </div>
 </div>
 <div id="loading-a-full-om-grid-using-load" class="section level1">
@@ -103,9 +137,9 @@
 <h1 class="hasAnchor">
 <a href="#flow-of-information-ss3---flr" class="anchor"></a>Flow of information SS3 - FLR</h1>
 </div>
-<div id="tested-model-structures" class="section level1">
+<div id="tested-ss-models" class="section level1">
 <h1 class="hasAnchor">
-<a href="#tested-model-structures" class="anchor"></a>Tested model structures</h1>
+<a href="#tested-ss-models" class="anchor"></a>Tested SS models</h1>
 </div>
 <div id="checking-an-operating-model" class="section level1">
 <h1 class="hasAnchor">
@@ -114,6 +148,16 @@
 <li>Convergence</li>
 <li>Estimates of B0</li>
 <li>Recruitment residual trends</li>
+</ul>
+</div>
+<div id="auxiliary-functions" class="section level1">
+<h1 class="hasAnchor">
+<a href="#auxiliary-functions" class="anchor"></a>Auxiliary functions</h1>
+<ul>
+<li>runtime</li>
+<li>convergencelevel,</li>
+<li>extractFbar, extractSSB, extractRec, extractZatage</li>
+<li>packss3run</li>
 </ul>
 </div>
   </div>
@@ -133,7 +177,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

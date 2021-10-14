@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ss3om</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0.9003</span>
       </span>
     </div>
 
@@ -77,8 +77,8 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#ss3om" class="anchor"></a>ss3om</h1></div>
 <ul>
-<li>Version: 0.4.0</li>
-<li>Date: 2020-05-25</li>
+<li>Version: 0.5.0.9003</li>
+<li>Date: 08-09-2021</li>
 <li>Author: Iago Mosqueira, EC JRC</li>
 <li>Maintainer: Iago Mosqueira <a href="mailto:iago.mosqueira@ec.europa.eu" class="email">iago.mosqueira@ec.europa.eu</a>
 </li>
@@ -91,6 +91,30 @@
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
 <p>Tools for conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions, jackknifing of models and use of McMC output. A grid of SS3 runs is created and results are loaded on various FLR objects using functions from the <a href="https://github.com/r4ss/r4ss">r4ss</a> package.</p>
+<div id="readfl" class="section level3">
+<h3 class="hasAnchor">
+<a href="#readfl" class="anchor"></a>readFL</h3>
+<ul>
+<li>readFLIBss3 – FLIndexBiomass</li>
+<li>readFLomss3 – FLom</li>
+<li>readFLRPss3 – FLpar (refpts)</li>
+<li>readFLSss3 – FLStock</li>
+<li>readFLSRss3 – FLSR</li>
+<li>readKobess3 – data.frame (kobe)</li>
+<li>readRESss3 – data.table (results)</li>
+<li>readRESIDss3– FLQuants (residuals)</li>
+<li>readCDss3 – lists (ctl, dat)</li>
+<li>readOutputss3 – list (SS_output)</li>
+</ul>
+</div>
+<div id="load" class="section level3">
+<h3 class="hasAnchor">
+<a href="#load" class="anchor"></a>load</h3>
+</div>
+</div>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
 <p>To install this package, start R and enter:</p>
 <p># INSTALL FLR pkgs and depedencies source(“<a href="http://flr-project.org/R/instFLR.R" class="uri">http://flr-project.org/R/instFLR.R</a>”)</p>
 <p># and then select mse, ggplotFL and FLFishery</p>
@@ -102,6 +126,27 @@
 <div id="usage" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h2>
+<div id="loading-an-ss3-run-as-an-flstock" class="section level3">
+<h3 class="hasAnchor">
+<a href="#loading-an-ss3-run-as-an-flstock" class="anchor"></a>Loading an SS3 run as an FLStock</h3>
+<p>Provide to <code>readFLSss3</code> the path to the folder containing the files. The fbar range can be specified in the call.</p>
+<pre class="{r}"><code>her &lt;- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
+  range = c(minfbar = 1, maxfbar = 5))</code></pre>
+</div>
+<div id="loading-the-estimated-reference-points" class="section level3">
+<h3 class="hasAnchor">
+<a href="#loading-the-estimated-reference-points" class="anchor"></a>Loading the estimated reference points</h3>
+</div>
+<div id="loading-the-stock-recruitment-relationship" class="section level3">
+<h3 class="hasAnchor">
+<a href="#loading-the-stock-recruitment-relationship" class="anchor"></a>Loading the stock-recruitment relationship</h3>
+</div>
+<div id="extract-yearly-time-series-from-r4ss-ss_output" class="section level3">
+<h3 class="hasAnchor">
+<a href="#extract-yearly-time-series-from-r4ss-ss_output" class="anchor"></a>Extract yearly time series from r4ss SS_output</h3>
+<pre class="{r}"><code>her &lt;- readOutputss3(system.file("ext-data", "herring", package="ss3om"))</code></pre>
+<pre class="{r}"><code>herSSB &lt;- </code></pre>
+</div>
 </div>
 <div id="build-status" class="section level2">
 <h2 class="hasAnchor">
@@ -168,7 +213,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

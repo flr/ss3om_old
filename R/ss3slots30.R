@@ -98,6 +98,7 @@ ss3n30 <- function(n, dmns) {
     .SD, .SDcols = c("Area", "unit", "Yr", "Seas", dmns$age)]
 
   # MELT by Sex, unit, Yr & Seas
+  # TODO convert to double
 	n <- data.table::melt(n, id.vars=c("Area", "unit", "Yr", "Seas"),
     variable.name="age")
   
