@@ -68,7 +68,7 @@ ss3mat30 <- function(endgrowth, dmns, spawnseas, option=3) {
 #' @details - `ss3m` returns the `m` slot.
 
 ss3m30 <- function(endgrowth, dmns, birthseas) {
-
+  
   # EXTRACT m - biol[, Seas, BirthSeas, Age, M]
   m <- endgrowth[, .(Age, unit, Seas, M)]
 

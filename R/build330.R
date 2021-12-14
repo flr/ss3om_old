@@ -79,12 +79,13 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
   
   # TABLE of areas and fleets
-  map <- unique(catage[, .(Area, Fleet)])
+  map <- unique(catage[Fleet %in% fleets, .(Area, Fleet)])
   
   # CALCULATE total catch.n, add fleets by area
   catch.n <- abind(lapply(unique(map$Area), function(x)
     Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
-      function(y) y$catch.n))))
+      function(y) y$catch.n))
+    ))
 
   # Arithmetic MEAN wt
   mcatch.wt <- abind(lapply(unique(map$Area), function(x) {
@@ -102,49 +103,52 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
     catch.wt[idx] <- c(mcatch.wt)[c(idx)]
   
   # DISCARDS
+  discards.n <- catch.n * 0
+  discards.wt <- catch.wt
+
   if(!is.na(out["discard"])) {
 
     # EXTRACT datage
     datage <- data.table(out$discard_at_age)
     setkey(datage, "Area", "Fleet", "Yr", "Seas", "Era", "Type")
+
+    # CHECK for type 4 (predator fleets)
+    if(any(unique(datage$Fleet) %in% fleets)) {
     
-    # SET unit
-    datage[, unit:=codeUnit(Sex, Morph)]
+      # SET unit
+      datage[, unit:=codeUnit(Sex, Morph)]
 
-    # FLEETs w/discards
-    idx <- setNames(nm=unique(datage$Fleet))
+      # FLEETs w/discards
+      idx <- setNames(nm=unique(datage$Fleet))
    
-    discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
-      idx=idx)
+      discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
+        idx=idx)
 
-    # TABLE of areas and fleets for discards
-    map <- unique(datage[, .(Area, Fleet)])
-    map[, Fleet:=as.character(Fleet)]
+      # TABLE of areas and fleets for discards
+      map <- unique(datage[Fleet %in% fleets, .(Area, Fleet)])
+      map[, Fleet:=as.character(Fleet)]
   
-    # CALCULATE total catch.n, add fleets by area
-    discards.n <- abind(lapply(unique(map$Area), function(x)
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-        function(y) y$catch.n))
+      # CALCULATE total catch.n, add fleets by area
+      discards.n <- abind(lapply(unique(map$Area), function(x)
+        Reduce("+", lapply(discards[map[Area == x, Fleet]],
+          function(y) y$catch.n))
       ))
 
-    # Arithmetic MEAN wt
-    mdiscards.wt <- abind(lapply(unique(map$Area), function(x) {
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-        function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
+      # Arithmetic MEAN wt
+      mdiscards.wt <- abind(lapply(unique(map$Area), function(x) {
+        Reduce("+", lapply(discards[map[Area == x, Fleet]],
+          function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
   
-    # Weighted MEAN wt
-    discards.wt <- abind(lapply(unique(map$Area), function(x) {
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-      function(y) y$catch.wt * y$catch.n))})) / discards.n
+      # Weighted MEAN wt
+      discards.wt <- abind(lapply(unique(map$Area), function(x) {
+        Reduce("+", lapply(discards[map[Area == x, Fleet]],
+        function(y) y$catch.wt * y$catch.n))})) / discards.n
 
-    # SUBSTITUTE 0s or NAs with arithmetic mean
-    idx <- is.na(discards.wt) | discards.wt == 0
-    if(any(idx))
-      discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
-  
-  } else {
-    discards.n <- catch.n * 0
-    discards.wt <- catch.wt
+      # SUBSTITUTE 0s or NAs with arithmetic mean
+      idx <- is.na(discards.wt) | discards.wt == 0
+      if(any(idx))
+        discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
+    }
   }
 
   # FLStock

@@ -323,8 +323,8 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 buildFLSRss3 <- function(out, ...) {
   
   # SUBSET out
-  out <- out[c("parameters", "recruit", "derived_quants",
-    "likelihoods_used", "SRRtype", "spawnseas", "CoVar", "nsexes")]
+  out <- out[c("parameters", "recruit", "derived_quants", "nseasons", "nsexes",
+    "likelihoods_used", "SRRtype", "spawnseas", "CoVar")]
 
   # EXTRACT elements
   recruit <- data.table(out$recruit)[era %in% c("Fixed", "Main"),]
@@ -362,9 +362,7 @@ buildFLSRss3 <- function(out, ...) {
     attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   }
 
-  # TODO SETUP for multiple recruit season/units
-  
-  # LOAD FLQuants
+    # LOAD FLQuants
   dms <- list(year=yrs, season=out$spawnseas)
 
   # rec
@@ -375,6 +373,15 @@ buildFLSRss3 <- function(out, ...) {
   fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), units="1000")
   # residuals
   residuals <- FLQuant(recruit$dev, dimnames=c(age=0, dms), units="")
+  
+  # SETUP for multiple recruit seasons
+  if(out$nseasons > 1) {
+
+    params <- FLPar(rep(c(params), out$nseasons),
+      dimnames=list(params=dimnames(params)$params, season=seq(out$nseasons), iter=1))
+
+    params[,-out$spawnseas,] <- NA
+  }
   
   # vcov
   estpar <- parameters[grepl("SR_", Label),][!is.na(Active_Cnt),]
