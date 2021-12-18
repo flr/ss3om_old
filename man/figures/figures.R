@@ -15,7 +15,7 @@ library(ggplot2)
 stk <- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
   range = c(minfbar = 1, maxfbar = 5))
 
-png(filename="her.png", type="cairo", units="in",
+png(filename="stk.png", type="cairo", units="in",
   width=7, height=6, pointsize=16, res=96)
 
 plot(stk) + ggtitle("HER 27.30.31")
@@ -26,7 +26,7 @@ dev.off()
 
 srr <- readFLSRss3(system.file("ext-data", "herring", package="ss3om"))
 
-png(filename="hersrr.png", type="cairo", units="in",
+png(filename="srr.png", type="cairo", units="in",
   width=7, height=6, pointsize=16, res=96)
 
 plot(srr)
