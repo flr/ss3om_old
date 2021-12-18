@@ -25,16 +25,32 @@ or directly from the github repository by first updating to the latest version o
 
 Different FLR objects can be loaded from a folder containing the output of an SS3 run.
 
+```{r}
+dir <- system.file("ext-data", "herring", package="ss3om")
+```
+
+
 To create an *FLStock* object from a model run, we can call *readFLSss3*,
 
 ```{r}
-her <- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
-  range = c(minfbar = 1, maxfbar = 5))
+stk <- readFLSss3(dir)
 
-plot(her)
+plot(stk)
 ```
 
-![her](man/figures/her.png)
+![stk](man/figures/stk.png)
+
+and to extract and convert the stock-recruit relationship, you can use
+
+```{r}
+srr <- readFLSRss3(dir)
+
+plot(her)
+
+```
+
+![srr](man/figures/srr.png)
+
 
 ## License
 Copyright (c) 2016-2021 European Union & Iago Mosqueira. Released under the [EUPL 1.2](https://eupl.eu/1.2/en/).

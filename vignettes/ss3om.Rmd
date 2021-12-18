@@ -18,13 +18,14 @@ opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE,
   fig.width=5, fig.height=4.5)
 ```
 
-The *ss3om* package has been developed to bring the output of the Stock Synthesis (**SS**) integrated stock assessment platform [@Methot_2013] into the **FLR** framework [@Kell_2007]. This package allows the use of **SS** model runs to construct Operating Models (OM) for Management Strategy Evaluation (MSE) of candidate Management Procedures (MP). The outputs of model runs are used to construct object of the various classes employed when running evaluation of management procedures using the FLR methods, particularly the [`mse`](https://flr-project.org/mse) package. Initial and current work on these code is related to the evaluation of management procedures for some stocks managed by the [Indian Ocean Tuna Commission](https://iotc.org/) (IOTC), but has then been extended for other stocks and fora.
+The *ss3om* package has been developed to bring the output of the Stock Synthesis (**SS**) integrated stock assessment platform [@Methot_2013] into the **FLR** framework [@Kell_2007]. The package initial objective was to allows the use of **SS** model runs to construct Operating Models (OM) for Management Strategy Evaluation (MSE) of candidate Management Procedures (MP). The outputs of model runs are used to construct object of the various classes employed when running evaluation of management procedures using the FLR methods, particularly those defined in the [`mse`](https://flr-project.org/mse) package. Initial and current work on these code is related to the evaluation of management procedures for some stocks managed by the [Indian Ocean Tuna Commission](https://iotc.org/) (IOTC), but has been extended for other stocks and model configurations.
 
-The MPs evaluated using these OMs are generally based on simpler estimators of stock status or trends, so no attempt is made to provide facilities for running **SS** as part of a management procedure. For simulations involving **SS** as a status indicator, please take a look at the [ss3sim](https://github.com/ss3sim/ss3sim) package.
+The MPs evaluated using these OMs are generally based on simpler estimators of stock status or trends, so no attempt is made here to provide facilities for running **SS** as part of a management procedure. For simulations involving **SS** as a status indicator, please take a look at the [ss3sim](https://github.com/ss3sim/ss3sim) package.
 
 This package has been used on a number of **SS** models (see below), for both versions 3.24 and 3.30. Stock synthesis is a very flexible framework, able to allow construction of a large number of different models. Not all of them can currently be loaded into **FLR** using *ss3om*. If your model fails to load, or the objects do not quite hold the right information, please do not hesitate contacting us to see if the code could be extended to work on it. However, development is now focused on models coming from **SS** 3.30, including some of the new features it has brought. Nevertheless, interaction with the output and input files is taken care by the [r4ss](https://github.com/r4ss/r4ss) package. So as long as *r4ss* can load your model, there is a good chance we can load it into **FLR**.
 
 # Installation
+
 
 The package is available from the **FLR** repository, and can be installed, including all its dependencies, by calling
 
@@ -33,14 +34,14 @@ install.packages("ss3om", repos=structure(c(CRAN="https://cloud.r-project.org/",
   FLR="https://flr-project.org/R")))
 ```
 
-You can also install the development version directly from the [github repository](https://github.com/flr/ss3om)
+You can also install the development version directly from the [github repository](https://github.com/flr/ss3om). For this an updated version of [r4ss](https://github.com/r4ss/r4ss) is needed:
 
 ```{r, eval=FALSE}
+remotes::install_github("r4ss/r4ss")
 remotes::install_github("flr/ss3om")
 ```
 
 # Using `read` functions to load SS3 results
-
 
 ```{r loadpkg}
 library(ss3om)
@@ -53,9 +54,11 @@ dir <- system.file("ext-data/albio", package="ss3om")
 ## *FLStock*
 
 ```{r readfls}
-albio <- readFLSss3(dir, name="herring")
-```
+albio <- readFLSss3(dir, name="ALB")
+range(albio) <- c(minfbar=1, maxfbar=12)
 
+plot(albio)
+```
 
 | FLR class | From folder | From list   |               |
 |-----------|-------------|-------------|---------------|
