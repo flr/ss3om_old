@@ -34,7 +34,7 @@ her <- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
 plot(her)
 ```
 
-![her](man/figures/her.png)
+![her](man/figures/her.png | width=100)
 
 ## License
 Copyright (c) 2016-2021 European Union & Iago Mosqueira. Released under the [EUPL 1.2](https://eupl.eu/1.2/en/).
