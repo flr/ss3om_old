@@ -6,48 +6,47 @@
 #
 # Distributed under the terms of the EUPL-1.2
 
+# --- adrhke {{{
 
-# --- simple {{{
+path <- file.path("3.30", "adrhke")
 
-path <- file.path("3.30", "simple")
+hke <- readOutputss3(path)
 
-sim <- readOutputss3(path)
-sims <- readFLSss3(path, range = c(minfbar=10, maxfbar=15))
+hkes <- readFLSss3(path, range = c(minfbar=1, maxfbar=4))
+hkeom <- readFLomss3(path, range = c(minfbar=1, maxfbar=4))
 
 # CHECK SS_output & FLStock load
 
-test_that("simple SS_output and FLStock load", {
-
-  expect_true(validObject(sims))
-
+test_that("hake FLStock is valid", {
+  expect_true(validObject(hkes))
   }
 )
 
 # CHECK SSB matches
 
-test_that("Calculated simple SSB matches that in Report.sso", {
+test_that("Calculated hake SSB matches that in Report.sso", {
   expect_comparable(
-    unitSums(ssb(sims)),
-    extractSSB(sim))
+    unitSums(ssb(hkes)),
+    extractSSB(hke))
   }
 )
-
+  
 # CHECK annual F matches
 
-test_that("Calculated simple annual F matches that in Report.sso", {
+test_that("Calculated hake annual F matches that in Report.sso", {
   expect_comparable(
-    unitMeans(fbar(sims))[, -1],
-    extractFbar(sim))
+    unitMeans(fbar(hkes))[, -1],
+    extractFbar(hke))
   }
 )
 
 # CHECK harvest
 
-test_that("Calculated simple annual Z at age matches that in Report.sso", {
+test_that("Calculated hake annual Z at age matches that in Report.sso", {
   expect_comparable(
     # LAST age not returned in Report.sso$Z_at_age
-    z(sims)[dimnames(sims)$age[-dims(sims)$age],],
-    extractZatage(sim))
+    z(hkes)[ac(0:18),],
+    extractZatage(hke)[ac(0:18),])
   }
 )
 # }}}
@@ -84,96 +83,6 @@ test_that("Calculated albio annual Z at age matches that in Report.sso", {
     # LAST age not returned in Report.sso$Z_at_age
     seasonSums(z(albs)[dimnames(albs)$age[-dims(albs)$age],]),
     extractZatage(alb))
-  }
-)
-# }}}
-
-# --- vendace {{{
-
-path <- file.path("3.30", "vendace")
-
-fev <- readOutputss3(path)
-fevs <- readFLSss3(path, range = c(minfbar=1, maxfbar=3))
-
-# CHECK SS_output & FLStock load
-
-test_that("vendance SS_output and FLStock load", {
-  expect_true(validObject(fevs))
-  }
-)
-
-# DEBUG CHECK SSB matches
-
-test_that("Calculated vendance SSB matches that in Report.sso", {
-  expect_comparable(
-    unitSums(ssb(fevs)),
-    extractSSB(fev))
-  }
-)
-
-# CHECK annual F matches
-
-test_that("Calculated vendance annual F matches that in Report.sso", {
-  expect_comparable(
-    unitMeans(fbar(fevs))[, -1],
-    extractFbar(fev))
-  }
-)
-
-# CHECK harvest
-
-test_that("Calculated vendance annual Z at age matches that in Report.sso", {
-  expect_comparable(
-    # LAST age not returned in Report.sso$Z_at_age
-    z(fevs)[ac(0:10), ],
-    extractZatage(fev)[ac(0:10), ])
-  }
-)
-# }}}
-
-# --- sole {{{
-
-path <- file.path("3.30", "sole")
-
-sole <- readOutputss3(path)
-soles <- readFLSss3(path, range = c(minfbar=2, maxfbar=30))
-
-solei <- readFLIBss3(path)
-
-sold <- SS_readdat(file.path(path, "2019_petrale.dat"))
-
-# CHECK SS_output & FLStock load
-
-test_that("vendance SS_output and FLStock load", {
-  expect_true(validObject(fevs))
-  }
-)
-
-# DEBUG CHECK SSB matches
-
-test_that("Calculated vendance SSB matches that in Report.sso", {
-  expect_comparable(
-    unitSums(ssb(fevs)),
-    extractSSB(fev))
-  }
-)
-
-# CHECK annual F matches
-
-test_that("Calculated vendance annual F matches that in Report.sso", {
-  expect_comparable(
-    unitMeans(fbar(fevs))[, -1],
-    extractFbar(fev))
-  }
-)
-
-# CHECK harvest
-
-test_that("Calculated vendance annual Z at age matches that in Report.sso", {
-  expect_comparable(
-    # LAST age not returned in Report.sso$Z_at_age
-    z(fevs)[ac(0:10), ],
-    extractZatage(fev)[ac(0:10), ])
   }
 )
 # }}}
@@ -221,14 +130,13 @@ test_that("Calculated herring annual Z at age matches that in Report.sso", {
 )
 # }}}
 
-# --- adrhke {{{
+# --- nhke {{{
 
-path <- file.path("3.30", "adrhke")
+path <- file.path("3.30", "nhke")
 
 hke <- readOutputss3(path)
 
 hkes <- readFLSss3(path, range = c(minfbar=1, maxfbar=4))
-hkeom <- readFLomss3(path, range = c(minfbar=1, maxfbar=4))
 
 # CHECK SS_output & FLStock load
 
@@ -264,6 +172,99 @@ test_that("Calculated hake annual Z at age matches that in Report.sso", {
     extractZatage(hke)[ac(0:18),])
   }
 )
+# }}}
+
+# --- simple {{{
+
+path <- file.path("3.30", "simple")
+
+sim <- readOutputss3(path)
+sims <- readFLSss3(path, range = c(minfbar=10, maxfbar=15))
+
+# CHECK SS_output & FLStock load
+
+test_that("simple SS_output and FLStock load", {
+
+  expect_true(validObject(sims))
+
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated simple SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(sims)),
+    extractSSB(sim))
+  }
+)
+
+# CHECK annual F matches
+
+test_that("Calculated simple annual F matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(sims))[, -1],
+    extractFbar(sim))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated simple annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(sims)[dimnames(sims)$age[-dims(sims)$age],],
+    extractZatage(sim))
+  }
+)
+# }}}
+
+# simple2
+# simple_realF
+# simple_with_discard
+
+# --- skjio {{{
+
+path <- file.path("3.30", "skjio")
+
+skj <- readOutputss3(path)
+
+skjs <- readFLSss3(path)[-1,]
+
+# CHECK SS_output & FLStock load
+
+test_that("skj FLStock is valid", {
+  expect_true(validObject(skjs))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated skipjack SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(skjs))[,,,1],
+    extractSSB(skj))
+  }
+)
+
+# CHECK annual F matches
+
+ test_that("Calculated skipjack annual F matches that in Report.sso", {
+   expect_comparable(
+    seasonSums(unitMeans(fbar(skjs)))[, -1],
+    extractFbar(skj))
+   }
+ )
+
+# CHECK harvest
+ 
+ test_that("Calculated skipjack annual Z at age matches that in Report.sso", {
+   expect_comparable(
+     # LAST age not returned in Report.sso$Z_at_age
+     z(simplify(skjs)),
+     extractZatage(skj))
+   }
+ )
 # }}}
 
 # --- swoiotc {{{
@@ -311,6 +312,49 @@ test_that("Calculated swordfish SSB matches that in Report.sso", {
  )
 #  }}}
 
+# --- vendace {{{
+
+path <- file.path("3.30", "vendace")
+
+fev <- readOutputss3(path)
+fevs <- readFLSss3(path, range = c(minfbar=1, maxfbar=3))
+
+# CHECK SS_output & FLStock load
+
+test_that("vendance SS_output and FLStock load", {
+  expect_true(validObject(fevs))
+  }
+)
+
+# DEBUG CHECK SSB matches
+
+test_that("Calculated vendance SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(fevs)),
+    extractSSB(fev))
+  }
+)
+
+# CHECK annual F matches
+
+test_that("Calculated vendance annual F matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(fevs))[, -1],
+    extractFbar(fev))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated vendance annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(fevs)[ac(0:10), ],
+    extractZatage(fev)[ac(0:10), ])
+  }
+)
+# }}}
+
 # --- yftio {{{
 
 path <- file.path("3.30", "yftio")
@@ -355,94 +399,6 @@ test_that("Calculated yellowfin SSB matches that in Report.sso", {
      extractZatage(yft)[ac(0:9),])
    }
  )
-# }}}
-
-# --- skjio {{{
-
-path <- file.path("3.30", "skjio")
-
-skj <- readOutputss3(path)
-
-skjs <- readFLSss3(path)[-1,]
-
-# CHECK SS_output & FLStock load
-
-test_that("skj FLStock is valid", {
-  expect_true(validObject(skjs))
-  }
-)
-
-# CHECK SSB matches
-
-test_that("Calculated skipjack SSB matches that in Report.sso", {
-  expect_comparable(
-    unitSums(ssb(skjs))[,,,1],
-    extractSSB(skj))
-  }
-)
-
-# CHECK annual F matches
-
- test_that("Calculated skipjack annual F matches that in Report.sso", {
-   expect_comparable(
-    seasonSums(unitMeans(fbar(skjs)))[, -1],
-    extractFbar(skj))
-   }
- )
-
-# CHECK harvest
- 
- test_that("Calculated skipjack annual Z at age matches that in Report.sso", {
-   expect_comparable(
-     # LAST age not returned in Report.sso$Z_at_age
-     z(simplify(skjs)),
-     extractZatage(skj))
-   }
- )
-# }}}
-
-# --- nhke {{{
-
-path <- file.path("3.30", "nhke")
-
-hke <- readOutputss3(path)
-
-hkes <- readFLSss3(path, range = c(minfbar=1, maxfbar=4))
-
-# CHECK SS_output & FLStock load
-
-test_that("hake FLStock is valid", {
-  expect_true(validObject(hkes))
-  }
-)
-
-# CHECK SSB matches
-
-test_that("Calculated hake SSB matches that in Report.sso", {
-  expect_comparable(
-    unitSums(ssb(hkes)),
-    extractSSB(hke))
-  }
-)
-  
-# CHECK annual F matches
-
-test_that("Calculated hake annual F matches that in Report.sso", {
-  expect_comparable(
-    unitMeans(fbar(hkes))[, -1],
-    extractFbar(hke))
-  }
-)
-
-# CHECK harvest
-
-test_that("Calculated hake annual Z at age matches that in Report.sso", {
-  expect_comparable(
-    # LAST age not returned in Report.sso$Z_at_age
-    z(hkes)[ac(0:18),],
-    extractZatage(hke)[ac(0:18),])
-  }
-)
 # }}}
 
 # -- Annual F option 4
@@ -495,5 +451,3 @@ test_that("Calculated simple_realF annual Z at age matches that in Report.sso", 
   }
 )
 # }}}
-
-# -- discards
