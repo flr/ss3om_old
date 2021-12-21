@@ -19,6 +19,7 @@ Imports:
   FLFishery,
   mse
 Additional_repositories: http://flr-project.org/R
+Remotes: r4ss/r4ss
 BugReports: https://github.com/flr/ss3om/issues
 Suggests:
   doParallel,
