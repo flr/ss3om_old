@@ -1,0 +1,21 @@
+#V3.30.18.00;_safe;_compile_date:_Sep 30 2021;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.3
+#_Stock_Synthesis_is_a_work_of_the_U.S._Government_and_is_not_subject_to_copyright_protection_in_the_United_States.
+#_Foreign_copyrights_may_apply._See_copyright.txt_for_more_information.
+#_User_support_available_at:NMFS.Stock.Synthesis@noaa.gov
+#_User_info_available_at:https://vlab.noaa.gov/group/stock-synthesis
+#_Source_code_at:_https://github.com/nmfs-stock-synthesis/stock-synthesis
+
+This file contains warnings, suggestions and notes generated as files are read and processed
+
+1 NOTE:  Max data length bin: 100  < max pop len bins: 130; so will accumulate larger pop len bins
+2 Fleet:_1 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+3 Fleet:_2 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+4 Fleet:_3 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+5 Fleet:_4 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+6 Fleet:_5 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+7 Fleet:_6 min bound on parameter for size at peak is 5; should be >= midsize bin 2 (5.5)
+8 1st iteration warning: catch logL > 50% total logL; check configuration; suggest start with larger R0
+9  Early recdev biasadj is >2 times ratio of rmse to sigmaR
+10 Final gradient: 0.00273525 is larger than final_conv: 0.0001
+11  Number_of_active_parameters_on_or_near_bounds: 2
+N warnings: 11

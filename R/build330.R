@@ -40,15 +40,15 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
 
   # SET Age and unit
   endgrowth[, Age:=int_Age]
-  endgrowth[, unit:=codeUnit(Sex, Morph)]
+  endgrowth[, unit:=dmns$unit[Morph]]
 
   # NATAGE
   natage <- data.table(out$natage)
-  natage[, unit:=codeUnit(Sex, Morph)]
+  natage[, unit:=dmns$unit[Morph]]
   
   # CATCH.N
   catage <- data.table(out$catage)
-  catage[, unit:=codeUnit(Sex, Morph)]
+  catage[, unit:=dmns$unit[Morph]]
   # NOTE catage$0 comes out as integer
   catage[, `0` := as.double(`0`)]
   setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
@@ -116,7 +116,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
     if(any(unique(datage$Fleet) %in% fleets)) {
     
       # SET unit
-      datage[, unit:=codeUnit(Sex, Morph)]
+      datage[, unit:=dmns$unit[Morph]]
 
       # FLEETs w/discards
       idx <- setNames(nm=unique(datage$Fleet))
@@ -635,7 +635,17 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     return(FLFishery(effort=ef, A=ca))
     }, c=catches, s=selex, ef=effqs)
 
+
+  # fishery names
   names(flfs) <- out$FleetNames[out$fleet_type == 1]
+
+  # catch names
+  if(!missing(name)) {
+    flfs <- lapply(flfs, function(x) {
+      names(x) <- name
+      return(x)
+    })
+  }
  
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])

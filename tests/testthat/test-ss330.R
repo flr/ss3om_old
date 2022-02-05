@@ -219,10 +219,6 @@ test_that("Calculated simple annual Z at age matches that in Report.sso", {
 )
 # }}}
 
-# simple2
-# simple_realF
-# simple_with_discard
-
 # --- skjio {{{
 
 path <- file.path("3.30", "skjio")
@@ -247,7 +243,7 @@ test_that("Calculated skipjack SSB matches that in Report.sso", {
   }
 )
 
-# CHECK annual F matches
+# DEBUG CHECK annual F matches
 
  test_that("Calculated skipjack annual F matches that in Report.sso", {
    expect_comparable(
@@ -256,7 +252,7 @@ test_that("Calculated skipjack SSB matches that in Report.sso", {
    }
  )
 
-# CHECK harvest
+# DEBUG CHECK harvest
  
  test_that("Calculated skipjack annual Z at age matches that in Report.sso", {
    expect_comparable(
@@ -380,7 +376,7 @@ test_that("Calculated yellowfin SSB matches that in Report.sso", {
   }
 )
 
-# CHECK annual F matches
+# DEBUG CHECK annual F matches
 
  test_that("Calculated yellowfin annual F matches that in Report.sso", {
    expect_comparable(
@@ -389,7 +385,7 @@ test_that("Calculated yellowfin SSB matches that in Report.sso", {
    }
  )
 
-# CHECK harvest
+# DEBUG CHECK harvest
  
  test_that("Calculated yellowfin annual Z at age matches that in Report.sso", {
    expect_comparable(

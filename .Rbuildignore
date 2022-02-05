@@ -5,6 +5,7 @@ docs/
 man-roxygen/
 Makefile
 .git/
+.github/
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown.yml$
