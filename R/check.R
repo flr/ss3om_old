@@ -55,8 +55,9 @@ extractSSB <- function(out) {
 extractRec <- function(out) {
   
   rec <- data.table(out$derived_quants)[Label %in% paste0("Recr_",
-    seq(out$startyr, out$endyr)), Value] *
-    out$recruitment_dist[[1]][, "Frac/sex"]
+    seq(out$startyr, out$endyr)), Value] 
+  # DEBUG
+  # * out$recruitment_dist[[1]][, "Frac/sex"]
 
   return(FLQuant(rec, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
     unit=list("unique", c("F", "M"))[[out$nsexes]]), units="1000"))

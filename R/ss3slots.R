@@ -39,6 +39,20 @@ ss3index <- function(cpue, fleets) {
   return(as(index, "FLQuants"))
 }
 
+ss3index.fit <- function(cpue, fleets) {
+
+# EXTRACT Exp
+index <- cpue[Fleet_name %in% names(fleets), c("Fleet_name", "Yr", "Seas", "Exp")]
+
+# CHANGE names and SORT
+names(index) <- c("qname", "year", "season", "data")
+setorder(index, year, season, qname)
+index[, age:='all']
+
+# CONVERT to FLQuants
+return(as(index, "FLQuants"))
+}
+
 #' @rdname ss3slot
 #' @aliases ss3index.res
 #' @details - `ss3index.res` returns the `index.res` slot of each survey/CPUE fleet.

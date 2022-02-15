@@ -158,16 +158,21 @@ ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
   return(catch)
 } 
 
-ss3z30 <- function(zatage, m, dmns) {
+ss3z30 <- function(zatage, dmns) {
 
   zaa <- zatage[Yr %in% dmns$year, -1]
   setnames(zaa, c("Sex", "Yr"), c("unit", "year"))
+
+  # CONVERT class of last age column
+  zaa[[dim(zaa)[2]]] <- as.numeric(NA)
 
   zatage <- data.table::melt(zaa, id.vars=c("unit", "year"),
     measure.vars=dmns$age, variable.name="age", value.name = "data")
   
   z <- as.FLQuant(zatage, units="z")
   dimnames(z) <- dmns[-4]
+
+  z[dim(z)[1],] <- z[dim(z)[1] - 1,]
 
   return(z)
 }

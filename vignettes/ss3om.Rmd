@@ -48,14 +48,14 @@ library(ss3om)
 ```
 
 ```{r setpwd}
-dir <- system.file("ext-data/albio", package="ss3om")
+dir <- system.file("ext-data/herring", package="ss3om")
 ```
 
 ## *FLStock*
 
 ```{r readfls}
-albio <- readFLSss3(dir, name="ALB")
-range(albio) <- c(minfbar=1, maxfbar=12)
+albio <- readFLSss3(dir, name="HER")
+range(albio) <- c(minfbar=3, maxfbar=7)
 
 plot(albio)
 ```

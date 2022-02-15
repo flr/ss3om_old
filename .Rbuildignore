@@ -2,6 +2,7 @@
 appveyor.yml
 NEWS.md
 docs/
+inst/tests
 man-roxygen/
 Makefile
 .git/
