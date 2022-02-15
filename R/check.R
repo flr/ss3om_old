@@ -59,7 +59,7 @@ extractRec <- function(out) {
   # DEBUG
   # * out$recruitment_dist[[1]][, "Frac/sex"]
 
-  return(FLQuant(rec, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
+  return(FLQuant(rec/out$nsexes, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
     unit=list("unique", c("F", "M"))[[out$nsexes]]), units="1000"))
 }
 
