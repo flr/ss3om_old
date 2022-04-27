@@ -386,7 +386,7 @@ buildFLSRss3 <- function(out, ...) {
   # vcov
   estpar <- parameters[grepl("SR_", Label),][!is.na(Active_Cnt),]
   
-  # CREATE var is only one param estimated
+  # CREATE var if only one param estimated
   if(dim(estpar)[1] == 1) {
     vcov <- array((estpar$Parm_StDev)^2, dim=c(1,1,1),
       dimnames=list(estpar$Label, estpar$Label, iter=1))

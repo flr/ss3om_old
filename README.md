@@ -1,4 +1,4 @@
-# ss3om <img src="man/figures/ss3om.png" align="right" width="120" />
+# ss3om <img src="man/figures/logo.png" align="right" width="120" />
 
 [![R-CMD-check](https://github.com/flr/ss3om/workflows/R-CMD-check/badge.svg)](https://github.com/flr/ss3om/actions)
 [![License](https://flr-project.org/img/eupl12.svg)](https://eupl.eu/1.2/en/)

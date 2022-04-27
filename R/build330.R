@@ -547,10 +547,6 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # STOCK.WT
   wt <- ss3wt30(endgrowth, dmns, birthseas=1)
 
-  # CORRECT Mat*Fecund to by unit body weight
-  if(out$Maturity_option == 6)
-    mat <- mat / wt
-
   # M
   m <- ss3m30(endgrowth, dmns, morph)
   
@@ -585,6 +581,10 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # MAT
   mat <- ss3mat30(endgrowth, dmns, spawnseas=spawnseas,
     option=out$Maturity_option)
+
+  # CORRECT Mat*Fecund to by unit body weight
+  if(out$Maturity_option == 6)
+    mat <- mat / wt
     
   # FLBiol
   biol <- FLBiol(
