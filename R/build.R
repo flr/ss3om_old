@@ -55,30 +55,39 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CATCH.WT, assumes _mat_option == 3
   wtatage <- endgrowth[BirthSeas %in% birthseas,
     c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
-  
+ 
+  # 0 column loads as integer if no values
+  catage[, `0` := as.double(`0`)]
+
   catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
+ 
+  # TABLE of areas and fleets
+  map <- unique(catage[Fleet %in% fleets, .(Area, Fleet)])
   
-  # CALCULATE total catch.n & catch.wt
-  catch.n <- FLQuant(0, dimnames=dmns, units="1000")
-  catch.wt <- FLQuant(0, dimnames=dmns, units="kg")
-  catch.den <- FLQuant(0, dimnames=dmns, units="kg")
-  
-  for (i in seq(length(fleets))) {
-    catch.n <- catch.n %++% catches[[i]]$catch.n
+  # CALCULATE total catch.n, add fleets by area
+  catch.n <- abind(lapply(unique(map$Area), function(x)
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
+      function(y) y$catch.n))
+    ))
 
-    # DROP NAs from discards fleets
-    if(!all(is.na(catches[[i]]$catch.wt))) {
-      catch.den <- catch.n %++% catches[[i]]$catch.n
-      catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
-    }
-  }
+  # Arithmetic MEAN wt
+  mcatch.wt <- abind(lapply(unique(map$Area), function(x) {
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
+      function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
   
-  # COMPUTE no. of fleets per area
-  wtsbyarea <- c(table(unlist(lapply(catches, function(x) dimnames(x$catch.wt)$area))))
+  # Weighted MEAN wt
+  catch.wt <- abind(lapply(unique(map$Area), function(x) {
+    Reduce("+", lapply(catches[as.character(map[Area == x, Fleet])],
+    function(y) y$catch.wt * y$catch.n))})) / catch.n
 
-  # DIVIDE by total catch
-  catch.wt <- catch.wt / (catch.den + FLQuant(rep(1e-3 * wtsbyarea,
-    each=prod(dim(catch.n)[-5])), dimnames=dmns, units="1000"))
+  # SUBSTITUTE 0s or NAs with arithmetic mean
+  idx <- is.na(catch.wt) | catch.wt == 0
+  if(any(idx))
+    catch.wt[idx] <- c(mcatch.wt)[c(idx)]
+  
+  # DISCARDS
+  discards.n <- catch.n * 0
+  discards.wt <- catch.wt
 
   # RESET units(catch.wt)
   units(catch.wt) <- "kg"
@@ -90,16 +99,16 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     lastyr <- unique(ageselex[Factor=="Asel2", Yr])
     
     # TOTAL selex (catch$kill_nums)
-    seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="sel_nums")
+    seltot <- ss3sel.pattern(ageselex, lastyr, fleets,
+      morphs=unique(ageselex$Morph), factor="sel_nums")
     
     # RETAINED selex (catch$ret_num)
-    selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="sel*ret_nums")
+    selret <- ss3sel.pattern(ageselex, lastyr, fleets, 
+      morphs=unique(ageselex$Morph), factor="sel*ret_nums")
     
     # DEAD selex (catch$kill_num)
-    seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-      factor="dead_nums")
+    seldea <- ss3sel.pattern(ageselex, lastyr, fleets, 
+      morphs=unique(ageselex$Morph), factor="dead_nums")
     
     # DISCARD selex (dead + alive)
     seldis <- mapply(function(x, y) x - y, seltot, selret, SIMPLIFY=FALSE)
@@ -122,10 +131,6 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
     
     discards.wt <- catch.wt
 
-  } else {
-    discards.n <- catch.n
-    discards.n[] <- 0
-    discards.wt <- catch.wt
   }
 
   # FLStock
@@ -140,168 +145,8 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CALCULATE stock, catch, landings & discards
   landings(stock) <- computeLandings(stock)
   discards(stock) <- computeDiscards(stock)
-  catch(stock) <- computeCatch(stock, slot='all')
-  stock(stock) <- computeStock(stock)
-
-  # ASSIGN harvest.spwn and m.spwn in birthseas
-  harvest.spwn(stock)[,,,birthseas] <- 0
-  m.spwn(stock)[,,,birthseas] <- 0
-
-  # HARVEST
-  harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
-  
-  # range
-  if(!missing(range))
-    range(stock) <- range
-
-  return(stock)
-
-} # }}}
-
-# HACK for no discards selex
-# buildFLSss3 - FLStock {{{
-
-buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
-  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "), range="missing",
-  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet])) {
-  
-  # SUBSET out
-  out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
-    "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
-    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
-    "discard", "catch", "morph_indexing")]
-
-  # TODO: call spread()
-
-  # GET ages from catage
-  ages <- getRange(out$catage)
-  ages <- ac(seq(ages['min'], ages['max']))
-  dmns <- getDimnames(out)
-  dim <- unlist(lapply(dmns, length))
-
-  # EXTRACT from out
-  if(out$nsexes == 1) {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Age"))
-  } else {
-    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Sex", "Age"))
-  }
-  # NATAGE
-  natage <- data.table(out$natage)
-  
-  # CATCH.N
-  catage <- data.table(out$catage)
-  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
-
-  # STOCK.WT
-  wt <- ss3wt(endgrowth, dmns, birthseas)
-
-  # MAT
-  mat <- ss3mat(endgrowth, dmns, birthseas)
-
-  # M
-  m <- ss3m(endgrowth, dmns, birthseas)
-  
-  # STOCK.N
-  n <- ss3n(natage, dmns, birthseas)
-
-  # CATCH.WT, assumes _mat_option == 3
-  wtatage <- endgrowth[BirthSeas %in% birthseas,
-    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
-  
-  catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
-  
-  # CALCULATE total catch.n & catch.wt
-  catch.n <- FLQuant(0, dimnames=dmns, units="1000")
-  catch.wt <- FLQuant(0, dimnames=dmns, units="kg")
-  catch.den <- FLQuant(0, dimnames=dmns, units="kg")
-  
-  for (i in seq(length(fleets))) {
-    catch.n <- catch.n %++% catches[[i]]$catch.n
-
-    # DROP NAs from discards fleets
-    if(!all(is.na(catches[[i]]$catch.wt))) {
-      catch.den <- catch.n %++% catches[[i]]$catch.n
-      catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
-    }
-  }
-  
-  # COMPUTE no. of fleets per area
-  wtsbyarea <- c(table(unlist(lapply(catches, function(x) dimnames(x$catch.wt)$area))))
-
-  # DIVIDE by total catch
-  catch.wt <- catch.wt / (catch.den + FLQuant(rep(1e-3 * wtsbyarea,
-    each=prod(dim(catch.n)[-5])), dimnames=dmns, units="1000"))
-
-  # RESET units(catch.wt)
-  units(catch.wt) <- "kg"
-
-  # DISCARDS
-  if(!is.na(out["discard"])) {
-
-    ageselex <- data.table(out$ageselex)
-    lastyr <- unique(ageselex[Factor=="Asel2", Yr])
-
-    # CHECK runs with no discards selex
-    if(all(c("sel_nums", "sel*ret_nums", "dead_nums") %in% ageselex$Factor)) {
-    
-      # TOTAL selex (catch$kill_nums)
-      seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-        factor="sel_nums")
-      
-      # RETAINED selex (catch$ret_num)
-      selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-        factor="sel*ret_nums")
-      
-      # DEAD selex (catch$kill_num)
-      seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
-        factor="dead_nums")
-      
-      # DISCARD selex (dead + alive)
-      seldis <- mapply(function(x, y) x - y, seltot, selret, SIMPLIFY=FALSE)
-  
-      discard <- data.table(out$discard)
-      catch <- data.table(out$catch)
-  
-      # F_discards by fleet: catch from last estimation yr
-      Fdiscards <- FLQuants(mapply(function(x, y) x * y, seldis,
-        as.list(catch[Yr == max(Yr) & Fleet %in% fleets, F]), SIMPLIFY=FALSE))
-  
-      # APPLY Baranov for discards.n
-      discards.n <- Reduce('+', mapply(function(x)
-        FLQuant((x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, units="1000"),
-        Fdiscards, SIMPLIFY=FALSE))
-      dimnames(discards.n) <- dimnames(catch.n)
-  
-      # SET discards.n not in discard period as 0
-      discards.n[, !dimnames(discards.n)$year %in% discard$Yr] <- 0
-      
-      discards.wt <- catch.wt
-    } else {
-      warning("Model has discards estimates but discards-at-age could not be built.")
-
-      discards.n <- catch.n
-      discards.n[] <- 0
-      discards.wt <- catch.wt
-    }
-  } else {
-    discards.n <- catch.n
-    discards.n[] <- 0
-    discards.wt <- catch.wt
-  }
-
-  # FLStock
-  stock <- FLStock(
-    name=name, desc=desc,
-    catch.n=catch.n, catch.wt=catch.wt,
-    discards.n=discards.n, discards.wt=discards.wt,
-    landings.n=catch.n - discards.n, landings.wt=catch.wt,
-    stock.n=n, stock.wt=wt,
-    m=m, mat=mat)
-
-  # CALCULATE stock, catch, landings & discards
-  landings(stock) <- computeLandings(stock)
-  discards(stock) <- computeDiscards(stock)
-  catch(stock) <- computeCatch(stock, slot='all')
+  browser()
+  catch(stock) <- computeCatch(stock)
   stock(stock) <- computeStock(stock)
 
   # ASSIGN harvest.spwn and m.spwn in birthseas
@@ -785,5 +630,167 @@ buildFLBFss3 <- function(out, birthseas=unique(out$natage$BirthSeas)) {
   names(fisheries) <- out$FleetNames[idx]
 
   return(list(biol=biol, fisheries=fisheries))
+
+} # }}}
+
+# TODO: HACK for no discards selex
+
+# buildFLSss3 - FLStock {{{
+
+HbuildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
+  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "), range="missing",
+  fleets=setNames(out$fleet_ID[out$IsFishFleet], out$fleet_ID[out$IsFishFleet])) {
+  
+  # SUBSET out
+  out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
+    "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
+    "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
+    "discard", "catch", "morph_indexing")]
+
+  # TODO: call spread()
+
+  # GET ages from catage
+  ages <- getRange(out$catage)
+  ages <- ac(seq(ages['min'], ages['max']))
+  dmns <- getDimnames(out)
+  dim <- unlist(lapply(dmns, length))
+
+  # EXTRACT from out
+  if(out$nsexes == 1) {
+    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Age"))
+  } else {
+    endgrowth <- data.table(out$endgrowth, key=c("Seas", "Sex", "Age"))
+  }
+  # NATAGE
+  natage <- data.table(out$natage)
+  
+  # CATCH.N
+  catage <- data.table(out$catage)
+  setkey(catage, "Area", "Fleet", "Gender", "Morph", "Yr", "Seas", "Era")
+
+  # STOCK.WT
+  wt <- ss3wt(endgrowth, dmns, birthseas)
+
+  # MAT
+  mat <- ss3mat(endgrowth, dmns, birthseas)
+
+  # M
+  m <- ss3m(endgrowth, dmns, birthseas)
+  
+  # STOCK.N
+  n <- ss3n(natage, dmns, birthseas)
+
+  # CATCH.WT, assumes _mat_option == 3
+  wtatage <- endgrowth[BirthSeas %in% birthseas,
+    c("Seas", "Sex", "BirthSeas", "Age", paste0("RetWt:_", fleets)), with=FALSE]
+  
+  catches <- ss3catch(catage, wtatage, dmns, birthseas, fleets)
+  
+  # CALCULATE total catch.n & catch.wt
+  catch.n <- FLQuant(0, dimnames=dmns, units="1000")
+  catch.wt <- FLQuant(0, dimnames=dmns, units="kg")
+  catch.den <- FLQuant(0, dimnames=dmns, units="kg")
+  
+  for (i in seq(length(fleets))) {
+    catch.n <- catch.n %++% catches[[i]]$catch.n
+
+    # DROP NAs from discards fleets
+    if(!all(is.na(catches[[i]]$catch.wt))) {
+      catch.den <- catch.n %++% catches[[i]]$catch.n
+      catch.wt <- catch.wt %++% (catches[[i]]$catch.wt * (catches[[i]]$catch.n + 1e-3))
+    }
+  }
+  
+  # COMPUTE no. of fleets per area
+  wtsbyarea <- c(table(unlist(lapply(catches, function(x) dimnames(x$catch.wt)$area))))
+
+  # DIVIDE by total catch
+  catch.wt <- catch.wt / (catch.den + FLQuant(rep(1e-3 * wtsbyarea,
+    each=prod(dim(catch.n)[-5])), dimnames=dmns, units="1000"))
+
+  # RESET units(catch.wt)
+  units(catch.wt) <- "kg"
+
+  # DISCARDS
+  if(!is.na(out["discard"])) {
+
+    ageselex <- data.table(out$ageselex)
+    lastyr <- unique(ageselex[Factor=="Asel2", Yr])
+
+    # CHECK runs with no discards selex
+    if(all(c("sel_nums", "sel*ret_nums", "dead_nums") %in% ageselex$Factor)) {
+    
+      # TOTAL selex (catch$kill_nums)
+      seltot <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+        factor="sel_nums")
+      
+      # RETAINED selex (catch$ret_num)
+      selret <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+        factor="sel*ret_nums")
+      
+      # DEAD selex (catch$kill_num)
+      seldea <- ss3sel.pattern(ageselex, lastyr, fleets, morphs=unique(ageselex$Morph),
+        factor="dead_nums")
+      
+      # DISCARD selex (dead + alive)
+      seldis <- mapply(function(x, y) x - y, seltot, selret, SIMPLIFY=FALSE)
+  
+      discard <- data.table(out$discard)
+      catch <- data.table(out$catch)
+  
+      # F_discards by fleet: catch from last estimation yr
+      Fdiscards <- FLQuants(mapply(function(x, y) x * y, seldis,
+        as.list(catch[Yr == max(Yr) & Fleet %in% fleets, F]), SIMPLIFY=FALSE))
+  
+      # APPLY Baranov for discards.n
+      discards.n <- Reduce('+', mapply(function(x)
+        FLQuant((x %/% (x %+% m)) * (1 - exp(-(x %+% m))) * n, units="1000"),
+        Fdiscards, SIMPLIFY=FALSE))
+      dimnames(discards.n) <- dimnames(catch.n)
+  
+      # SET discards.n not in discard period as 0
+      discards.n[, !dimnames(discards.n)$year %in% discard$Yr] <- 0
+      
+      discards.wt <- catch.wt
+    } else {
+      warning("Model has discards estimates but discards-at-age could not be built.")
+
+      discards.n <- catch.n
+      discards.n[] <- 0
+      discards.wt <- catch.wt
+    }
+  } else {
+    discards.n <- catch.n
+    discards.n[] <- 0
+    discards.wt <- catch.wt
+  }
+
+  # FLStock
+  stock <- FLStock(
+    name=name, desc=desc,
+    catch.n=catch.n, catch.wt=catch.wt,
+    discards.n=discards.n, discards.wt=discards.wt,
+    landings.n=catch.n - discards.n, landings.wt=catch.wt,
+    stock.n=n, stock.wt=wt,
+    m=m, mat=mat)
+
+  # CALCULATE stock, catch, landings & discards
+  landings(stock) <- computeLandings(stock)
+  discards(stock) <- computeDiscards(stock)
+  catch(stock) <- computeCatch(stock, slot='all')
+  stock(stock) <- computeStock(stock)
+
+  # ASSIGN harvest.spwn and m.spwn in birthseas
+  harvest.spwn(stock)[,,,birthseas] <- 0
+  m.spwn(stock)[,,,birthseas] <- 0
+
+  # HARVEST
+  harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
+  
+  # range
+  if(!missing(range))
+    range(stock) <- range
+
+  return(stock)
 
 } # }}}

@@ -19,7 +19,8 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
-    "discard", "discard_at_age", "catch", "NatMort_option", "GrowthModel_option",
+    "discard", "discard_at_age", "catch", "NatMort_option", 
+    "GrowthModel_option",
     "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing")]
 
