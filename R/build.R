@@ -145,7 +145,6 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
   # CALCULATE stock, catch, landings & discards
   landings(stock) <- computeLandings(stock)
   discards(stock) <- computeDiscards(stock)
-  browser()
   catch(stock) <- computeCatch(stock)
   stock(stock) <- computeStock(stock)
 
