@@ -528,15 +528,15 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
 
   # SET Age and unit
   endgrowth[, Age:=int_Age]
-  endgrowth[, unit:=codeUnit(Sex, Morph)]
+  endgrowth[, unit:=dmns$unit[Morph]]
 
   # NATAGE
   natage <- data.table(out$natage)
-  natage[, unit:=codeUnit(Sex, Morph)]
+  natage[, unit:=dmns$unit[Morph]]
   
   # CATCH.N
   catage <- data.table(out$catage)
-  catage[, unit:=codeUnit(Sex, Morph)]
+  catage[, unit:=dmns$unit[Morph]]
   # NOTE catage$0 comes out as integer
   catage[, `0` := as.double(`0`)]
   setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
@@ -659,7 +659,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     setkey(datage, "Area", "Fleet", "Yr", "Seas", "Era", "Type")
     
     # SET unit
-    datage[, unit:=codeUnit(Sex, Morph)]
+    datage[, unit:=dmns$unit[Morph]]
 
     # FLEETs w/discards
     idx <- setNames(nm=unique(datage$Fleet))
