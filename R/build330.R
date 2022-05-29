@@ -509,7 +509,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     "NatMort_option", "GrowthModel_option", "Maturity_option",
     "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing",
-    "exploitation", "recruitment_dist")]
+    "exploitation", "recruitment_dist", "recruit", "sigma_R_in")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
@@ -566,6 +566,9 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
       R0=out$derived_quants["Recr_Virgin", "Value"],
       v=out$derived_quants["SSB_Virgin", "Value"])
 
+    if(out$nsexes == 2)
+      pars$sratio = 0.5
+
   } else {
 
     pars <- FLPar(NA, dimnames=list(params=c("s", "R0", "v", "seasp"),
@@ -578,6 +581,10 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
         recdist[i, "Frac/sex"])
     }
   }
+
+  recruit <- data.table(out$recruit)
+  srrdevs <- FLQuant(exp(recruit[Yr %in% dmns$year,]$dev -0.5 *
+    out$sigma_R_in^2), dimnames=c(age=dmns$age[1], dmns[-1]), units="")
 
   # MAT
   mat <- ss3mat30(endgrowth, dmns, spawnseas=spawnseas,
@@ -592,7 +599,8 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     name=name, desc=desc,
     n=n, wt=wt,
     m=m, mat=predictModel(FLQuants(mat=mat), model=~mat),
-    rec=predictModel(model=bevholtss3()$model, params=pars))
+    rec=predictModel(model=bevholtss3()$model, params=pars,
+      FLQuants(residuals=srrdevs)))
   
   spwn(biol) <- out$Spawn_timing_in_season
 
@@ -620,7 +628,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   effs <- expl[Yr %in% dmns$year, c("Yr", "Seas",
     out$FleetNames[out$fleet_type == 1]), with=FALSE]
   if(length(unique(effs$Seas)) == 1)
-    effs[, Seas:="all"]
+    effs[, Seas:=rep("all", nrow(effs))]
 
   effqs <- FLQuants(lapply(colnames(effs)[-c(1, 2)], function(x) {
     y <- effs[, c("Yr", "Seas", x), with=FALSE]

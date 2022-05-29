@@ -167,8 +167,9 @@ buildFLSss3 <- function(out, birthseas=out$birthseas, name=out$Control_File,
 buildFLSRss3 <- function(out, ...) {
   
   # SUBSET out
-  out <- out[c("parameters", "recruit", "derived_quants", "nseasons", "nsexes",
-    "likelihoods_used", "SRRtype", "spawnseas", "CoVar")]
+  out <- out[c("parameters", "recruit", "derived_quants", "nseasons",
+    "nsexes", "likelihoods_used", "SRRtype", "spawnseas", "CoVar",
+    "sigma_R_in", "sigma_R_info")]
 
   # EXTRACT elements
   recruit <- data.table(out$recruit)[era %in% c("Fixed", "Main"),]
@@ -214,17 +215,20 @@ buildFLSRss3 <- function(out, ...) {
   # ssb
   ssb <- FLQuant(recruit$SpawnBio, dimnames=c(age="all", dms), units="t")
   # fitted
-  fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), units="1000")
-  # residuals
-  residuals <- FLQuant(recruit$dev, dimnames=c(age=0, dms), units="")
+  fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), 
+    units="1000")
+  # residuals with bias-correction
+  residuals <- FLQuant(exp(recruit$dev -0.5 * out$sigma_R_in^2),
+    dimnames=c(age=0, dms), units="")
   
   # SETUP for multiple recruit seasons
   if(out$nseasons > 1) {
 
     params <- FLPar(rep(c(params), out$nseasons),
-      dimnames=list(params=dimnames(params)$params, season=seq(out$nseasons), iter=1))
+      dimnames=list(params=dimnames(params)$params,
+      season=seq(out$nseasons), iter=1))
 
-    params[,-out$spawnseas,] <- NA
+    params[, -out$spawnseas,] <- NA
   }
   
   # vcov
