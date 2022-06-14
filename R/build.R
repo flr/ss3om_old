@@ -207,7 +207,7 @@ buildFLSRss3 <- function(out, ...) {
     attr(logLik, "df") <- length(rawp[!is.na(Active_Cnt), Active_Cnt])
   }
 
-    # LOAD FLQuants
+  # LOAD FLQuants
   dms <- list(year=yrs, season=out$spawnseas)
 
   # rec

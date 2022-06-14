@@ -1,7 +1,7 @@
 # build330.R - DESC
 # /build330.R
 
-# Copyright European Union, 2015-2019; WMR, 2020.
+# Copyright European Union, 2015-2019; WMR, 2020-2022.
 # Author: Iago Mosqueira (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
