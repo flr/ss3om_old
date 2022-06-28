@@ -212,7 +212,8 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
       out$fleet_type[out$fleet_ID %in% unique(out$catch$Fleet)] <- 1
     }
 
-    idx <- names(wasq)[!names(wasq) %in% c("0", "-1", "-2")][out$fleet_type == 1]
+    idx <- names(wasq)[!names(wasq) %in%
+      c("0", "-1", "-2")][out$fleet_type == 1]
 
     # COMPUTE catch.wt DEBUG weighted average
     catch.wt(res)[] <- Reduce("+", wasq[idx]) /
@@ -225,6 +226,14 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     discards(res) <- computeDiscards(res)
     stock(res) <- computeStock(res)
   }
+
+  # READ fbar range from starter.ss
+  if(file.exists(file.path(dir, "starter.ss"))) {
+    sta <- SS_readstarter(file.path(dir, "starter.ss"), verbose=FALSE)
+    if(sta$F_report_units == 5) {
+      range(res)[c("minfbar", "maxfbar")] <- sta$F_age_range
+    }
+  } 
 
   return(res)
 
