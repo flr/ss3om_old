@@ -658,7 +658,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
  
   # TABLE of areas and fleets
   map <- unique(catage[, .(Area, Fleet)])
-  
+
   # DISCARDS
   if(!is.na(out["discard"])) {
 
@@ -678,27 +678,12 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     # TABLE of areas and fleets for discards
     map <- unique(datage[, .(Area, Fleet)])
     map[, Fleet:=as.character(Fleet)]
-  
-    # CALCULATE total catch.n, add fleets by area
-    discards.n <- abind(lapply(unique(map$Area), function(x)
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-        function(y) y$catch.n))
-      ))
 
-    # Arithmetic MEAN wt
-    mdiscards.wt <- abind(lapply(unique(map$Area), function(x) {
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-        function(y) y$catch.wt)) / length(map[Area == x, Fleet])}))
-  
-    # Weighted MEAN wt
-    discards.wt <- abind(lapply(unique(map$Area), function(x) {
-      Reduce("+", lapply(discards[map[Area == x, Fleet]],
-      function(y) y$catch.wt * y$catch.n))})) / discards.n
-
-    # SUBSTITUTE 0s or NAs with arithmetic mean
-    idx <- is.na(discards.wt) | discards.wt == 0
-    if(any(idx))
-      discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
+    flfs[idx] <- Map(function(x, y) {
+      discards.n(x[[1]]) <- y$catch.n
+      discards.wt(x[[1]]) <- y$catch.wt
+      return(x)
+      }, x=flfs[idx], y=discards)
   }
 
   return(list(biol=biol, fisheries=FLFisheries(flfs)))
