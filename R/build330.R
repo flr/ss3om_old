@@ -637,6 +637,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     as.FLQuant(y)
   }))
   
+  # ADD discards to fisheries
   flfs <- Map(function(c, s, ef) {
     ca <- FLCatch(landings.n=c$catch.n, landings.wt=c$catch.wt, catch.sel=s)
     discards.n(ca)[] <- 0
@@ -679,9 +680,13 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     map <- unique(datage[, .(Area, Fleet)])
     map[, Fleet:=as.character(Fleet)]
 
+
     flfs[idx] <- Map(function(x, y) {
       discards.n(x[[1]]) <- y$catch.n
       discards.wt(x[[1]]) <- y$catch.wt
+
+      landings.n(x[[1]]) <- landings.n(x[[1]]) - discards.n(x[[1]])
+
       return(x)
       }, x=flfs[idx], y=discards)
   }
