@@ -542,7 +542,9 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   setkey(catage, "Area", "Fleet", "unit", "Yr", "Seas", "Era")
 
   # WT
-  wtatage <- endgrowth[, c("Seas", "unit", "Age", paste0("RetWt:_", fleets)),
+  lwtatage <- endgrowth[, c("Seas", "unit", "Age", paste0("RetWt:_", fleets)),
+    with=FALSE]
+  cwtatage <- endgrowth[, c("Seas", "unit", "Age", paste0("SelWt:_", fleets)),
     with=FALSE]
 
   # STOCK.WT
@@ -694,3 +696,63 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   return(list(biol=biol, fisheries=FLFisheries(flfs)))
 
 } # }}}
+
+# buildLCss330 {{{
+
+#' @examples
+#' # LOAD data file
+# albd <- SS_readdat(file.path(path, 'abt.dat'))
+# lcs <- buildLCss330(albd)
+# plotLengths(lcs[[1]][, c(1, 5, 10, 15, 20)])
+# plotLengths(seasonSums(lcs[[5]][, c(1, 5, 10, 15, 20)]))
+# lapply(lcs, function(x) unitSums(quantSums(seasonSums(x))))
+
+buildLCss330 <- function(dat) {
+
+  # EXTRACT lencomp
+  lencomp <- data.table(dat$lencomp)
+
+  # DIMENSIONS
+  nsex <- dat$Nsexes
+  nseas <- dat$nseas
+  nlen <- dat$N_lbins
+
+  cnms <- colnames(lencomp)[-seq(1, 6)]
+  
+  # COERCE data columns to double
+  lencomp[, (cnms) := lapply(.SD, as.double), .SDcols=cnms]
+
+  # MELT to long format
+  lc <- melt(lencomp[, .SD, .SDcols=c(1, 2, 3, seq(7, nlen * nsex + 6))],
+      id.vars=c("Yr", "Seas", "FltSvy"), variable.name="len", value.name="data")
+
+  # SPLIT len & unit
+  if(nsex == 2) {
+    lc[, unit := toupper(strtrim(as.character(len), 1))]
+    lc[, len := substr(lc$len, 2, 10)]
+  } else {
+    lc[, len := substr(lc$len, 2, 10)]
+  }
+
+  # SET season
+  lc[, season := factor(Seas, labels=1:4)]
+
+  # RENAME Yr column
+  setnames(lc, "Yr", "year")
+
+  # SPLIT by FltSvy
+  lcs <- split(lc, by="FltSvy")
+
+  # ADD FltSvy names
+  names(lcs) <- dat$fleetnames[as.numeric(names(lcs))]
+
+  res <- lapply(lcs, function(x) {
+    x <- as.FLQuant(x[, .(len, year, unit, season, data)])
+    x[is.na(x)] <- 0
+    units(x) <- "NA"
+    return(x)
+  })
+
+  return(FLQuants(res))
+}
+# }}}

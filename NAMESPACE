@@ -20,6 +20,7 @@ export(
   "buildFLRPss330",
   "buildKobess3",
   "buildKobess330",
+  "buildLCss330",
   "buildRESss3",
   "buildRESss330",
   "convergencelevel",
