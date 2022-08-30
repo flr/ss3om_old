@@ -119,7 +119,7 @@ loadOMS <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
 
   names(indices) <- names(out[[1]]$indices)
 
-  # SSoutput
+  # SS_output
   outs <- lapply(out, function(x) x$out)
 
   return(list(stock=stock, sr=sr, refpts=refpts, results=results,

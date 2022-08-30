@@ -6,22 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3 • ss3om</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3">
-<meta property="og:description" content="Tools for conditioning of Operating Models based on SS3 by considering
-  structural uncertainty in input parameters and assumptions, jackknifing of
-  models and use of McMC output. A grid of SS3 runs is created and results are
-  loaded on various FLR objects using functions from the r4ss package.">
+<meta property="og:description" content="Tools for loading Stock Synthesis (SS3) models into FLR. Used in
+  conditioning of Operating Models based on SS3 by considering structural
+  uncertainty in input parameters and assumptions. A grid of SS3 runs can be
+  created and results loaded on objects of various FLR classes.">
+<meta property="og:image" content="/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -34,14 +43,14 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ss3om</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0.9003</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.2</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="http://github.com/flr/FLCore">
+  <a href="http://github.com/flr/FLCore" class="external-link">
     <span class="fa fa-github fa-lg"></span>
      
     Source
@@ -59,7 +68,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="http://flr-project.org/">FLR</a>
+  <a href="http://flr-project.org/" class="external-link">FLR</a>
 </li>
       </ul>
 </div>
@@ -73,108 +82,60 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="ss3om" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#ss3om" class="anchor"></a>ss3om</h1></div>
-<ul>
-<li>Version: 0.5.0.9003</li>
-<li>Date: 08-09-2021</li>
-<li>Author: Iago Mosqueira, EC JRC</li>
-<li>Maintainer: Iago Mosqueira <a href="mailto:iago.mosqueira@ec.europa.eu" class="email">iago.mosqueira@ec.europa.eu</a>
-</li>
-<li>Repository: <a href="https://github.com/iagomosqueira/ss3om/" class="uri">https://github.com/iagomosqueira/ss3om/</a>
-</li>
-<li>Bug reports: <a href="https://github.com/iagomosqueira/ss3om/issues" class="uri">https://github.com/iagomosqueira/ss3om/issues</a>
-</li>
-</ul>
-<div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
-<p>Tools for conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions, jackknifing of models and use of McMC output. A grid of SS3 runs is created and results are loaded on various FLR objects using functions from the <a href="https://github.com/r4ss/r4ss">r4ss</a> package.</p>
-<div id="readfl" class="section level3">
-<h3 class="hasAnchor">
-<a href="#readfl" class="anchor"></a>readFL</h3>
-<ul>
-<li>readFLIBss3 – FLIndexBiomass</li>
-<li>readFLomss3 – FLom</li>
-<li>readFLRPss3 – FLpar (refpts)</li>
-<li>readFLSss3 – FLStock</li>
-<li>readFLSRss3 – FLSR</li>
-<li>readKobess3 – data.frame (kobe)</li>
-<li>readRESss3 – data.table (results)</li>
-<li>readRESIDss3– FLQuants (residuals)</li>
-<li>readCDss3 – lists (ctl, dat)</li>
-<li>readOutputss3 – list (SS_output)</li>
-</ul>
+<div class="section level1">
+<div class="page-header"><h1 id="ss3om-">ss3om <img src="reference/figures/logo.png" align="right" width="120"><a class="anchor" aria-label="anchor" href="#ss3om-"></a>
+</h1></div>
+
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>Tools for loading Stock Synthesis (SS3) models into FLR. Used in conditioning of Operating Models based on SS3 by considering structural uncertainty in input parameters and assumptions. A grid of SS3 runs can be created and results loaded on objects of various classes, ready for use in FLR.</p>
 </div>
-<div id="load" class="section level3">
-<h3 class="hasAnchor">
-<a href="#load" class="anchor"></a>load</h3>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>To install this package, and all its dependencies, start R and enter:</p>
+<pre><code><span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ss3om"</span>, repos<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>CRAN<span class="op">=</span><span class="st">"https://cloud.r-project.org/"</span>, FLR<span class="op">=</span><span class="st">"https://flr-project.org/R"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre>
+<p>or directly from the github repository by first updating to the latest version of <a href="https://github.com/r4ss/r4ss" class="external-link">r4ss</a>:</p>
+<pre><code><span>  <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"r4ss/r4ss"</span><span class="op">)</span></span>
+<span>  <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"flr/ss3om"</span><span class="op">)</span></span></code></pre>
 </div>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
+<p>Different FLR objects can be loaded from a folder containing the output of an SS3 run.</p>
+<pre class="{r}"><code><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"ext-data"</span>, <span class="st">"herring"</span>, package<span class="op">=</span><span class="st">"ss3om"</span><span class="op">)</span></span></code></pre>
+<p>To create an <em>FLStock</em> object from a model run, we can call <em>readFLSss3</em>,</p>
+<pre class="{r}"><code><span><span class="va">stk</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/readFLSss3.html">readFLSss3</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stk</span><span class="op">)</span></span></code></pre>
+<div class="figure">
+<img src="reference/figures/stk.png" alt=""><p class="caption">stk</p>
 </div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>To install this package, start R and enter:</p>
-<p># INSTALL FLR pkgs and depedencies source(“<a href="http://flr-project.org/R/instFLR.R" class="uri">http://flr-project.org/R/instFLR.R</a>”)</p>
-<p># and then select mse, ggplotFL and FLFishery</p>
-<p># INSTALL devtools install.packages(“devtools”)</p>
-<p># INSTALL recent r4ss devtools::install_github(‘r4ss/r4ss’)</p>
-<p># DISABLE install_github turning warnings into errors Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS=TRUE)</p>
-<p># INSTALL ss3om devtools::install_github(‘iagomosqueira/ss3om’)</p>
-</div>
-<div id="usage" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h2>
-<div id="loading-an-ss3-run-as-an-flstock" class="section level3">
-<h3 class="hasAnchor">
-<a href="#loading-an-ss3-run-as-an-flstock" class="anchor"></a>Loading an SS3 run as an FLStock</h3>
-<p>Provide to <code>readFLSss3</code> the path to the folder containing the files. The fbar range can be specified in the call.</p>
-<pre class="{r}"><code>her &lt;- readFLSss3(system.file("ext-data", "herring", package="ss3om"),
-  range = c(minfbar = 1, maxfbar = 5))</code></pre>
-</div>
-<div id="loading-the-estimated-reference-points" class="section level3">
-<h3 class="hasAnchor">
-<a href="#loading-the-estimated-reference-points" class="anchor"></a>Loading the estimated reference points</h3>
-</div>
-<div id="loading-the-stock-recruitment-relationship" class="section level3">
-<h3 class="hasAnchor">
-<a href="#loading-the-stock-recruitment-relationship" class="anchor"></a>Loading the stock-recruitment relationship</h3>
-</div>
-<div id="extract-yearly-time-series-from-r4ss-ss_output" class="section level3">
-<h3 class="hasAnchor">
-<a href="#extract-yearly-time-series-from-r4ss-ss_output" class="anchor"></a>Extract yearly time series from r4ss SS_output</h3>
-<pre class="{r}"><code>her &lt;- readOutputss3(system.file("ext-data", "herring", package="ss3om"))</code></pre>
-<pre class="{r}"><code>herSSB &lt;- </code></pre>
+<p>and to extract and convert the stock-recruit relationship, you can use</p>
+<pre class="{r}"><code><span><span class="va">srr</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/readFLSRss3.html">readFLSRss3</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">her</span><span class="op">)</span></span></code></pre>
+<div class="figure">
+<img src="reference/figures/srr.png" alt=""><p class="caption">srr</p>
 </div>
 </div>
-<div id="build-status" class="section level2">
-<h2 class="hasAnchor">
-<a href="#build-status" class="anchor"></a>Build Status</h2>
-<p><a href="https://travis-ci.org/iagomosqueira/ss3om"><img src="https://travis-ci.org/iagomosqueira/ss3om.svg?branch=master" alt="Travis Build Status"></a> <a href="https://ci.appveyor.com/project/iagomosqueira/ss3om"><img src="https://ci.appveyor.com/api/projects/status/github/iagomosqueira/ss3om?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></p>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>Copyright (c) 2016-2022 European Union &amp; Iago Mosqueira. Released under the <a href="https://eupl.eu/1.2/en/" class="external-link">EUPL 1.2</a>.</p>
 </div>
-<div id="releases" class="section level2">
-<h2 class="hasAnchor">
-<a href="#releases" class="anchor"></a>Releases</h2>
-<ul>
-<li><a href="https://github.com/iagomosqueira/ss3om/releases/">All release</a></li>
-</ul>
-</div>
-<div id="license" class="section level2">
-<h2 class="hasAnchor">
-<a href="#license" class="anchor"></a>License</h2>
-<p>Copyright (c) 2017 European Union. Released under the <a href="https://joinup.ec.europa.eu/page/eupl-text-11-12">European Union Public License 1.2</a>.</p>
-</div>
-<div id="contact" class="section level2">
-<h2 class="hasAnchor">
-<a href="#contact" class="anchor"></a>Contact</h2>
+<div class="section level2">
+<h2 id="contact">Contact<a class="anchor" aria-label="anchor" href="#contact"></a>
+</h2>
 <p>You are welcome to:</p>
 <ul>
-<li>Submit suggestions and bug-reports at: <a href="https://github.com/iagomosqueira/ss3om/issues" class="uri">https://github.com/iagomosqueira/ss3om/issues</a>
+<li>Submit suggestions and bug-reports at: <a href="https://github.com/flr/ss3om/issues" class="external-link uri">https://github.com/flr/ss3om/issues</a>
 </li>
-<li>Send a pull request on: <a href="https://github.com/iagomosqueira/ss3om/" class="uri">https://github.com/iagomosqueira/ss3om/</a>
+<li>Send a pull request on: <a href="https://github.com/flr/ss3omn/" class="external-link uri">https://github.com/flr/ss3omn/</a>
 </li>
-<li>Compose a friendly e-mail to: <a href="mailto:me@my.com" class="email">me@my.com</a>
+<li>Maintainer: Iago Mosqueira (WMR) <a href="mailto:iago.mosqueira@wur.nl" class="email">iago.mosqueira@wur.nl</a>
 </li>
 </ul>
 </div>
@@ -183,24 +144,40 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/iagomosqueira/ss3om/">https://​github.com/​iagomosqueira/​ss3om/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/iagomosqueira/ss3om/issues">https://​github.com/​iagomosqueira/​ss3om/​issues</a>
-</li>
+<li><a href="https://github.com/flr/ss3om/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/flr/ss3om/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>EUPL</li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing ss3om</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Iago Mosqueira <br><small class="roles"> Author, maintainer </small>  </li>
+</ul>
+</div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/flr/ss3om/actions" class="external-link"><img src="https://github.com/flr/ss3om/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://eupl.eu/1.2/en/" class="external-link"><img src="https://flr-project.org/img/eupl12.svg" alt="License"></a></li>
 </ul>
 </div>
 
@@ -209,11 +186,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Iago Mosqueira.</p>
+  <p></p>
+<p>Developed by Iago Mosqueira.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
@@ -221,6 +200,8 @@
 
   
 
+
+  
 
   </body>
 </html>

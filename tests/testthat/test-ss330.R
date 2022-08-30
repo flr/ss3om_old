@@ -1,7 +1,7 @@
 # test-ss330.R - TEST for load, build and read SS 3.30 models
 # ss3om/tests/testthat/test-ss330.R
 
-# Copyright Iago MOSQUEIRA (WMR), 2020
+# Copyright WUR, 2020
 # Author: Iago MOSQUEIRA (WMR) <iago.mosqueira@wur.nl>
 #
 # Distributed under the terms of the EUPL-1.2
@@ -57,6 +57,8 @@ path <- file.path("3.30", "albio")
 
 alb <- readOutputss3(path)
 albs <- readFLSss3(path, range = c(minfbar=1, maxfbar=12))
+
+albd <- SS_readdat(file.path(path, 'abt.dat'))
 
 # CHECK SSB matches
 
@@ -137,6 +139,7 @@ path <- file.path("3.30", "nhke")
 hke <- readOutputss3(path)
 
 hkes <- readFLSss3(path, range = c(minfbar=1, maxfbar=4))
+hked <- SS_readdat(file.path(path, 'nhake-wg20.dat'))
 
 # CHECK SS_output & FLStock load
 
@@ -226,6 +229,8 @@ path <- file.path("3.30", "skjio")
 skj <- readOutputss3(path)
 
 skjs <- readFLSss3(path)[-1,]
+
+skjd <- SS_readdat(file.path(path, 'data.ss'))
 
 # CHECK SS_output & FLStock load
 

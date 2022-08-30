@@ -26,3 +26,4 @@ hin <- fwd(simplify(st$stock, "season"),
   deviances=seasonSums(residuals(st$srr)))
 
 plot(simplify(st$stock, "season"), hin)
+

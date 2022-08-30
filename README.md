@@ -53,7 +53,7 @@ plot(her)
 
 
 ## License
-Copyright (c) 2016-2021 European Union & Iago Mosqueira. Released under the [EUPL 1.2](https://eupl.eu/1.2/en/).
+Copyright (c) 2016-2022 European Union & Iago Mosqueira. Released under the [EUPL 1.2](https://eupl.eu/1.2/en/).
 
 ## Contact
 You are welcome to:

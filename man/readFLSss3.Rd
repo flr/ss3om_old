@@ -4,7 +4,13 @@
 \alias{readFLSss3}
 \title{A function to read SS3 results as an FLStock object}
 \usage{
-readFLSss3(dir, repfile = "Report.sso", compfile = "CompReport.sso", ...)
+readFLSss3(
+  dir,
+  repfile = "Report.sso",
+  compfile = "CompReport.sso",
+  wtatage = out$wtatage_switch,
+  ...
+)
 }
 \arguments{
 \item{dir}{Directory holding the SS3 output files}
