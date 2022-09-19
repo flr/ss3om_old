@@ -192,9 +192,10 @@ prepareRetro <- function(path, starter="starter.ss", years=5) {
     sta <- SS_readstarter(file.path(rdir, starter), verbose=FALSE)
 
     sta$retro_yr <- paste0("-", i)
+    sta$init_values_src <- 0
 
     SS_writestarter(sta, dir=rdir, file=starter, overwrite=TRUE,
-      verbose=FALSE, warn=FALSE)
+      verbose=FALSE)
   }
 
   invisible(TRUE)
