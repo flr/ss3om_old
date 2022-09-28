@@ -509,7 +509,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     "NatMort_option", "GrowthModel_option", "Maturity_option",
     "Fecundity_option", "Z_at_age", "M_at_age", "derived_quants",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing",
-    "exploitation", "recruitment_dist", "recruit", "sigma_R_in")]
+    "exploitation", "recruitment_dist", "recruit", "sigma_R_in", "wtatage")]
 
   # GET ages from catage
   ages <- getRange(out$catage)
