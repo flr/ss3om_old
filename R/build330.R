@@ -76,7 +76,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   # STOCK.N
   n <- ss3n30(natage, dmns)
 
-  # CATCH 
+  # CATCH TODO: by unit or morph?
   catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
   
   # TABLE of areas and fleets
@@ -608,7 +608,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
 
   # CATCH 
   
-  catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
+  catches <- ss3catch30(catage, cwtatage, dmns, morphs, fleets, col="SelWt")
 
   # ageselex
   ageselex <- data.table(out$ageselex,
@@ -674,9 +674,9 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
 
     # FLEETs w/discards
     idx <- setNames(nm=unique(datage$Fleet))
-   
-    discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
-      idx=idx)
+    
+    discards <- ss3catch30(datage[Type == "disc",], cwtatage, dmns, morphs,
+      idx=idx, col="SelWt")
 
     # TABLE of areas and fleets for discards
     map <- unique(datage[, .(Area, Fleet)])

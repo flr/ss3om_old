@@ -402,6 +402,52 @@ test_that("Calculated yellowfin SSB matches that in Report.sso", {
  )
 # }}}
 
+# --- wbcod {{{
+
+path <- file.path("3.30", "wbc")
+
+wbc <- readOutputss3(path)
+
+wbcs <- readFLSss3(path)
+wbcom <- readFLomss3(path)
+
+# CHECK SS_output & FLStock load
+
+test_that("wbc FLStock is valid", {
+  expect_true(validObject(wbcs))
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated yellowfin SSB matches that in Report.sso", {
+  expect_comparable(
+    areaSums(unitSums(ssb(wbcs)))[,,,1],
+    extractSSB(wbc))
+  }
+)
+
+# DEBUG CHECK annual F matches
+
+ test_that("Calculated yellowfin annual F matches that in Report.sso", {
+   expect_comparable(
+    seasonSums(unitMeans(fbar(wbcs)))[, -1],
+    extractFbar(wbc))
+   }
+ )
+
+# DEBUG CHECK harvest
+ 
+ test_that("Calculated yellowfin annual Z at age matches that in Report.sso", {
+   expect_comparable(
+     # LAST age not returned in Report.sso$Z_at_age
+     z(simplify(wbcs))[ac(0:9),],
+#     seasonSums(unitMeans(z(wbcs)[ac(0:9),])),
+     extractZatage(wbc)[ac(0:9),])
+   }
+ )
+# }}}
+
 # -- Annual F option 4
 
 # --- simple_realF {{{

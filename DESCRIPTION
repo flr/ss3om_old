@@ -1,6 +1,6 @@
 Package: ss3om
 Title: Tools for Conditioning Fisheries Operating Models Using Stock Synthesis 3
-Version: 0.5.2
+Version: 0.5.2.9001
 Authors@R: person("Iago", "Mosqueira", email = "iago.mosqueira@wur.nl",
   role = c("aut", "cre"))
 Description: Tools for loading Stock Synthesis (SS3) models into FLR. Used in

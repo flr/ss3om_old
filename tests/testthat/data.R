@@ -15,7 +15,7 @@ stocks <- lapply(setNames(file.path("3.30", paths), nm=paths),
   function(x) list(stock=readFLSss3(x), srr=readFLSRss3(x))
 )
 
-save(stocks, file="stocks.Rdata", compress="xz")
+save(stocks, file="stocks.RData", compress="xz")
 
 # HINDCAST
 

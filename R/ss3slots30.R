@@ -101,6 +101,7 @@ ss3n30 <- function(n, dmns) {
   # TODO convert to double
 	n <- data.table::melt(n, id.vars=c("Area", "unit", "Yr", "Seas"),
     variable.name="age")
+  setorder(n, "Area", "Seas", "unit")
   
   # RENAME
   names(n) <- c("area", "unit", "year", "season", "age", "data")
@@ -117,7 +118,7 @@ ss3n30 <- function(n, dmns) {
 #' @param idx The fishing fleets, as in `SS_output$fleet_ID[SS_output$IsFishFleet]`.
 #' @details - `ss3catch` currently returns the `landings.n` slot, equal to `catch.n` as discards are not being parsed.
 
-ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
+ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx, col="RetWt") {
 
   # FIND and SUBSET fishing fleets, TIME and BirthSeas
   catage <- catage[Fleet %in% idx & Era == "TIME",]
@@ -135,6 +136,8 @@ ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
     "unit"), measure.vars=dmns$age, variable.name="age")
 
   names(catage) <- c("area", "fleet", "year", "season", "unit", "age", "data")
+  
+  setorder(catage, "area", "fleet", "year", "season", "unit", "age", "data")
 
   # RENAME Area and Season if only 1
   cols <- c("Seas")
@@ -143,9 +146,10 @@ ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx) {
 
   # MELT by Sex, BirthSeas, Yr & Seas
   wtatage <- data.table::melt(wtatage, id.vars=c("Age", "unit", "Seas"),
-    measure.vars=paste0("RetWt:_", idx), variable.name="fleet")
+    measure.vars=paste0(col, ":_", idx), variable.name="fleet")
   names(wtatage) <- c("age", "unit", "season", "fleet", "data")
-  wtatage[,fleet:=sub("RetWt:_", "", fleet)]
+  wtatage[,fleet:=sub(paste0(col, ":_"), "", fleet)]
+  setorder(wtatage, "fleet", "season", "unit", "age")
 
   # FLQuants for catch per fleet
   catch <- lapply(idx, function(x) {

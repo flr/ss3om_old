@@ -14,20 +14,32 @@ getDimnames <- function(out) {
   range <- getRange(out$catage)
   ages <- ac(seq(range['min'], range['max']))
 
-  # MORPHS
-  sex <- unique(out$morph_indexing[,'Sex'])
+  # DIMENSIONS
   morphs <- unique(out$morph_indexing[,'Index'])
-
-  if(identical(morphs, sex))
-    morphs <- numeric()
-  else
-    morphs <- unique(out$morph_indexing[,'BirthSeas'])
   
+  sex <- unique(out$morph_indexing[,'Sex'])
+  gps <- unique(out$morph_indexing[,'GP'])
+  bss <- unique(out$morph_indexing[,'BirthSeas'])
+
+  # PARSE morphs et al for unit
+
+  # SINGLE morph
+  if(length(morphs) == 1)
+    unit <- "unique"
+  # SEXES
+  else if(identical(morphs, sex))
+    unit <- c("F", "M")
+  # COMBINATIONS
+  else
+    unit <- sort(data.table(expand.grid(
+      s=switch((length(sex) > 1) + 1, character(1), c("F", "M")),
+      g=switch((length(gps) > 1) + 1, character(1), gps),
+      b=switch((length(bss) > 1) + 1, character(1), bss)))[, paste0(s, g, b),])
+
   dmns <- list(age=ages,
     year=seq(range['minyear'], range['maxyear']),
     # unit = combinations(Sex, birthseas)
-    unit=c(t(outer(switch(out$nsexes, "", c("F", "M")),
-      switch((length(morphs) > 1) + 1, "", morphs), paste0))),
+    unit=unit,
     season=switch(ac(out$nseasons), "1"="all", seq(out$nseasons)),
     area=switch(ac(out$nareas), "1"="unique", seq(out$nareas)),
     iter=1)
