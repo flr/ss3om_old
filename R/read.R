@@ -245,7 +245,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
 readRESss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
-  out <- readOutputss3(dir, repfile=repfile, compfile=compfile, covar=FALSE)
+  out <- readOutputss3(dir, repfile=repfile, compfile=compfile, covarfile=FALSE)
 
   if(out$SS_versionNumeric > 3.24)
     buildRESss330(out, ...)
