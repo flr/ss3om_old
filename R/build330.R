@@ -20,7 +20,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
     "catch_units", "nsexes", "nseasons", "nareas", "IsFishFleet", "fleet_ID",
     "FleetNames", "birthseas", "spawnseas", "inputs", "SS_versionshort",
     "discard", "discard_at_age", "catch", "NatMort_option", 
-    "GrowthModel_option",
+    "GrowthModel_option", "recruitment_dist",
     "Maturity_option", "Fecundity_option", "Z_at_age", "M_at_age",
     "mean_body_wt", "Spawn_seas", "Spawn_timing_in_season", "morph_indexing")]
 
@@ -170,6 +170,9 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   # ASSIGN harvest.spwn and m.spwn
   harvest.spwn(stock) <- out$Spawn_timing_in_season
   m.spwn(stock) <- out$Spawn_timing_in_season
+
+  # TODO: CHECK if GP & areas are linked
+  gpareas <- out$recruitment_dist$recruit_dist[, c("G_pattern", "Area")]
 
   # HARVEST
   harvest(stock) <- harvest(stock.n(stock), catch=catch.n(stock), m=m(stock))
