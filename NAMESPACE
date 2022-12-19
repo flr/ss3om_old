@@ -5,7 +5,7 @@ import("mse")
 import("data.table")
 import("foreach")
 import("r4ss")
-importFrom("stats", "optimize", "setNames")
+importFrom("stats", "optimise", "setNames")
 
 export(
   "buildFLBFss3",

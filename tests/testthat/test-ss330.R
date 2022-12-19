@@ -152,7 +152,7 @@ test_that("hake FLStock is valid", {
 
 test_that("Calculated hake SSB matches that in Report.sso", {
   expect_comparable(
-    unitSums(ssb(hkes)),
+    seasonSums(unitSums(ssb(hkes))),
     extractSSB(hke))
   }
 )
@@ -161,7 +161,7 @@ test_that("Calculated hake SSB matches that in Report.sso", {
 
 test_that("Calculated hake annual F matches that in Report.sso", {
   expect_comparable(
-    unitMeans(fbar(hkes))[, -1],
+    fbar(simplify(hkes))[, -1],
     extractFbar(hke))
   }
 )
@@ -171,8 +171,8 @@ test_that("Calculated hake annual F matches that in Report.sso", {
 test_that("Calculated hake annual Z at age matches that in Report.sso", {
   expect_comparable(
     # LAST age not returned in Report.sso$Z_at_age
-    z(hkes)[ac(0:18),],
-    extractZatage(hke)[ac(0:18),])
+    z(simplify(hkes))[ac(0:14),],
+    extractZatage(hke)[ac(0:14),])
   }
 )
 # }}}
