@@ -108,7 +108,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   discards.wt <- catch.wt
 
   if(!is.na(out["discard"])) {
-
+    
     # EXTRACT datage
     datage <- data.table(out$discard_at_age)
     setkey(datage, "Area", "Fleet", "Yr", "Seas", "Era", "Type")
@@ -149,6 +149,16 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
       idx <- is.na(discards.wt) | discards.wt == 0
       if(any(idx))
         discards.wt[idx] <- c(mdiscards.wt)[c(idx)]
+
+      # EXPAND discards FLQuants for areas / seasons with no data
+      discards.n <- expand(discards.n, area=dimnames(catch.n)$area,
+        season=dimnames(catch.n)$season)
+      
+      # EXPAND discards FLQuants for areas / seasons with no data
+      discards.n <- expand(discards.n, area=dimnames(catch.n)$area,
+        season=dimnames(catch.n)$season)
+      discards.wt <- expand(discards.wt, area=dimnames(catch.n)$area,
+        season=dimnames(catch.n)$season)
     }
   }
 
