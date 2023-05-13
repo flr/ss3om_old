@@ -222,6 +222,51 @@ test_that("Calculated simple annual Z at age matches that in Report.sso", {
 )
 # }}}
 
+# --- simple_with_discard {{{
+
+path <- file.path("3.30", "simple_with_discard")
+
+sid <- readOutputss3(path)
+sids <- readFLSss3(path, range = c(minfbar=10, maxfbar=15))
+
+# CHECK SS_output & FLStock load
+
+test_that("simple_with_discards SS_output and FLStock load", {
+
+  expect_true(validObject(sids))
+
+  }
+)
+
+# CHECK SSB matches
+
+test_that("Calculated simple_with_discards SSB matches that in Report.sso", {
+  expect_comparable(
+    unitSums(ssb(sids)),
+    extractSSB(sid))
+  }
+)
+
+# CHECK annual F matches
+
+test_that("Calculated simple_with_discards annual F matches that in Report.sso", {
+  expect_comparable(
+    unitMeans(fbar(sids))[, -1],
+    extractFbar(sid))
+  }
+)
+
+# CHECK harvest
+
+test_that("Calculated simple annual Z at age matches that in Report.sso", {
+  expect_comparable(
+    # LAST age not returned in Report.sso$Z_at_age
+    z(sims)[dimnames(sims)$age[-dims(sims)$age],],
+    extractZatage(sim))
+  }
+)
+# }}}
+
 # --- skjio {{{
 
 path <- file.path("3.30", "skjio")

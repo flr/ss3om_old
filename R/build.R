@@ -187,8 +187,9 @@ buildFLSRss3 <- function(out, ...) {
   
   # BH
   if(out$SRRtype %in% c(3, 6)) {
+  mname <- grep("steep",rownames(out$parameters), value=TRUE)
     params <- FLPar(
-      s=rawp[Label == "SR_BH_steep", Value],
+      s=rawp[Label == mname, Value],
       R0=exp(rawp[Label == "SR_LN(R0)", Value]),
       v=dquants[Label == "SSB_Virgin", Value],
       sratio=1 / out$nsexes,

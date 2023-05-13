@@ -572,12 +572,14 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   # SRR
   recdist <- out$recruitment_dist$recruit_dist
 
+  mname <- grep("steep",rownames(out$parameters), value=TRUE)
+
   spawnseas <- recdist[, "Settle#"]
   nspsea <- length(spawnseas)
 
   if(nspsea == 1) {
 
-    pars <- FLPar(s=out$parameters["SR_BH_steep", "Value"],
+    pars <- FLPar(s=out$parameters[mname, "Value"],
       R0=out$derived_quants["Recr_Virgin", "Value"],
       v=out$derived_quants["SSB_Virgin", "Value"])
 
@@ -590,7 +592,7 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
       unit=spawnseas, season=recdist[, "Seas"], iter=1))
 
     for(i in spawnseas) {
-      pars[, i, i] <- c(out$parameters["SR_BH_steep", "Value"],
+      pars[, i, i] <- c(out$parameters[mname, "Value"],
         out$derived_quants["Recr_Virgin", "Value"],
         out$derived_quants["SSB_Virgin", "Value"],
         recdist[i, "Frac/sex"])
