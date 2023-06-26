@@ -26,10 +26,13 @@ oms <- buildFLBFss330(out)
 bio <- oms$biol
 fis <- oms$fisheries
 
+# BUG: fisheries names choke plot()
+names(fis) <- 1:25
+
 # RUN hindcast
 
 # ASSEMBLE fwdControl for catch by fleet/year/season
-# - Akward syntax, need to add a way to do this using as(, 'fwdControl')
+# - NOTE: Akward syntax, need to add a way to do this using as(, 'fwdControl')
 
 x <- unitSums(window(catch(fis), start=2000, end=2017))
 
@@ -64,3 +67,4 @@ plot(tsb(bio), tsb(hin$bio))
 
 plot(ssb(bio), ssb(hin$bio))
 
+plot(catch(fis)) + plot(catch(hin$fisheries))

@@ -25,8 +25,8 @@ ss3mat30 <- function(endgrowth, dmns, spawnseas, option=3) {
   if(option == 3)
     mat[, mat:= Age_Mat]
 
-  # maturity option 1: mat=Mat*Fecund / Wt_Beg
-  if(option == 1)
+  # maturity option 1: at=Mat*Fecund / Wt_Beg
+  if(option %in% c(1, 4))
     mat[, mat:= `Mat*Fecund` / Wt_Beg]
 
   # DEBUG
@@ -38,7 +38,7 @@ ss3mat30 <- function(endgrowth, dmns, spawnseas, option=3) {
     mat[, mat:= 0]
   
   # DEBUG
-  if(!option %in% c(3, 6, 1, 2, 5))
+  if(!option %in% c(3, 4, 6, 1, 2, 5))
     stop(paste0("maturity option not covered yet, option: ", option))
 
   # DELETE columns

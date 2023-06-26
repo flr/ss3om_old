@@ -622,7 +622,6 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
   spwn(biol) <- out$Spawn_timing_in_season
 
   # CATCH 
-  
   catches <- ss3catch30(catage, cwtatage, dmns, morphs, fleets, col="SelWt")
 
   # ageselex
@@ -696,7 +695,6 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
     # TABLE of areas and fleets for discards
     map <- unique(datage[, .(Area, Fleet)])
     map[, Fleet:=as.character(Fleet)]
-
 
     flfs[idx] <- Map(function(x, y) {
       discards.n(x[[1]]) <- y$catch.n
