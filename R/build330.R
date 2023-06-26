@@ -8,12 +8,20 @@
 
 # buildFLSss330 - FLStock {{{
 
-buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control_File,
-  desc=paste(out$inputs$repfile, out$SS_versionshort, sep=" - "),
-  fleets=setNames(nm=out$fleet_ID[out$IsFishFleet]), range="missing") {
+buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, 
+  name=out$Control_File, desc=paste(out$inputs$repfile,
+    out$SS_versionshort, sep=" - "),
+  fleets=setNames(nm=out$fleet_ID[out$IsFishFleet]), range="missing",
+  forecast=FALSE) {
+
+  #
+  if(forecast)
+    era <- c("TIME", "FORE")
+  else
+    era <- "TIME"
 
   # DIMENSIONS
-  dims <- dimss3(out)
+  dims <- dimss3(out, era=era)
   
   # SUBSET out
   out <- out[c("catage", "natage", "ageselex", "endgrowth", "Control_File",
@@ -27,7 +35,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   # GET ages from catage
   ages <- getRange(out$catage)
   ages <- ac(seq(ages['min'], ages['max']))
-  dmns <- getDimnames(out)
+  dmns <- getDimnames(out, era=era)
   dim <- unlist(lapply(dmns, length))
 
   # ENDGROWTH
@@ -74,10 +82,10 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Control
   m <- ss3m30(endgrowth, dmns, morph)
   
   # STOCK.N
-  n <- ss3n30(natage, dmns)
+  n <- ss3n30(natage, dmns, era=era)
 
   # CATCH TODO: by unit or morph?
-  catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets)
+  catches <- ss3catch30(catage, wtatage, dmns, morphs, fleets, era=era)
   
   # TABLE of areas and fleets
   map <- unique(catage[Fleet %in% fleets, .(Area, Fleet)])

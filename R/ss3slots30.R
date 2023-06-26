@@ -91,10 +91,10 @@ ss3m30 <- function(endgrowth, dmns, birthseas) {
 #' @param n A data frame obtained from SS_output$natage.
 #' @details - `ss3n30` returns the `stock.n` slot.
 
-ss3n30 <- function(n, dmns) {
+ss3n30 <- function(n, dmns, era="TIME") {
   
-  # SELECT start of season (Beg/Mid == 'B'), Era == 'TIME' & cols
-  n <- n[`Beg/Mid` == "B" & Era == 'TIME',
+  # SELECT start of season (Beg/Mid == 'B'), Era %in% era & cols
+  n <- n[`Beg/Mid` == "B" & Era %in% era,
     .SD, .SDcols = c("Area", "unit", "Yr", "Seas", dmns$age)]
 
   # MELT by Sex, unit, Yr & Seas
@@ -118,10 +118,11 @@ ss3n30 <- function(n, dmns) {
 #' @param idx The fishing fleets, as in `SS_output$fleet_ID[SS_output$IsFishFleet]`.
 #' @details - `ss3catch` currently returns the `landings.n` slot, equal to `catch.n` as discards are not being parsed.
 
-ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx, col="RetWt") {
+ss3catch30 <- function(catage, wtatage, dmns, birthseas, idx, col="RetWt",
+  era = "TIME") {
 
   # FIND and SUBSET fishing fleets, TIME and BirthSeas
-  catage <- catage[Fleet %in% idx & Era == "TIME",]
+  catage <- catage[Fleet %in% idx & Era %in% era,]
  
   # RENAME Area and Season if only 1
   cols <- c("Seas", "Area")

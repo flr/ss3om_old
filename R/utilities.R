@@ -8,10 +8,10 @@
 
 
 # getDimnames {{{
-getDimnames <- function(out) {
+getDimnames <- function(out, era="TIME") {
 
   # GET range
-  range <- getRange(out$catage)
+  range <- getRange(out$catage, era=era)
   ages <- ac(seq(range['min'], range['max']))
 
   # DIMENSIONS
@@ -52,7 +52,7 @@ getDimnames <- function(out) {
 } # }}}
 
 # getRange {{{
-getRange <- function(x) {
+getRange <- function(x, era="TIME") {
 	
   # empty range
 	range <- rep(as.numeric(NA), 7)
@@ -71,7 +71,7 @@ getRange <- function(x) {
 	range[c("minfbar", "maxfbar")] <- range[c("min", "max")]
 	
   # year range from catage
-	range[c("minyear", "maxyear")] <- range(x$Yr[x$Era == "TIME"])
+	range[c("minyear", "maxyear")] <- range(x$Yr[x$Era %in% era])
 
   return(range)
 } # }}}
@@ -128,9 +128,9 @@ codeUnit <- function(Sex, Morph) {
 } # }}}
 
 # dimss3 {{{
-dimss3 <- function(out) {
+dimss3 <- function(out, era="TIME") {
 
-  range <- getRange(out$catage)
+  range <- getRange(out$catage, era=era)
 
   return(list(
     age = length(seq(range["min"], range["max"])),
