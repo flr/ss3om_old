@@ -6,6 +6,10 @@
 #
 # Distributed under the terms of the European Union Public Licence (EUPL) V.1.1.
 
+# ADD buildFLSRRss3
+
+# FIX fisheries by area
+
 # buildFLSss330 - FLStock {{{
 
 buildFLSss330 <- function(out, morphs=out$morph_indexing$Index, 

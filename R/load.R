@@ -10,9 +10,6 @@
 loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   progress=TRUE, ...) {
 
-  if(progress)
-    cat("[1]\n", sep="")
-
   # READ first element
   first <- readFLomss3(subdirs[1], ...)
 
@@ -21,10 +18,8 @@ loadOM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
     return(first)
 
 	# LOOP over subdirs
-  om <- foreach(i=seq(2, length(subdirs)),
-    # PROPAGATE .init
-    .init=propagate(first, length(subdirs), FALSE),
-    # COMBINE by assigning to iter in .init
+  om <- foreach(i=seq(1, length(subdirs)),
+    # COMBINE
     .combine=combine, .inorder=TRUE,
     .errorhandling="remove", .multicombine=TRUE) %dopar% {
 
@@ -337,5 +332,71 @@ loadOUT <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
   
   return(out)
 } # }}}
+
+# loadOEM - FLoem {{{
+loadOEM <- function(dir=".", subdirs=list.dirs(path=dir, recursive=FALSE),
+  progress=TRUE, combine=TRUE, simplify=NULL, grid=NULL, ...) {
+
+	# LOOP over subdirs
+  out <- foreach(i=seq(length(subdirs)),
+    .final = function(x) setNames(x, nm=seq(length(subdirs))),
+    .inorder=TRUE, .errorhandling="stop") %dopar% {
+
+    if(progress)
+      cat("[", i, "]\n", sep="")
+
+    # OUPUT list with FLStock and iter number
+    run <- readOMSss3(subdirs[i], ...)
+
+    # SIMPLIFY
+    if(!is.null(simplify))
+      run$stock <- simplify(run$stock, dims=simplify)
+
+    # CONVERT stock to data.table
+    run$stock <- data.table(as.data.frame(run$stock, units=TRUE))
+    run$stock[, iter := NULL]
+    run$stock[, iter := i]
+
+    run
+  }
+
+  # CHECK for errors (NULL)
+  nulls <- unlist(lapply(out, function(x)
+    any(is.null(unlist(lapply(x, is.null))))))
+
+  if(any(nulls)) {
+    stop(paste("Some iters returned one or more NULL elements:",
+      paste(unname(which(nulls)), collapse=", ")))
+  }
+
+  if(progress)
+    cat("[combining now ...]\n", sep="")
+  
+  # COERCE & COMBINE as FLStock or FLStocks
+  if(combine) {
+    stock <- as(rbindlist(lapply(out, function(x) x$stock)), "FLStock")
+  } else {
+    stock <- FLStocks(lapply(out, function(x) as(x$stock, "FLStock")))
+  }
+  
+  # EXTRACT yr range per fleet
+  fleetyrs <- lapply(out, function(x) lapply(x$indices, function(y)
+    range(as.numeric(dimnames(index(y))$year))))
+
+  yrs <- setNames(lapply(names(fleetyrs[[1]]), function(x)
+    range(Reduce(c, lapply(fleetyrs, "[[", x)))), names(fleetyrs[[1]]))
+
+  # LOAD indices, expanding to yrs
+  indices <- FLIndices(lapply(names(out[[1]]$indices), function(x) {
+    Reduce(combine, lapply(out, function(y)
+      expand(y$indices[[x]], year=do.call(seq, as.list(yrs[[x]])))))
+  }))
+
+  names(indices) <- names(out[[1]]$indices)
+
+  return(FLoem(observations=list(stk=stock, idx=indices)))
+
+} # }}}
+
 
 # loadFLIBs

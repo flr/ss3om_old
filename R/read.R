@@ -43,7 +43,7 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas,
 } # }}}
 
 # readFLomss3 {{{
-readFLomss3 <- function(dir, birthseas=out$birthseas, fleets,
+readFLomss3 <- function(dir, birthseas=out$birthseas,
   repfile="Report.sso", compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
@@ -278,16 +278,15 @@ readFLoemss3 <- function(dir, fleets, repfile="Report.sso",
     stop("ss3om currently only supports SS3 <= 3.24")
 
   # FLIB
-  idx <- buildFLIBss3(out, fleets=fleets)
+  idx <- buildFLIBss3(out, fleets=2:3)
 
   # TODO FLS
-  
   oem <- FLoem(observations=list(idx=idx))
 
   return(oem)
 } # }}}
 
-# readFLomess3 {{{
+# readFLomeOMss3 {{{
 readFLomeOMss3 <- function(dir, birthseas=out$birthseas, fleets,
   repfile="Report.sso", compfile="CompReport.sso", ...) {
 
