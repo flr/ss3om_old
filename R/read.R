@@ -43,23 +43,23 @@ readFLIBss3 <- function(dir, fleets, birthseas=out$birthseas,
 } # }}}
 
 # readFLomss3 {{{
-readFLomss3 <- function(dir, birthseas=out$birthseas,
-  repfile="Report.sso", compfile="CompReport.sso", ...) {
+readFLomss3 <- function(dir, repfile="Report.sso",
+  compfile="CompReport.sso", ...) {
 
   # LOAD SS_output list
   out <- readOutputss3(dir, repfile=repfile, compfile=compfile)
   
   # FLS
-  if(out$SS_versionNumeric == 3.24)
-    stk <- buildFLSss3(out, birthseas=birthseas, ...)
-  else
-    stk <- buildFLSss330(out, ...)
+  stk <- readFLSss3(dir, ...)
 
   # FLSR
   srr <- buildFLSRss3(out)
 
   # RPs
-  rps <- buildFLRPss3(out)
+  if(out$SS_versionNumeric == 3.24)
+    rps <- buildFLRPss3(out)
+  else
+    rps <- buildFLRPss330(out)
 
   return(FLom(stock=stk, sr=srr, refpts=rps))
 } # }}}

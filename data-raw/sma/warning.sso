@@ -1,0 +1,45 @@
+#V3.30.16.00;_2020_09_03;_safe;_Stock_Synthesis_by_Richard_Methot_(NOAA)_using_ADMB_12.2
+#Stock Synthesis (SS) is a work of the U.S. Government and is not subject to copyright protection in the United States.
+#Foreign copyrights may apply. See copyright.txt for more information.
+Fri Sep  1 18:17:50 2023
+
+fishing fleet: 1 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 2 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 3 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 4 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 5 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 6 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 7 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 8 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 9 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 10 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 11 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+fishing fleet: 12 surveytime read as: 1 normally is -1 for fishing fleet; can override for indiv. obs. using 1000+month
+Forecast=0 or -1, so rest of forecast file will not be read and can be omitted;
+A one year forecast using recent F will be done automatically
+This model has just one settlement event; recommend changing to recr_dist_method 4 which takes no recr_dist parameters
+bias adjustment ramp extends into forecast; biasadj set to 0.0 internally for forecast years
+ Are you sure you want so few early recrdevs? Better to include in range of main recdevs 5
+fleet: 1 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 2 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 3 age selex range min read is: 0.1; SS expected an integer and will convert 
+fleet: 4 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 5 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 6 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 7 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 8 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 9 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 10 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 11 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 12 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 13 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 14 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 15 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 16 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 17 age selex range min read is: 0.01; SS expected an integer and will convert 
+fleet: 18 age selex range min read is: 0.01; SS expected an integer and will convert 
+ jitter not done unless parameter min & max are in reasonable parameter range -200 200
+ jitter not done unless parameter min & max are in reasonable parameter range -200 200
+setting in starter does not request all priors, and 28 parameters have priors and are not estimated, so their prior not included in obj_fun.
+ Minimum size bin is:_55; which is >10cm, which is large for use as size-at-age 0.0 recruitment
+ N warnings: 38

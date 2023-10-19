@@ -6,6 +6,7 @@ import("data.table")
 import("foreach")
 import("r4ss")
 importFrom("stats", "optimise", "setNames")
+importFrom("mvtnorm", "rmvnorm")
 
 export(
   "buildFLBFss3",
@@ -42,6 +43,7 @@ export(
   "prepareRetro",
   "readCDss3",
   "readFLIBss3",
+  "readFLoemss3",
   "readFLomss3",
   "readFLRPss3",
   "readFLSss3",
@@ -54,7 +56,8 @@ export(
   "readRESIDss3",
   "readOMSss3",
   "runss3grid",
-  "runtime"
+  "runtime",
+  "ssmvln"
 )
 
 exportMethods(
