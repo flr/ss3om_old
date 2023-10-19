@@ -130,10 +130,14 @@ ssmvln <- function(covar, hat=NULL, mc=500, new=!FALSE, as.FLQuants=TRUE) {
   setnames(rtn, c("variable", "value"), c("qname", "data"))
 
   #
-  if(as.FLQuants)
+  if(as.FLQuants) {
+
+    rtn[, age := 'all']
+    rtn[qname == 'Recr', age := "0"]
+
     rtn <- as(rtn, 'FLQuants')
+  }
 
   return(rtn)
 }
 # }}}
-
