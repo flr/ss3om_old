@@ -172,7 +172,7 @@ buildFLSRss3 <- function(out, ...) {
     "sigma_R_in", "sigma_R_info")]
 
   # EXTRACT elements
-  recruit <- data.table(out$recruit)[era %in% c("Fixed", "Main"),]
+  recruit <- data.table(out$recruit)[era %in% c("Early","Fixed","Main","Fore"),]
   parameters <- data.table(out$parameters)
   dquants <- data.table(out$derived_quants)
   lkhds <- out$likelihoods_used
@@ -213,16 +213,21 @@ buildFLSRss3 <- function(out, ...) {
 
   # rec
   rec <- FLQuant(recruit$pred_rec, dimnames=c(age=0, dms), units="1000")
+
   # ssb
   ssb <- FLQuant(recruit$SpawnBio, dimnames=c(age="all", dms), units="t")
+ 
   # fitted
   fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), 
     units="1000")
-  # residuals with bias-correction
-  residuals <- FLQuant(exp(recruit$dev -0.5 * out$sigma_R_in^2),
-    dimnames=c(age=0, dms), units="")
-  if(out$nsexes == 2)
+  
+  # residuals with bias-correction  
+  residuals <- FLQuant(exp(recruit$dev - recruit$biasadjuster * 0.5 *
+    out$sigma_R_info[1, 8] ^ 2), dimnames=c(age=0, dms), units="")
+  
+  if(out$nsexes == 2) {
     residuals <- expand(residuals, unit=c("F", "M"))
+  }
   
   # SETUP for multiple recruit seasons
   if(out$nseasons > 1) {
