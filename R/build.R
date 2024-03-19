@@ -169,7 +169,7 @@ buildFLSRss3 <- function(out, ...) {
   # SUBSET out
   out <- out[c("parameters", "recruit", "derived_quants", "nseasons",
     "nsexes", "likelihoods_used", "SRRtype", "spawnseas", "CoVar",
-    "sigma_R_in", "sigma_R_info")]
+    "sigma_R_info")]
 
   # EXTRACT elements
   recruit <- data.table(out$recruit)[era %in% c("Early","Fixed","Main","Fore"),]
@@ -218,7 +218,7 @@ buildFLSRss3 <- function(out, ...) {
   ssb <- FLQuant(recruit$SpawnBio, dimnames=c(age="all", dms), units="t")
  
   # fitted
-  fitted <- FLQuant(recruit$bias_adjusted, dimnames=c(age=0, dms), 
+  fitted <- FLQuant(recruit$exp_recr, dimnames=c(age=0, dms), 
     units="1000")
   
   # residuals with bias-correction  
