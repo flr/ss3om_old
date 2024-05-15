@@ -203,7 +203,8 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     stock.wt(res)[] <- wasq[["0"]]
 
     # mat, Fleet = -2 / wt
-    nmat <- wasq[["-2"]] %/% wasq[["-1"]]
+    # TODO: CHANGE 0 by ouit$spawnseas (Is it spawn_month?)
+    nmat <- wasq[["-2"]] %/% wasq[["0"]]
     mat(res)[] <- nmat
 
     # IDENTIFY catch fleets

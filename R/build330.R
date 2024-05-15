@@ -135,7 +135,7 @@ buildFLSss330 <- function(out, morphs=out$morph_indexing$Index,
       idx <- setNames(nm=unique(datage$Fleet))
    
       discards <- ss3catch30(datage[Type == "disc",], wtatage, dmns, morphs,
-        idx=idx)
+        idx=idx, era=era)
 
       # TABLE of areas and fleets for discards
       map <- unique(datage[Fleet %in% fleets, .(Area, Fleet)])

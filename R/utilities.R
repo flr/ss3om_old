@@ -212,3 +212,31 @@ prepareRetro <- function(path, starter="starter.ss", years=5) {
 
   invisible(TRUE)
 } # }}}
+
+# getFsByFishery {{{
+
+getFsByFishery <- function(out) {
+
+  fatage <- data.table(out$fatage)[Era %in% c("TIME", "FORE")]
+
+  # DIMS
+  fis <- unique(fatage$Fleet)
+
+  res <- FLQuants(lapply(fis, function(x) {
+
+    dat <- melt(fatage[Fleet == x,], measure.vars=names(fatage)[-seq(7)],
+      variable.name="age", value.name="data")[, .(age, Yr, Sex, Seas, Area,
+      data)]
+
+    setnames(dat, c('age', 'year', 'unit', 'season', 'area', 'data'))
+
+    return(as.FLQuant(dat))
+
+  }))
+
+  names(res) <- out$FleetNames[out$fleet_type == 1]
+
+  return(res)
+}
+
+# }}}

@@ -41,33 +41,67 @@
 #'
 #' extractFbar(out)
 
-extractSSB <- function(out) {
+extractSSB <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=TRUE)) {
 
   ssb <- data.table(out$derived_quants)[Label %in% paste0("SSB_",
-    seq(out$startyr, out$endyr)), Value]
+    seq(out$startyr, endyr)), Value]
 
-  return(FLQuant(ssb, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
+  return(FLQuant(ssb, dimnames=list(age="all", year=seq(out$startyr, endyr),
     unit=c("unique", "F")[out$nsexes]), units="t"))
 }
 
-#' @rdname extractSS
+extractSSBci <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=TRUE)) {
 
-extractRec <- function(out) {
-  
-  rec <- data.table(out$derived_quants)[Label %in% paste0("Recr_",
-    seq(out$startyr, out$endyr)), Value] 
-  # DEBUG
-  # * out$recruitment_dist[[1]][, "Frac/sex"]
+  ssb <- data.table(out$derived_quants)[Label %in% paste0("SSB_",
+    seq(out$startyr, endyr)), .(Value, StdDev)]
 
-  return(FLQuant(rec/out$nsexes, dimnames=list(age="all", year=seq(out$startyr, out$endyr),
-    unit=list("unique", c("F", "M"))[[out$nsexes]]), units="1000"))
+  res <- FLQuantPoint(FLQuant(dimnames=list(age="all",       
+    year=seq(out$startyr, endyr), unit=c("unique", "F")[out$nsexes]), 
+    units="t"))
+
+  mean(res)[] <- ssb$Value
+  median(res)[] <- ssb$Value
+  var(res)[] <- ssb$StdDev ^ 2
+  lowq(res)[] <- (ssb$Value - ssb$StdDev * 1.96)
+  uppq(res)[] <- (ssb$Value + ssb$StdDev * 1.96)
+
+  return(res)
 }
 
 #' @rdname extractSS
-extractFbar <- function(out) {
+
+extractRec <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=TRUE)) {
+  
+  rec <- data.table(out$derived_quants)[Label %in% paste0("Recr_",
+    seq(out$startyr, endyr)), Value] 
+
+  return(FLQuant(rec/out$nsexes, dimnames=list(age="all",
+    year=seq(out$startyr, endyr),
+    unit=list("unique", c("F", "M"))[[out$nsexes]]), units="1000"))
+}
+
+extractRecci <- function(out) {
+
+  rec <- data.table(out$derived_quants)[Label %in% paste0("Recr_",
+    seq(out$startyr, out$endyr)), .(Value, StdDev)]
+
+  res <- FLQuantPoint(FLQuant(dimnames=list(age="all",       
+    year=seq(out$startyr, out$endyr)), units="numbers"))
+
+  mean(res)[] <- rec$Value
+  median(res)[] <- rec$Value
+  var(res)[] <- rec$StdDev ^ 2
+  lowq(res)[] <- (rec$Value - rec$StdDev * 1.96)
+  uppq(res)[] <- (rec$Value + rec$StdDev * 1.96)
+
+  return(res)
+}
+
+#' @rdname extractSS
+extractFbar <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=TRUE)) {
   
   fbar <- data.table(out$derived_quants)[Label %in% paste0("F_",
-    seq(out$startyr + 1, out$endyr)), ]
+    seq(out$startyr + 1, endyr)), ]
   
   if(grepl("3.24", out$SS_version, fixed = TRUE))
     row <- "Fstd_MSY"
@@ -88,8 +122,27 @@ extractFbar <- function(out) {
     warning(paste("Returned F is relative to", out$F_report_basis))
   }
   return(FLQuant(fbar, dimnames=list(age="all",
-    year=seq(out$startyr + 1, out$endyr), unit="unique"), units="f"))
+    year=seq(out$startyr + 1, endyr), unit="unique"), units="f"))
 }
+
+extractFbaci <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=TRUE)) {
+
+  fbar <- data.table(out$derived_quants)[Label %in% paste0("F_",
+    seq(out$startyr, endyr)), .(Value, StdDev)]
+
+  res <- FLQuantPoint(FLQuant(dimnames=list(age="all",       
+    year=seq(out$startyr, endyr)), units="f"))
+
+  mean(res)[] <- fbar$Value
+  median(res)[] <- fbar$Value
+  var(res)[] <- fbar$StdDev ^ 2
+  lowq(res)[] <- (fbar$Value - fbar$StdDev * 1.96)
+  uppq(res)[] <- (fbar$Value + fbar$StdDev * 1.96)
+
+  return(res)
+}
+
+
 
 #' @rdname extractSS
 

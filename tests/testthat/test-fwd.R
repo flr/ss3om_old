@@ -11,6 +11,21 @@ library(ss3om)
 library(FLasher)
 library(patchwork)
 
+
+# fwd(stk, fbar)
+
+# fwd(stk, catch)
+
+# fwd(biol, fisheries, catch_f)
+
+# fwd(biol, fisheries, fbar + catch)
+
+
+
+
+
+
+
 # LOAD SS_output
 # - Using own ss3om function to deal with compressed files
 

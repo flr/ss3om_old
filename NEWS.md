@@ -1,3 +1,9 @@
+# CHANGES IN ss3om VERSION 0.5.3
+
+## BUG FIXES
+
+-  discards are now also loaded for forecast years
+
 # CHANGES IN ss3om VERSION 0.4.8
 
 ## BUG FIXES
