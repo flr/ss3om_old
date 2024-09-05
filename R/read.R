@@ -231,7 +231,7 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
   # READ fbar range from starter.ss
   if(file.exists(file.path(dir, "starter.ss"))) {
     sta <- SS_readstarter(file.path(dir, "starter.ss"), verbose=FALSE)
-    if(sta$F_report_units == 5) {
+    if(sta$F_std_units == 5) {
       range(res)[c("minfbar", "maxfbar")] <- sta$F_age_range
     }
   } 
