@@ -54,10 +54,10 @@ dir <- system.file("ext-data/herring", package="ss3om")
 ## *FLStock*
 
 ```{r readfls}
-albio <- readFLSss3(dir, name="HER")
-range(albio) <- c(minfbar=3, maxfbar=7)
+her <- readFLSss3(dir, name="HER")
+range(her) <- c(minfbar=3, maxfbar=7)
 
-plot(albio)
+plot(her)
 ```
 
 | FLR class | From folder | From list   |               |

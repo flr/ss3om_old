@@ -11,7 +11,7 @@ X-schema.org-keywords: fisheries, ss3, flr, R
 Depends:
   R (>= 3.3.2),
   FLCore (>= 2.6.5),
-  r4ss (>= 1.43.0)
+  r4ss (>= 1.50.0)
 Imports:
   methods,
   stats,
