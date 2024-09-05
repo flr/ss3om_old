@@ -724,13 +724,15 @@ buildFLBFss330 <- function(out, morphs=out$morph_indexing$Index, name=out$Contro
 
 # buildLCss330 {{{
 
+#' Creates an FLQuants from length-distributions by fleet
+#'
 #' @examples
 #' # LOAD data file
-# albd <- SS_readdat(file.path(path, 'abt.dat'))
-# lcs <- buildLCss330(albd)
-# plotLengths(lcs[[1]][, c(1, 5, 10, 15, 20)])
-# plotLengths(seasonSums(lcs[[5]][, c(1, 5, 10, 15, 20)]))
-# lapply(lcs, function(x) unitSums(quantSums(seasonSums(x))))
+#' albd <- SS_readdat(file.path(path, 'abt.dat'))
+#' lcs <- buildLCss330(albd)
+#' plotLengths(lcs[[1]][, c(1, 5, 10, 15, 20)])
+#' plotLengths(seasonSums(lcs[[5]][, c(1, 5, 10, 15, 20)]))
+#' lapply(lcs, function(x) unitSums(quantSums(seasonSums(x))))
 
 buildLCss330 <- function(dat) {
 

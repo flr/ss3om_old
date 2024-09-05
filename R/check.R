@@ -26,7 +26,7 @@
 #' is extracted from `recruitment_dist[[1]][, "Frac/sex"]`.
 #'
 #' The value returned by `extractFbar` is the actual mean F over the age range,
-#' and the value in `derived_quants` is corrected according to `F_report_basis`
+#' and the value in `derived_quants` is corrected according to `F_std_basis`
 #' for models where F reporting basis is F/FMSY.
 #'
 #' @param out A list as returned by r4ss::SS_output.
@@ -108,18 +108,18 @@ extractFbar <- function(out, endyr=sum(c(out$endyr, out$nforecastyears), na.rm=T
   else
     row <- "annF_MSY"
 
-  # F_report_basis F/Fmsy (2)
-  if(grepl("(F)/(Fmsy)", out$F_report_basis, fixed=TRUE)) {
+  # F_std_basis F/Fmsy (2)
+  if(grepl("(F)/(Fmsy)", out$F_std_basis, fixed=TRUE)) {
     fbar <- fbar$Value * out$derived_quants[row, "Value"]
 
-  # F_report_basis abs_F (5)
-  } else if(grepl("abs_F", out$F_report_basis, fixed=TRUE)) {
+  # F_std_basis abs_F (5)
+  } else if(grepl("abs_F", out$F_std_basis, fixed=TRUE)) {
     fbar <- fbar$Value
 
   # 
   } else {
     fbar <- fbar$Value
-    warning(paste("Returned F is relative to", out$F_report_basis))
+    warning(paste("Returned F is relative to", out$F_std_basis))
   }
   return(FLQuant(fbar, dimnames=list(age="all",
     year=seq(out$startyr + 1, endyr), unit="unique"), units="f"))

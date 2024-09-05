@@ -181,9 +181,9 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     waa <- data.table(SS_readwtatage(file.path(dir, waafile)))
 
     # SET year, unit and season
-    waa[, year:=abs(Yr)]
-    waa[, unit:=Sex]
-    waa[, season:=Seas]
+    waa[, year:=abs(year)]
+    waa[, unit:=sex]
+    waa[, season:=seas]
 
     # GET ages
     ages <- dimnames(res)$age
@@ -192,12 +192,13 @@ readFLSss3 <- function(dir, repfile="Report.sso", compfile="CompReport.sso",
     waa <- waa[year %in% dimnames(res)$year,]
 
     # SPLIT weights by fleet
-    was <- split(waa, by="Fleet")
+    was <- split(waa, by="fleet")
 
     # CREATE FLQuants
     wasq <- lapply(was, function(x)
-    as.FLQuant(melt(x[, -seq(1, 6)], id=c("unit", "year", "season"),
-      measure=ages, variable.name = "age", value.name = "data")))
+      as.FLQuant(melt(x[, -seq(2, 6)], id=c("unit", "year", "season"),
+      measure=ages, variable.name = "age", value.name = "data"))
+    )
 
     # stock.wt, Fleet = 0
     stock.wt(res)[] <- wasq[["0"]]
